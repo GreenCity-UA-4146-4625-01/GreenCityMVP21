@@ -5,7 +5,6 @@ import greencity.dto.econews.AddEcoNewsDtoRequest;
 import greencity.exception.exceptions.InvalidURLException;
 import greencity.exception.exceptions.WrongCountOfTagsException;
 import jakarta.validation.ConstraintValidatorContext;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,17 +22,11 @@ class EcoNewsDtoRequestValidatorTest {
     @Mock
     private ConstraintValidatorContext context;
 
-    @BeforeEach
-    void setUp() {
-        validator = new EcoNewsDtoRequestValidator();
-    }
-
     @Test
     void isValid_validTagsAndValidSource_returnsTrue() {
         AddEcoNewsDtoRequest dto = new AddEcoNewsDtoRequest();
         dto.setTags(Arrays.asList("tag1", "tag2"));
         dto.setSource("https://example.com");
-        assertThatCode(()->validator.isValid(dto, context)).doesNotThrowAnyException();
         assertThat(validator.isValid(dto,context)).isTrue();
     }
 

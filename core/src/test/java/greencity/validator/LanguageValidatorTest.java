@@ -46,7 +46,7 @@ public class LanguageValidatorTest {
         when(languageService.findAllLanguageCodes()).thenReturn(languageCodes);
 
         languageValidator.initialize(null);
-        assertFalse(languageValidator.isValid(Locale.FRENCH, null));
+        assertFalse(languageValidator.isValid(null, null));
     }
 
     @Test

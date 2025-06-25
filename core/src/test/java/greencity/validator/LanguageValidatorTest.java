@@ -39,4 +39,21 @@ public class LanguageValidatorTest {
         languageValidator.initialize(null);
         assertFalse(languageValidator.isValid(Locale.FRENCH, null));
     }
+
+    @Test
+    void isValidFalseWhenNullTest() {
+        List<String> languageCodes = Arrays.asList("en", "ua");
+        when(languageService.findAllLanguageCodes()).thenReturn(languageCodes);
+
+        languageValidator.initialize(null);
+        assertFalse(languageValidator.isValid(Locale.FRENCH, null));
+    }
+
+    @Test
+    void isValidFalseWhenEmptyListTest() {
+        when(languageService.findAllLanguageCodes()).thenReturn(List.of());
+
+        languageValidator.initialize(null);
+        assertFalse(languageValidator.isValid(Locale.FRENCH, null));
+    }
 }

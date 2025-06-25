@@ -1,9 +1,15 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import greencity.constant.ErrorMessage;
+import greencity.dto.genericresponse.GenericResponseDto;
 import greencity.dto.habit.HabitDto;
 import greencity.dto.habittranslation.HabitTranslationDto;
+import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.handler.CustomExceptionHandler;
 import greencity.service.HabitService;
 import greencity.service.TagsService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,7 +32,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @ExtendWith(MockitoExtension.class)
 public class HabitControllerTest {
 
@@ -36,10 +43,15 @@ public class HabitControllerTest {
     @MockBean
     TagsService tagsService;
     private MockMvc mockMvc;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setup() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(habitController).setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver()).build();
+        ErrorAttributes errorAttributes = new DefaultErrorAttributes();
+
+        this.mockMvc = MockMvcBuilders.standaloneSetup(habitController)
+            .setControllerAdvice(new CustomExceptionHandler(errorAttributes, objectMapper))
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver()).build();
     }
 
     @Test
@@ -53,14 +65,31 @@ public class HabitControllerTest {
         when(habitService.getByIdAndLanguageCode(habitId, locale.getLanguage())).thenReturn(expectedHabitDto);
 
         mockMvc.perform(get(baseUrl + "/" + habitId)
-                .locale(locale)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.habitTranslation.languageCode").value(locale.getLanguage()))
-                .andExpect(jsonPath("$.id").value(habitId));
+            .locale(locale)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.habitTranslation.languageCode").value(locale.getLanguage()))
+            .andExpect(jsonPath("$.id").value(habitId));
 
         verify(habitService).getByIdAndLanguageCode(habitId, locale.getLanguage());
 
+    }
+
+    @Test
+    void findHabitByIdWithLocaleTranslation_whenHabitNotFound404() throws Exception {
+        Long habitId = 1L;
+        Locale locale = Locale.ENGLISH;
+        String errorMessage = ErrorMessage.HABIT_NOT_FOUND_BY_ID + habitId;
+
+        when(habitService.getByIdAndLanguageCode(habitId, locale.getLanguage()))
+            .thenThrow(NotFoundException.class);
+
+        mockMvc.perform(get(baseUrl + "/" + habitId)
+            .locale(locale)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+
+        verify(habitService).getByIdAndLanguageCode(habitId, locale.getLanguage());
     }
 
 }

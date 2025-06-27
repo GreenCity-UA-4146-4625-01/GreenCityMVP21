@@ -1,14 +1,12 @@
 package greencity.controller;
 
-import com.azure.core.http.HttpResponse;
 import greencity.dto.PageableDto;
 import greencity.dto.habit.HabitDto;
 import greencity.dto.habittranslation.HabitTranslationDto;
+import greencity.dto.shoppinglistitem.ShoppingListItemDto;
 import greencity.dto.user.UserVO;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.service.HabitService;
-import greencity.service.TagsService;
-import greencity.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,11 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
-import org.springframework.social.ResourceNotFoundException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -29,7 +26,8 @@ import java.util.Locale;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Unit test for {@link HabitController}.
@@ -48,8 +46,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *      </li>
  * </ul>
  *
- * <ul>GET /habit – Get all habits for current user</ul>
- * <ul>GET /habit/{id}/shopping-list – Get shopping list items for a habit</ul>
+ * <ul>{@code GET /habit} – Get all habits for current user
+ *      <li>
+ *          {@link HabitControllerTest#shouldReturnPageableDtoOfHabitDto()}
+ *      </li>
+ * </ul>
+ * <ul>{@code GET /habit/{id}/shopping-list} – Get shopping list items for a habit
+ *      <li>
+ *          {@link HabitControllerTest#shouldReturnShoppingListItemDto()}
+ *      </li>
+ * </ul>
  * <ul>GET /habit/tags/search – Get habits by tags and language code</ul>
  * <ul>GET /habit/search – Filter habits by tags, isCustomHabit, complexities</ul>
  * <ul>GET /habit/tags – Get all habit tags</ul>
@@ -66,9 +72,7 @@ public class HabitControllerTest {
     @Mock
     HabitService habitService;
     @Mock
-    UserService userService;
-    @MockBean
-    TagsService tagsService;
+    ModelMapper modelMapper;
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -132,34 +136,48 @@ public class HabitControllerTest {
 
     @Test
     @DisplayName("GET /habit returns all default and custom habits")
-    void shouldReturnPageableDtoOfHabitDto_whenFindAllHabitsCalled() throws Exception {
+    void shouldReturnPageableDtoOfHabitDto() throws Exception {
 
         Locale locale = Locale.ENGLISH;
         List<HabitDto> habits = List.of(new HabitDto().setImage("https://csb10032000a548f571.blob.core.windows.net/allfiles/304ff73c-7e6d-4a17-be7d-59fc3666d351931fb71c088a926a1e04b6896d109fa2.jpg"));
         PageableDto<HabitDto> page = new PageableDto<>(habits, 1, 0, 1);
         when(habitService.getAllHabitsByLanguageCode(any(UserVO.class), any(Pageable.class), eq(locale.getLanguage()))).thenReturn(page);
 
-         mockMvc.perform(get(baseUrl)
-                         .accept(MediaType.APPLICATION_JSON))
-                 .andExpect(status().isOk())
-                 .andExpect(jsonPath("@.page[0].image").value("https://csb10032000a548f571.blob.core.windows.net/allfiles/304ff73c-7e6d-4a17-be7d-59fc3666d351931fb71c088a926a1e04b6896d109fa2.jpg"));
+        mockMvc.perform(get(baseUrl)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("@.page[0].image").value("https://csb10032000a548f571.blob.core.windows.net/allfiles/304ff73c-7e6d-4a17-be7d-59fc3666d351931fb71c088a926a1e04b6896d109fa2.jpg"));
 
-         verify(habitService).getAllHabitsByLanguageCode(any(UserVO.class), any(Pageable.class), eq(locale.getLanguage()));
+        verify(habitService).getAllHabitsByLanguageCode(any(UserVO.class), any(Pageable.class), eq(locale.getLanguage()));
     }
 
     @Test
-    @DisplayName("GET /habit returns '400 - Bad Request' when no habits found")
-    void shouldReturnPageableDtoOfHabitDto_whenNoHabitsFound() throws Exception {
+    @DisplayName("GET /habit/{id}/shopping-list should return array of 'ShoppingListItemDto'")
+    void shouldReturnShoppingListItemDto() throws Exception {
         Locale locale = Locale.ENGLISH;
-        List<HabitDto> habits = List.of();
-        PageableDto<HabitDto> page = new PageableDto<>(habits, 1, 0, 1);
+        Long habitId = 1L;
 
-        when(habitService.getAllHabitsByLanguageCode(any(UserVO.class), any(Pageable.class), eq(locale.getLanguage()))).thenReturn(page);
+        ShoppingListItemDto dto1 = new ShoppingListItemDto();
+        dto1.setId(10L);
+        dto1.setText("Reusable bag");
 
-        mockMvc.perform(get(baseUrl)
-                .locale(locale)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+        ShoppingListItemDto dto2 = new ShoppingListItemDto();
+        dto2.setId(11L);
+        dto2.setText("Glass bottle");
+
+        when(habitService.getShoppingListForHabit(habitId, locale.getLanguage()))
+                .thenReturn(List.of(dto1, dto2));
+
+        mockMvc.perform(get(baseUrl + "/" + habitId + "/shopping-list")
+                        .locale(locale)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(10L))
+                .andExpect(jsonPath("$[0].text").value("Reusable bag"))
+                .andExpect(jsonPath("$[1].id").value(11L))
+                .andExpect(jsonPath("$[1].text").value("Glass bottle"));
+
+        verify(habitService).getShoppingListForHabit(habitId, locale.getLanguage());
     }
 
 }

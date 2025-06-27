@@ -18,8 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-import org.testcontainers.shaded.com.google.common.collect.Lists;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -299,7 +299,7 @@ class HabitAssignControllerTest {
                         .principal(() -> testEmail))
                 .andExpect(status().isOk());
 
-        verify(habitAssignService).findHabitByUserIdAndHabitAssignId(userVO.getId(), habitId, locale.getLanguage());
+        verify(habitAssignService).findHabitByUserIdAndHabitAssignId(userVO.getId(), habitAssignId, locale.getLanguage());
     }
 
     @Test

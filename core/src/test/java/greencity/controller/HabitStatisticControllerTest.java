@@ -9,7 +9,6 @@ import greencity.enums.HabitRate;
 import greencity.service.HabitStatisticService;
 import greencity.service.LanguageService;
 import greencity.service.UserService;
-import greencity.validator.LanguageValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -24,11 +23,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 
-import javax.xml.validation.Validator;
-import java.time.ZonedDateTime;
 
+import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Locale;
+
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -39,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(HabitStatisticController.class)
 @ContextConfiguration(classes = GreenCityApplication.class)
-@WithMockUser(username = "Oleksandr", roles = {"ADMIN"})
+@WithMockUser(username = "Admin", roles = {"ADMIN"})
 class HabitStatisticControllerTest {
 
     @Autowired

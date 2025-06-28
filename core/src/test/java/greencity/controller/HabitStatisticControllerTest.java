@@ -2,8 +2,6 @@ package greencity.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import greencity.GreenCityApplication;
 import greencity.dto.habitstatistic.*;
 import greencity.dto.user.UserVO;
@@ -24,12 +22,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
-
-
 import java.time.ZonedDateTime;
 import java.util.List;
-
-
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -61,6 +55,9 @@ class HabitStatisticControllerTest {
     private ObjectMapper objectMapper;
 
     private final ZonedDateTime now = ZonedDateTime.now();
+    private static final Long TEST_USER_ID = 1L;
+    private static final Long TEST_HABIT_ID = 1L;
+    private static final Integer TEST_AMOUNT = 5;
 
     @BeforeEach
     void setup() {
@@ -97,21 +94,21 @@ class HabitStatisticControllerTest {
     }
 
     @Test
-    void saveHabitStatistic() throws Exception {
-        Long habitId = 1L;
-        Long userId = 1L;
+    void testSaveHabitStatistic() throws Exception {
+        Long habitId = TEST_HABIT_ID;
+        Long userId = TEST_USER_ID;
 
 
         HabitStatisticDto responseDto = HabitStatisticDto.builder()
                 .id(1L)
-                .amountOfItems(5)
+                .amountOfItems(TEST_AMOUNT)
                 .habitRate(HabitRate.GOOD)
                 .createDate(now)
                 .build();
 
 
         AddHabitStatisticDto requestDto = new AddHabitStatisticDto();
-        requestDto.setAmountOfItems(5);
+        requestDto.setAmountOfItems(TEST_AMOUNT);;
         requestDto.setHabitRate(HabitRate.GOOD);
         requestDto.setCreateDate(now);
 
@@ -141,7 +138,7 @@ class HabitStatisticControllerTest {
     }
 
     @Test
-    void updateStatistic() throws Exception {
+    void testUpdateStatistic() throws Exception {
         Long statisticId = 1L;
         Long userId = 1L;
 
@@ -158,8 +155,6 @@ class HabitStatisticControllerTest {
                 eq(userId),
                 any(UpdateHabitStatisticDto.class)))
                 .thenReturn(responseDto);
-
-
 
         String requestJson = objectMapper.writeValueAsString(requestDto);
 

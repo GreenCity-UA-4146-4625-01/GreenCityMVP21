@@ -115,8 +115,7 @@ class HabitStatisticControllerTest {
         requestDto.setHabitRate(HabitRate.GOOD);
         requestDto.setCreateDate(now);
 
-        UserVO userVO = new UserVO();
-        userVO.setId(userId);
+
 
         when(habitStatisticService.saveByHabitIdAndUserId(
                 eq(habitId),
@@ -124,11 +123,6 @@ class HabitStatisticControllerTest {
                 any(AddHabitStatisticDto.class)))
                 .thenReturn(responseDto);
 
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
         mockMvc.perform(post("/habit/statistic/{habitId}", habitId)
@@ -151,18 +145,13 @@ class HabitStatisticControllerTest {
         Long statisticId = 1L;
         Long userId = 1L;
 
-
         UpdateHabitStatisticDto responseDto = new UpdateHabitStatisticDto();
         responseDto.setAmountOfItems(10);
         responseDto.setHabitRate(HabitRate.BAD);
 
-
         UpdateHabitStatisticDto requestDto = new UpdateHabitStatisticDto();
         requestDto.setAmountOfItems(10);
         requestDto.setHabitRate(HabitRate.BAD);
-
-        UserVO userVO = new UserVO();
-        userVO.setId(userId);
 
         when(habitStatisticService.update(
                 eq(statisticId),
@@ -171,7 +160,7 @@ class HabitStatisticControllerTest {
                 .thenReturn(responseDto);
 
 
-        ObjectMapper objectMapper = new ObjectMapper();
+
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
         mockMvc.perform(put("/habit/statistic/{id}", statisticId)

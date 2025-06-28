@@ -9,12 +9,14 @@ import greencity.enums.HabitRate;
 import greencity.service.HabitStatisticService;
 import greencity.service.LanguageService;
 import greencity.service.UserService;
+import greencity.validator.LanguageValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,9 +24,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 
+import javax.xml.validation.Validator;
 import java.time.ZonedDateTime;
 
 import java.util.List;
+import java.util.Locale;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -37,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = GreenCityApplication.class)
 @WithMockUser(username = "Oleksandr", roles = {"ADMIN"})
 class HabitStatisticControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -54,7 +59,6 @@ class HabitStatisticControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
 
     @BeforeEach
     void setup() {
@@ -161,17 +165,21 @@ class HabitStatisticControllerTest {
 
     @Test
     void testGetTodayStatisticsForAllHabitItems() throws Exception {
-        String language = "en";
-        List<HabitItemsAmountStatisticDto> stats = List.of(new HabitItemsAmountStatisticDto());
+        String lang = "en";
+        HabitItemsAmountStatisticDto responseDto = HabitItemsAmountStatisticDto.builder()
+                .habitItem("Reusable cup")
+                .notTakenItems(3L)
+                .build();
+        List<HabitItemsAmountStatisticDto> stats = List.of(responseDto);
 
-        when(habitStatisticService.getTodayStatisticsForAllHabitItems(language)).thenReturn(stats);
+        when(habitStatisticService.getTodayStatisticsForAllHabitItems(lang)).thenReturn(stats);
 
         mockMvc.perform(get("/habit/statistic/todayStatisticsForAllHabitItems")
-                        .header("Accept-Language", "en"))
+                        .header(HttpHeaders.ACCEPT_LANGUAGE, lang))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(stats)));
 
-        verify(habitStatisticService).getTodayStatisticsForAllHabitItems(language);
+        verify(habitStatisticService).getTodayStatisticsForAllHabitItems(lang);
     }
 
     @Test

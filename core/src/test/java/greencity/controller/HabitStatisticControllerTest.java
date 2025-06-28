@@ -2,6 +2,8 @@ package greencity.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import greencity.GreenCityApplication;
 import greencity.dto.habitstatistic.*;
 import greencity.dto.user.UserVO;
@@ -58,6 +60,8 @@ class HabitStatisticControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private final ZonedDateTime now = ZonedDateTime.now();
+
     @BeforeEach
     void setup() {
         when(languageService.findAllLanguageCodes()).thenReturn(List.of("en", "ua"));
@@ -96,30 +100,41 @@ class HabitStatisticControllerTest {
     void saveHabitStatistic() throws Exception {
         Long habitId = 1L;
         Long userId = 1L;
-        ZonedDateTime now = ZonedDateTime.now();
+
+
         HabitStatisticDto responseDto = HabitStatisticDto.builder()
                 .id(1L)
                 .amountOfItems(5)
                 .habitRate(HabitRate.GOOD)
                 .createDate(now)
                 .build();
+
+
+        AddHabitStatisticDto requestDto = new AddHabitStatisticDto();
+        requestDto.setAmountOfItems(5);
+        requestDto.setHabitRate(HabitRate.GOOD);
+        requestDto.setCreateDate(now);
+
         UserVO userVO = new UserVO();
         userVO.setId(userId);
+
         when(habitStatisticService.saveByHabitIdAndUserId(
                 eq(habitId),
                 eq(userId),
                 any(AddHabitStatisticDto.class)))
                 .thenReturn(responseDto);
+
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        String requestJson = objectMapper.writeValueAsString(requestDto);
+
         mockMvc.perform(post("/habit/statistic/{habitId}", habitId)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                {
-                    "amountOfItems": 5,
-                    "habitRate": "GOOD",
-                    "createDate": "%s"
-                }
-                """.formatted(now.toString())))
+                        .content(requestJson))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.amountOfItems").value(5))
@@ -135,31 +150,39 @@ class HabitStatisticControllerTest {
     void updateStatistic() throws Exception {
         Long statisticId = 1L;
         Long userId = 1L;
+
+
         UpdateHabitStatisticDto responseDto = new UpdateHabitStatisticDto();
         responseDto.setAmountOfItems(10);
         responseDto.setHabitRate(HabitRate.BAD);
+
+
+        UpdateHabitStatisticDto requestDto = new UpdateHabitStatisticDto();
+        requestDto.setAmountOfItems(10);
+        requestDto.setHabitRate(HabitRate.BAD);
+
         UserVO userVO = new UserVO();
         userVO.setId(userId);
+
         when(habitStatisticService.update(
                 eq(statisticId),
                 eq(userId),
                 any(UpdateHabitStatisticDto.class)))
                 .thenReturn(responseDto);
 
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String requestJson = objectMapper.writeValueAsString(requestDto);
+
         mockMvc.perform(put("/habit/statistic/{id}", statisticId)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                {
-                    "amountOfItems": 10,
-                    "habitRate": "BAD"
-                }
-                """))
+                        .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amountOfItems").value(10))
                 .andExpect(jsonPath("$.habitRate").value("BAD"));
 
-        // Verify service was called
+
         verify(habitStatisticService).update(
                 eq(statisticId),
                 eq(userId),

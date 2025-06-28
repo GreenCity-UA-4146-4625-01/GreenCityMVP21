@@ -6,6 +6,7 @@ import greencity.dto.habittranslation.HabitTranslationDto;
 import greencity.dto.shoppinglistitem.ShoppingListItemDto;
 import greencity.dto.user.UserVO;
 import greencity.service.HabitService;
+import greencity.service.TagsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -58,7 +60,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *          {@link HabitControllerTest#shouldReturnPageableDtoByTags()}
  *      </li>
  * </ul>
- * <ul>GET /habit/search – Filter habits by tags, isCustomHabit, complexities</ul>
+ * <ul>{@code GET /habit/search} – Filter habits by tags, isCustomHabit, complexities
+ *      <li>
+ *          {@link HabitControllerTest#shouldReturnPageWithSearchResult()}
+ *      </li>
+ * </ul>
  * <ul>GET /habit/tags – Get all habit tags</ul>
  * <ul>POST /habit/custom – Add new custom habit with multipart image</ul>
  * <ul>GET /habit/{habitId}/friends/profile-pictures – Get profile pictures of friends assigned to habit</ul>
@@ -74,6 +80,8 @@ public class HabitControllerTest {
     HabitController habitController;
     @Mock
     HabitService habitService;
+    @Mock
+    TagsService tagsService;
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -221,4 +229,22 @@ public class HabitControllerTest {
         verify(habitService).getAllByDifferentParameters(any(UserVO.class), any(Pageable.class), eq(Optional.of(tags)),
                 eq(Optional.of(isCustom)), eq(Optional.of(complexities)), eq(locale.getLanguage()));
     }
+
+    @Test
+    @DisplayName("GET /habit/tags – should return all habit tags")
+    void shouldReturnAllHabitTags() throws Exception{
+        List<String> list = List.of("ECO_NEWS", "EVENT");
+
+        when(tagsService.findAllHabitsTags(locale.getLanguage())).thenReturn(list);
+
+        mockMvc.perform(get(baseUrl + "/tags")
+                .accept(locale.getLanguage())
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(tagsService).findAllHabitsTags(locale.getLanguage());
+    }
+
+
 }

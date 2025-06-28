@@ -124,6 +124,11 @@ class HabitStatisticControllerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.amountOfItems").value(5))
                 .andExpect(jsonPath("$.habitRate").value("GOOD"));
+
+        verify(habitStatisticService).saveByHabitIdAndUserId(
+                eq(habitId),
+                eq(userId),
+                any(AddHabitStatisticDto.class));
     }
 
     @Test

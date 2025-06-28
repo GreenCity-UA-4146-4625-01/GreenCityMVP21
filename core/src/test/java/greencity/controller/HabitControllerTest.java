@@ -1,6 +1,9 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.dto.PageableDto;
+import greencity.dto.habit.AddCustomHabitDtoRequest;
+import greencity.dto.habit.AddCustomHabitDtoResponse;
 import greencity.dto.habit.HabitDto;
 import greencity.dto.habittranslation.HabitTranslationDto;
 import greencity.dto.shoppinglistitem.ShoppingListItemDto;
@@ -17,7 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -25,9 +29,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,12 +72,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *          {@link HabitControllerTest#shouldReturnPageWithSearchResult()}
  *      </li>
  * </ul>
- * <ul>GET /habit/tags – Get all habit tags</ul>
+ * <ul>{@code GET /habit/tags} – Get all habit tags
+ *      <li>
+ *          {@link HabitControllerTest#shouldReturnAllHabitTags()}
+ *      </li>
+ * </ul>
  * <ul>POST /habit/custom – Add new custom habit with multipart image</ul>
  * <ul>GET /habit/{habitId}/friends/profile-pictures – Get profile pictures of friends assigned to habit</ul>
  */
 
 @ExtendWith(MockitoExtension.class)
+@WithMockUser(username = "usergreencity@gmail.com", roles = {"USER"})
 public class HabitControllerTest {
 
     private static final String baseUrl = "/habit";
@@ -194,7 +206,7 @@ public class HabitControllerTest {
 
     @Test
     @DisplayName("GET /habit/search – Filter habits by tags, isCustomHabit, complexities")
-    void shouldReturnPageWithSearchResult() throws Exception{
+    void shouldReturnPageWithSearchResult() throws Exception {
         List<String> tags = List.of("EVENT");
         Boolean isCustom = false;
         List<Integer> complexities = List.of(1);
@@ -208,7 +220,7 @@ public class HabitControllerTest {
         dto2.setTags(List.of("ECO_NEWS"));
         dto2.setImage("https://csb10032000a548f571.blob.core.windows.net/allfiles/304ff73c-7e6d-4a17-be7d-59fc3666d351931fb71c088a926a1e04b6896d109fa2.jpg");
 
-        PageableDto<HabitDto> pageableDto = new PageableDto<>(List.of(dto1, dto2), 2, 0,1);
+        PageableDto<HabitDto> pageableDto = new PageableDto<>(List.of(dto1, dto2), 2, 0, 1);
 
         when(habitService.getAllByDifferentParameters(
                 any(UserVO.class),
@@ -219,11 +231,11 @@ public class HabitControllerTest {
                 eq(locale.getLanguage()))).thenReturn(pageableDto);
 
         mockMvc.perform(get(baseUrl + "/search")
-                .param("tags", "EVENT")
-                .param("isCustomHabit", "false")
-                .param("complexities", "1")
-                .locale(locale)
-                .accept(MediaType.APPLICATION_JSON))
+                        .param("tags", "EVENT")
+                        .param("isCustomHabit", "false")
+                        .param("complexities", "1")
+                        .locale(locale)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         verify(habitService).getAllByDifferentParameters(any(UserVO.class), any(Pageable.class), eq(Optional.of(tags)),
@@ -232,19 +244,52 @@ public class HabitControllerTest {
 
     @Test
     @DisplayName("GET /habit/tags – should return all habit tags")
-    void shouldReturnAllHabitTags() throws Exception{
+    void shouldReturnAllHabitTags() throws Exception {
         List<String> list = List.of("ECO_NEWS", "EVENT");
 
         when(tagsService.findAllHabitsTags(locale.getLanguage())).thenReturn(list);
 
         mockMvc.perform(get(baseUrl + "/tags")
-                .accept(locale.getLanguage())
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(locale.getLanguage())
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
         verify(tagsService).findAllHabitsTags(locale.getLanguage());
     }
 
+    @Test
+    @DisplayName("POST /habit/custom – should add new custom habit with multipart image")
+    void shouldAddNewCustomHabitWithMultipartImage() throws Exception {
+        AddCustomHabitDtoRequest requestDto = new AddCustomHabitDtoRequest();
+        requestDto.setTagIds(Set.of(1L, 2L));
+        requestDto.setComplexity(1);
+        requestDto.setHabitTranslations(List.of(new HabitTranslationDto()));
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+
+        MockMultipartFile jsonPart = new MockMultipartFile("request", "", "application/json", jsonRequest.getBytes());
+
+        MockMultipartFile imagePart = new MockMultipartFile("image", "image.jpg", MediaType.IMAGE_JPEG_VALUE, "image-bytes".getBytes());
+
+        AddCustomHabitDtoResponse responseDto = new AddCustomHabitDtoResponse();
+        responseDto.setId(1L);
+        responseDto.setImage("https://csb10032000a548f571.blob.core.windows.net/allfiles/304ff73c-7e6d-4a17-be7d-59fc3666d351931fb71c088a926a1e04b6896d109fa2.jpg");
+
+        when(habitService.addCustomHabit(any(), any(), eq("usergreencity@gmail.com"))).thenReturn(responseDto);
+
+        mockMvc.perform(multipart(baseUrl + "/custom")
+                        .file(jsonPart)
+                        .file(imagePart)
+                        .with(csrf())
+                        .principal(() -> "usergreencity@gmail.com")
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.image").value("https://csb10032000a548f571.blob.core.windows.net/allfiles/304ff73c-7e6d-4a17-be7d-59fc3666d351931fb71c088a926a1e04b6896d109fa2.jpg"));
+
+        verify(habitService).addCustomHabit(any(), any(), eq("usergreencity@gmail.com"));
+    }
 }

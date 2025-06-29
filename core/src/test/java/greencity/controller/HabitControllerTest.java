@@ -132,7 +132,7 @@ public class HabitControllerTest {
 
     @Test
     @DisplayName("GET /habit/{id} returns '400 - Bad Request' when passed wrong @id")
-    void shouldReturn404WhenPassedWrongId() throws Exception {
+    void shouldReturn400WhenPassedWrongId() throws Exception {
         String habitIdStr = "abc";
 
         mockMvc.perform(get(BASE_URL + "/{HABIT_ID}", habitIdStr)
@@ -336,6 +336,7 @@ public class HabitControllerTest {
                         .header("Accept-Language", LOCALE.getLanguage())
                         .with(csrf())
                         .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].name").value("Greg"))
                 .andExpect(jsonPath("$[0].profilePicturePath").value(IMG_EXAMPLE))

@@ -48,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *      <li>
  *          {@link HabitControllerTest#shouldReturnExistingDtoWhenHabitIsFound()} ()}
  *      <li>
- *          {@link HabitControllerTest#shouldReturn404WhenPassedWrongId()}
+ *          {@link HabitControllerTest#shouldReturn400WhenPassedWrongId()}
  *      </li>
  * </ul>
  *

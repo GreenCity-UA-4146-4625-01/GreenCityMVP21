@@ -1,5 +1,11 @@
 package greencity.controller;
 
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.GreenCityApplication;
@@ -9,6 +15,10 @@ import greencity.enums.HabitRate;
 import greencity.service.HabitStatisticService;
 import greencity.service.LanguageService;
 import greencity.service.UserService;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -17,19 +27,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.ZonedDateTime;
-import java.util.List;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(HabitStatisticController.class)
 @ContextConfiguration(classes = GreenCityApplication.class)
@@ -58,10 +58,14 @@ class HabitStatisticControllerTest {
     private static final Long TEST_USER_ID = 1L;
     private static final Long TEST_HABIT_ID = 1L;
     private static final Integer TEST_AMOUNT = 5;
+    private static final Long TEST_STATISTIC_ID = 1L;
+    private static final String TEST_LANGUAGE = "en";
 
     @BeforeEach
     void setup() {
-        when(languageService.findAllLanguageCodes()).thenReturn(List.of("en", "ua"));
+        when(languageService.findAllLanguageCodes()).thenReturn(
+                List.of("en", "ua")
+        );
         UserVO mockUser = new UserVO();
         mockUser.setId(1L);
         when(userService.findByEmail(anyString())).thenReturn(mockUser);
@@ -69,138 +73,153 @@ class HabitStatisticControllerTest {
 
     @Test
     void testFindAllByHabitId() throws Exception {
-        Long habitId = 1L;
         GetHabitStatisticDto dto = new GetHabitStatisticDto();
-        when(habitStatisticService.findAllStatsByHabitId(habitId)).thenReturn(dto);
+        when(habitStatisticService.findAllStatsByHabitId(TEST_HABIT_ID)).thenReturn(
+                dto
+        );
 
-        mockMvc.perform(get("/habit/statistic/{habitId}", habitId))
+        mockMvc
+                .perform(get("/habit/statistic/{habitId}", TEST_HABIT_ID))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(dto)));
 
-        verify(habitStatisticService).findAllStatsByHabitId(habitId);
+        verify(habitStatisticService).findAllStatsByHabitId(TEST_HABIT_ID);
     }
 
     @Test
     void testFindAllStatsByHabitAssignId() throws Exception {
-        Long habitAssignId = 2L;
         List<HabitStatisticDto> list = List.of(new HabitStatisticDto());
-        when(habitStatisticService.findAllStatsByHabitAssignId(habitAssignId)).thenReturn(list);
+        when(
+                habitStatisticService.findAllStatsByHabitAssignId(TEST_HABIT_ID)
+        ).thenReturn(list);
 
-        mockMvc.perform(get("/habit/statistic/assign/{habitAssignId}", habitAssignId))
+        mockMvc
+                .perform(get("/habit/statistic/assign/{habitAssignId}", TEST_HABIT_ID))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(list)));
 
-        verify(habitStatisticService).findAllStatsByHabitAssignId(habitAssignId);
+        verify(habitStatisticService).findAllStatsByHabitAssignId(TEST_HABIT_ID);
     }
 
     @Test
     void testSaveHabitStatistic() throws Exception {
-        Long habitId = TEST_HABIT_ID;
-        Long userId = TEST_USER_ID;
-
-
         HabitStatisticDto responseDto = HabitStatisticDto.builder()
-                .id(1L)
+                .id(TEST_STATISTIC_ID)
                 .amountOfItems(TEST_AMOUNT)
                 .habitRate(HabitRate.GOOD)
                 .createDate(now)
                 .build();
 
-
         AddHabitStatisticDto requestDto = new AddHabitStatisticDto();
-        requestDto.setAmountOfItems(TEST_AMOUNT);;
+        requestDto.setAmountOfItems(TEST_AMOUNT);
         requestDto.setHabitRate(HabitRate.GOOD);
         requestDto.setCreateDate(now);
 
-
-
-        when(habitStatisticService.saveByHabitIdAndUserId(
-                eq(habitId),
-                eq(userId),
-                any(AddHabitStatisticDto.class)))
-                .thenReturn(responseDto);
+        when(
+                habitStatisticService.saveByHabitIdAndUserId(
+                        eq(TEST_HABIT_ID),
+                        eq(TEST_USER_ID),
+                        any(AddHabitStatisticDto.class)
+                )
+        ).thenReturn(responseDto);
 
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
-        mockMvc.perform(post("/habit/statistic/{habitId}", habitId)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+        mockMvc
+                .perform(
+                        post("/habit/statistic/{habitId}", TEST_HABIT_ID)
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestJson)
+                )
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.amountOfItems").value(5))
+                .andExpect(jsonPath("$.id").value(TEST_STATISTIC_ID))
+                .andExpect(jsonPath("$.amountOfItems").value(TEST_AMOUNT))
                 .andExpect(jsonPath("$.habitRate").value("GOOD"));
 
         verify(habitStatisticService).saveByHabitIdAndUserId(
-                eq(habitId),
-                eq(userId),
-                any(AddHabitStatisticDto.class));
+                eq(TEST_HABIT_ID),
+                eq(TEST_USER_ID),
+                any(AddHabitStatisticDto.class)
+        );
     }
 
     @Test
     void testUpdateStatistic() throws Exception {
-        Long statisticId = 1L;
-        Long userId = 1L;
-
         UpdateHabitStatisticDto responseDto = new UpdateHabitStatisticDto();
-        responseDto.setAmountOfItems(10);
+        responseDto.setAmountOfItems(TEST_AMOUNT);
         responseDto.setHabitRate(HabitRate.BAD);
 
         UpdateHabitStatisticDto requestDto = new UpdateHabitStatisticDto();
-        requestDto.setAmountOfItems(10);
+        requestDto.setAmountOfItems(TEST_AMOUNT);
         requestDto.setHabitRate(HabitRate.BAD);
 
-        when(habitStatisticService.update(
-                eq(statisticId),
-                eq(userId),
-                any(UpdateHabitStatisticDto.class)))
-                .thenReturn(responseDto);
+        when(
+                habitStatisticService.update(
+                        eq(TEST_STATISTIC_ID),
+                        eq(TEST_USER_ID),
+                        any(UpdateHabitStatisticDto.class)
+                )
+        ).thenReturn(responseDto);
 
         String requestJson = objectMapper.writeValueAsString(requestDto);
 
-        mockMvc.perform(put("/habit/statistic/{id}", statisticId)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
+        mockMvc
+                .perform(
+                        put("/habit/statistic/{id}", TEST_STATISTIC_ID)
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestJson)
+                )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amountOfItems").value(10))
+                .andExpect(jsonPath("$.amountOfItems").value(TEST_AMOUNT))
                 .andExpect(jsonPath("$.habitRate").value("BAD"));
 
-
         verify(habitStatisticService).update(
-                eq(statisticId),
-                eq(userId),
-                any(UpdateHabitStatisticDto.class));
+                eq(TEST_STATISTIC_ID),
+                eq(TEST_USER_ID),
+                any(UpdateHabitStatisticDto.class)
+        );
     }
 
     @Test
     void testGetTodayStatisticsForAllHabitItems() throws Exception {
-        String lang = "en";
-        HabitItemsAmountStatisticDto responseDto = HabitItemsAmountStatisticDto.builder()
-                .habitItem("Reusable cup")
-                .notTakenItems(3L)
-                .build();
-        List<HabitItemsAmountStatisticDto> stats = List.of(responseDto);
+        List<HabitItemsAmountStatisticDto> stats = List.of(
+                new HabitItemsAmountStatisticDto()
+        );
 
-        when(habitStatisticService.getTodayStatisticsForAllHabitItems(lang)).thenReturn(stats);
+        when(
+                habitStatisticService.getTodayStatisticsForAllHabitItems(TEST_LANGUAGE)
+        ).thenReturn(stats);
 
-        mockMvc.perform(get("/habit/statistic/todayStatisticsForAllHabitItems")
-                        .header(HttpHeaders.ACCEPT_LANGUAGE, lang))
+        mockMvc
+                .perform(
+                        get("/habit/statistic/todayStatisticsForAllHabitItems").header(
+                                HttpHeaders.ACCEPT_LANGUAGE,
+                                TEST_LANGUAGE
+                        )
+                )
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(stats)));
 
-        verify(habitStatisticService).getTodayStatisticsForAllHabitItems(lang);
+        verify(habitStatisticService).getTodayStatisticsForAllHabitItems(
+                TEST_LANGUAGE
+        );
     }
 
     @Test
     void testFindAmountOfAcquiredHabits() throws Exception {
         Long userId = 7L;
         Long expected = 3L;
-        when(habitStatisticService.getAmountOfAcquiredHabitsByUserId(userId)).thenReturn(expected);
+        when(
+                habitStatisticService.getAmountOfAcquiredHabitsByUserId(userId)
+        ).thenReturn(expected);
 
-        mockMvc.perform(get("/habit/statistic/acquired/count")
-                        .param("userId", userId.toString()))
-                    .andExpect(status().isOk())
+        mockMvc
+                .perform(
+                        get("/habit/statistic/acquired/count").param("userId", userId.toString())
+                )
+                .andExpect(status().isOk())
                 .andExpect(content().string(expected.toString()));
 
         verify(habitStatisticService).getAmountOfAcquiredHabitsByUserId(userId);
@@ -210,14 +229,20 @@ class HabitStatisticControllerTest {
     void testFindAmountOfHabitsInProgress() throws Exception {
         Long userId = 8L;
         Long expected = 5L;
-        when(habitStatisticService.getAmountOfHabitsInProgressByUserId(userId)).thenReturn(expected);
+        when(
+                habitStatisticService.getAmountOfHabitsInProgressByUserId(userId)
+        ).thenReturn(expected);
 
-        mockMvc.perform(get("/habit/statistic/in-progress/count")
-                        .param("userId", userId.toString()))
+        mockMvc
+                .perform(
+                        get("/habit/statistic/in-progress/count").param(
+                                "userId",
+                                userId.toString()
+                        )
+                )
                 .andExpect(status().isOk())
                 .andExpect(content().string(expected.toString()));
 
         verify(habitStatisticService).getAmountOfHabitsInProgressByUserId(userId);
     }
 }
-

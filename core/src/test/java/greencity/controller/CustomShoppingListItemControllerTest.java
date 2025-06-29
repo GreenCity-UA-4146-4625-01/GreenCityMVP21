@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.hamcrest.Matchers.hasSize;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WithMockUser
 @WebMvcTest(CustomShoppingListItemController.class)
 @ContextConfiguration(classes = GreenCityApplication.class)
 class CustomShoppingListItemControllerTest {
@@ -43,30 +45,34 @@ class CustomShoppingListItemControllerTest {
     @MockBean
     private ModelMapper modelMapper;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @WithMockUser
     @Test
     void getAllAvailableCustomShoppingListItems_Returns200AndListTest() throws Exception {
 
-        CustomShoppingListItemResponseDto item1 = new CustomShoppingListItemResponseDto();
-        item1.setId(1L);
-        item1.setText("Item1");
+        CustomShoppingListItemResponseDto item1 = new CustomShoppingListItemResponseDto().builder()
+                .id(1L)
+                .text("Item1")
+                .build();
 
-        CustomShoppingListItemResponseDto item2 = new CustomShoppingListItemResponseDto();
-        item2.setId(2L);
-        item2.setText("Item2");
+        CustomShoppingListItemResponseDto item2 = new CustomShoppingListItemResponseDto().builder()
+                .id(2L)
+                .text("Item2")
+                .build();
 
         List<CustomShoppingListItemResponseDto> mockedKList = List.of(item1, item2);
 
         when(customShoppingListItemService.findAllAvailableCustomShoppingListItems(1L, 2L))
                 .thenReturn(mockedKList);
 
-        mockMvc.perform(get("/custom/shopping-list-items/1/10"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/custom/shopping-list-items/1/2"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].text").value("Item1"))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[1].text").value("Item2"));
     }
 
-    @WithMockUser
     @Test
     void saveUserCustomShoppingListItems_Returns201AndListTest() throws Exception {
 
@@ -99,7 +105,6 @@ class CustomShoppingListItemControllerTest {
                 .andExpect(jsonPath("$[0].status").value("ACTIVE"));
     }
 
-    @WithMockUser
     @Test
     void updateItemStatusTest() throws Exception {
         Long userId = 1L;
@@ -125,7 +130,6 @@ class CustomShoppingListItemControllerTest {
                 .andExpect(jsonPath("$.status").value(status));
     }
 
-    @WithMockUser
     @Test
     void updateItemStatusToDoneTest() throws Exception {
         Long userId = 1L;
@@ -140,7 +144,6 @@ class CustomShoppingListItemControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @WithMockUser
     @Test
     void bulkDeleteCustomShoppingListItemsTest() throws Exception {
         String ids = "1,2";
@@ -161,7 +164,6 @@ class CustomShoppingListItemControllerTest {
         verify(customShoppingListItemService).bulkDelete(ids);
     }
 
-    @WithMockUser
     @Test
     void getAllCustomShoppingItemsByStatusTest() throws Exception {
         Long userId = 1L;

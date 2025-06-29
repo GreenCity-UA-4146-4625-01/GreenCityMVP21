@@ -39,13 +39,17 @@ jobs:
 #         with:
 #           go-version: 1.18
 
-      - name: Run a multi-line script
+      - name: Build and analyze with SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           git fetch --unshallow
-          mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=ita-social-projects-green-city -Dsonar.organization=ita-social-projects -Dsonar.host.url=https://sonarcloud.io -Dsonar.binaries=target/classes -Dsonar.dynamicAnalysis=reuseReports
+            mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar \
+           -Dsonar.projectKey=greencity-ua-4146-4625-01 \
+           -Dsonar.organization='GreenCity-UA-4146&4625' \
+           -Dsonar.host.url=https://sonarcloud.io \
+           -Dsonar.binaries=target/classes
 
       - name: Test Reporter
         uses: dorny/test-reporter@v1.5.0
@@ -66,7 +70,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
+
       - name: Build and push Docker images
         uses: docker/build-push-action@v3.0.0
         with:

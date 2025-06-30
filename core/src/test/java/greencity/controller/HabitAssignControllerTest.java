@@ -30,8 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class HabitAssignControllerTest {
@@ -96,6 +95,8 @@ class HabitAssignControllerTest {
 
         HabitAssignManagementDto habitAssignManagementDto = HabitAssignManagementDto.builder().id(habitId).build();
 
+        List<HabitAssignManagementDto> expectedList = List.of(habitAssignManagementDto);
+
         when(habitAssignService.assignCustomHabitForUser(eq(habitId), any(), any()))
                 .thenReturn(Lists.newArrayList(habitAssignManagementDto));
 
@@ -103,7 +104,8 @@ class HabitAssignControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(habitAssignManagementDto))
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedList)));
 
         verify(habitAssignService).assignCustomHabitForUser(eq(habitId), any(), any());
     }

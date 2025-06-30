@@ -1,6 +1,5 @@
 package greencity.mapping;
 
-import greencity.dto.category.CategoryDto;
 import greencity.dto.category.CategoryDtoResponse;
 import greencity.entity.Category;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
-public class CategoryDtoResponseMapperTest {
+class CategoryDtoResponseMapperTest {
     @InjectMocks
     CategoryDtoResponseMapper categoryDtoResponseMapper;
 

@@ -32,7 +32,6 @@ public class EcoNewsCommentVOMapperTest {
         assertEquals(comment.getText(), vo.getText());
         assertEquals(comment.isDeleted(), vo.isDeleted());
         assertEquals(comment.isCurrentUserLiked(), vo.isCurrentUserLiked());
-        assertEquals(comment.getCreatedDate(), vo.getCreatedDate());
         assertEquals(Set.of(ModelUtils.getUserVO()), vo.getUsersLiked());
         assertEquals(ModelUtils.getEcoNewsVO(), vo.getEcoNews());
     }

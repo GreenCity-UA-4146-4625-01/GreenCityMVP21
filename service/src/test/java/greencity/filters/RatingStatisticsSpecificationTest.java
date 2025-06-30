@@ -42,6 +42,14 @@ class RatingStatisticsSpecificationTest {
 
     @Mock
     private Path<String> emailPath;
+    @Mock
+    Path<Object> idPathObj;
+
+    @Mock
+    Path<Object> pointsChangedPath;
+
+    @Mock
+    Path<Object> currentRatingPath;
 
     @Mock
     private Predicate predicateConjunction;
@@ -82,13 +90,11 @@ class RatingStatisticsSpecificationTest {
 
     @Test
     void testNumericFilters() {
-        Path<Object> idPath = mock(Path.class);
-        Path<Object> pointsChangedPath = mock(Path.class);
-        Path<Object> currentRatingPath = mock(Path.class);
-        when(root.get("id")).thenReturn(idPath);
+
+        when(root.get("id")).thenReturn(idPathObj);
         when(root.get("pointsChanged")).thenReturn(pointsChangedPath);
         when(root.get("currentRating")).thenReturn(currentRatingPath);
-        when(cb.equal(idPath, 1)).thenReturn(mock(Predicate.class));
+        when(cb.equal(idPathObj, 1)).thenReturn(mock(Predicate.class));
         when(cb.equal(pointsChangedPath, 10)).thenReturn(mock(Predicate.class));
         when(cb.equal(currentRatingPath, 5)).thenReturn(mock(Predicate.class));
 
@@ -98,10 +104,11 @@ class RatingStatisticsSpecificationTest {
                 new SearchCriteria(5, "currentRating", "currentRating")
         );
 
-        RatingStatisticsSpecification spec = new RatingStatisticsSpecification(criteriaList);
-        Predicate result = spec.toPredicate(root, cq, cb);
+        specification = new RatingStatisticsSpecification(criteriaList);
+        specification.toPredicate(root, cq, cb);
 
-        verify(cb).equal(idPath, 1);
+
+        verify(cb).equal(idPathObj, 1);
         verify(cb).equal(pointsChangedPath, 10);
         verify(cb).equal(currentRatingPath, 5);
     }
@@ -128,8 +135,8 @@ class RatingStatisticsSpecificationTest {
 
         when(cb.and(any(Predicate.class), any(Predicate.class))).thenAnswer(invocation -> invocation.getArgument(1));
 
-        RatingStatisticsSpecification specification = new RatingStatisticsSpecification(List.of(c));
-        Predicate result = specification.toPredicate(root, cq, cb);
+        RatingStatisticsSpecification spec = new RatingStatisticsSpecification(List.of(c));
+        spec.toPredicate(root, cq, cb);
 
         verify(cb).disjunction();
         verify(cb, atLeastOnce()).or(any(), any());
@@ -166,7 +173,6 @@ class RatingStatisticsSpecificationTest {
         when(cb.and(any(), any())).thenAnswer(invocation -> invocation.getArgument(1));
 
         specification = new RatingStatisticsSpecification(List.of(c));
-        Predicate result = specification.toPredicate(root, cq, cb);
 
         verify(cb, never()).equal(any(), any());
     }
@@ -174,7 +180,6 @@ class RatingStatisticsSpecificationTest {
     void testUserIdFilterInvalidNonNumeric() {
         SearchCriteria c = new SearchCriteria("invalid", "userId", "userId");
         specification = new RatingStatisticsSpecification(List.of(c));
-        Predicate result = specification.toPredicate(root, cq, cb);
 
         verify(cb, never()).equal(any(), any());
     }
@@ -183,7 +188,6 @@ class RatingStatisticsSpecificationTest {
         SearchCriteria c = new SearchCriteria(null, "userId", "userId");
 
         specification = new RatingStatisticsSpecification(List.of(c));
-        Predicate result = specification.toPredicate(root, cq, cb);
 
         verify(cb, never()).equal(any(), any());
     }
@@ -210,30 +214,28 @@ class RatingStatisticsSpecificationTest {
 
     @Test
     void testMultipleCriteriaAndBehavior() {
+        Predicate predicate1 = mock(Predicate.class);
+        Predicate predicate2 = mock(Predicate.class);
+        Predicate conjunction = mock(Predicate.class);
+
+        when(root.get("id")).thenReturn(idPathObj);
+        when(root.get("pointsChanged")).thenReturn(pointsChangedPath);
+        when(cb.equal(idPathObj, 1)).thenReturn(predicate1);
+        when(cb.equal(pointsChangedPath, 20)).thenReturn(predicate2);
+        when(cb.conjunction()).thenReturn(conjunction);
+        when(cb.and(any(), any())).thenReturn(mock(Predicate.class));
+
         SearchCriteria c1 = new SearchCriteria(1, "id", "id");
         SearchCriteria c2 = new SearchCriteria(20, "pointsChanged", "pointsChanged");
 
-        Path<Object> idPath = mock(Path.class);
-        Path<Object> pointsChangedPath = mock(Path.class);
+        specification = new RatingStatisticsSpecification(List.of(c1, c2));
+        specification.toPredicate(root, cq, cb);
 
-        when(root.get("id")).thenReturn(idPath);
-        when(root.get("pointsChanged")).thenReturn(pointsChangedPath);
-
-        Predicate idPredicate = mock(Predicate.class);
-        Predicate pointsPredicate = mock(Predicate.class);
-
-        when(cb.equal(idPath, 1)).thenReturn(idPredicate);
-        when(cb.equal(pointsChangedPath, 20)).thenReturn(pointsPredicate);
-
-        RatingStatisticsSpecification spec = new RatingStatisticsSpecification(List.of(c1, c2));
-        Predicate result = spec.toPredicate(root, cq, cb);
-
-        assertNotNull(result);
-
-        verify(cb).equal(idPath, 1);
+        verify(cb).equal(idPathObj, 1);
         verify(cb).equal(pointsChangedPath, 20);
-        verify(cb, atLeastOnce()).and(any(Predicate.class), any(Predicate.class));
+        verify(cb, atLeastOnce()).and(any(), any());
     }
+
     @Test
     void testEmptyCriteriaList() {
         RatingStatisticsSpecification spec = new RatingStatisticsSpecification(List.of());

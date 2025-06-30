@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-public class CustomShoppingListMapperTest {
+class CustomShoppingListMapperTest {
     @InjectMocks
     CustomShoppingListMapper customShoppingListMapper;
 

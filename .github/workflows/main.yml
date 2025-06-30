@@ -51,7 +51,8 @@ jobs:
            -Dsonar.projectKey=GreenCity-UA-4146-4625-01_GreenCityMVP21 \
            -Dsonar.organization=greencity-ua-4146-4625-01 \
            -Dsonar.host.url=https://sonarcloud.io \
-           -Dsonar.binaries=target/classes 
+           -Dsonar.binaries=target/classes \
+           -Dsonar.login=$SONAR_TOKEN
 
       - name: Test Reporter
         uses: dorny/test-reporter@v1.6.0

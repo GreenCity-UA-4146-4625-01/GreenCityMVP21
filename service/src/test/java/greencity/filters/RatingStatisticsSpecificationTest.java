@@ -135,8 +135,8 @@ class RatingStatisticsSpecificationTest {
 
         when(cb.and(any(Predicate.class), any(Predicate.class))).thenAnswer(invocation -> invocation.getArgument(1));
 
-        RatingStatisticsSpecification spec = new RatingStatisticsSpecification(List.of(c));
-        spec.toPredicate(root, cq, cb);
+        specification = new RatingStatisticsSpecification(List.of(c));
+        specification.toPredicate(root, cq, cb);
 
         verify(cb).disjunction();
         verify(cb, atLeastOnce()).or(any(), any());
@@ -238,8 +238,8 @@ class RatingStatisticsSpecificationTest {
 
     @Test
     void testEmptyCriteriaList() {
-        RatingStatisticsSpecification spec = new RatingStatisticsSpecification(List.of());
-        Predicate result = spec.toPredicate(root, cq, cb);
+        specification = new RatingStatisticsSpecification(List.of());
+        Predicate result = specification.toPredicate(root, cq, cb);
 
         assertNotNull(result);
         verify(cb).conjunction();
@@ -248,15 +248,15 @@ class RatingStatisticsSpecificationTest {
 
     @Test
     void testNullCriteriaList() throws Exception {
-        RatingStatisticsSpecification spec = new RatingStatisticsSpecification(null);
+        specification = new RatingStatisticsSpecification(null);
 
         Field criteriaField = RatingStatisticsSpecification.class.getDeclaredField("searchCriteriaList");
         criteriaField.setAccessible(true);
-        criteriaField.set(spec, Collections.emptyList());
+        criteriaField.set(specification, Collections.emptyList());
 
         when(cb.conjunction()).thenReturn(mock(Predicate.class));
 
-        Predicate result = spec.toPredicate(root, cq, cb);
+        Predicate result = specification.toPredicate(root, cq, cb);
 
         assertNotNull(result);
         verify(cb).conjunction();
@@ -266,8 +266,8 @@ class RatingStatisticsSpecificationTest {
     void testUnknownFilterType() {
         SearchCriteria c = new SearchCriteria("value", "field", "unknownType");
 
-        RatingStatisticsSpecification spec = new RatingStatisticsSpecification(List.of(c));
-        Predicate result = spec.toPredicate(root, cq, cb);
+        specification = new RatingStatisticsSpecification(List.of(c));
+        Predicate result = specification.toPredicate(root, cq, cb);
 
         assertNotNull(result);
     }

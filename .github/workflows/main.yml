@@ -36,6 +36,7 @@ jobs:
         with:
           java-version: 21
           distribution: 'temurin'
+          cache: 'maven'
 #       - name: Set up Go
 #         uses: actions/setup-go@v3
 #         with:
@@ -50,8 +51,7 @@ jobs:
            -Dsonar.projectKey=GreenCity-UA-4146-4625-01_GreenCityMVP21 \
            -Dsonar.organization=greencity-ua-4146-4625-01 \
            -Dsonar.host.url=https://sonarcloud.io \
-           -Dsonar.binaries=target/classes \
-           -Dsonar.login=$SONAR_TOKEN
+           -Dsonar.binaries=target/classes 
 
       - name: Test Reporter
         uses: dorny/test-reporter@v1.6.0

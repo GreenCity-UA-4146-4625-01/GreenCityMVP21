@@ -38,10 +38,10 @@ class RatingStatisticsSpecificationTest {
     private Join<RatingStatistics, User> userJoin;
 
     @Mock
-    private Path<Long> userIdPath;
+    private Path<Long> idPath;
 
     @Mock
-    private Path<String> userEmailPath;
+    private Path<String> emailPath;
 
     @Mock
     private Predicate predicateConjunction;
@@ -69,8 +69,8 @@ class RatingStatisticsSpecificationTest {
         User_.email = userEmailAttr;
 
         when(root.join(ratingStatisticsUserAttr)).thenReturn(userJoin);
-        when(userJoin.get(userIdAttr)).thenReturn(userIdPath);
-        when(userJoin.get(userEmailAttr)).thenReturn(userEmailPath);
+        when(userJoin.get(userIdAttr)).thenReturn(idPath);
+        when(userJoin.get(userEmailAttr)).thenReturn(emailPath);
 
         when(cb.conjunction()).thenReturn(predicateConjunction);
         when(cb.disjunction()).thenReturn(predicateDisjunction);
@@ -140,9 +140,6 @@ class RatingStatisticsSpecificationTest {
     void testUserIdFilterValid() {
         SearchCriteria c = new SearchCriteria(42, "userId", "userId");
 
-        Join<RatingStatistics, User> userJoin = mock(Join.class);
-        Path<Long> idPath = mock(Path.class);
-
         when(root.join(ratingStatisticsUserAttr)).thenReturn(userJoin);
         when(userJoin.get(userIdAttr)).thenReturn(idPath);
 
@@ -162,9 +159,6 @@ class RatingStatisticsSpecificationTest {
     @Test
     void testUserIdFilterInvalidEmptyString() {
         SearchCriteria c = new SearchCriteria("", "userId", "userId");
-
-        Join<RatingStatistics, User> userJoin = mock(Join.class);
-        Path<Long> idPath = mock(Path.class);
 
         when(root.join(ratingStatisticsUserAttr)).thenReturn(userJoin);
         when(userJoin.get(userIdAttr)).thenReturn(idPath);
@@ -197,9 +191,6 @@ class RatingStatisticsSpecificationTest {
     @Test
     void testUserMailFilter() {
         SearchCriteria c = new SearchCriteria("test@example.com", "userMail", "userMail");
-
-        Join<RatingStatistics, User> userJoin = mock(Join.class);
-        Path<String> emailPath = mock(Path.class);
 
         when(root.join(ratingStatisticsUserAttr)).thenReturn(userJoin);
         when(userJoin.get(userEmailAttr)).thenReturn(emailPath);

@@ -16,7 +16,7 @@ import static greencity.ModelUtils.getLanguageDTO;
 import static greencity.ModelUtils.getLanguageTranslationDTO;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class LanguageTranslationValidatorTest {

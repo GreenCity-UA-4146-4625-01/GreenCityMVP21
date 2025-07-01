@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class EcoNewsAuthorDtoMapperTest {
+class EcoNewsAuthorDtoMapperTest {
     @InjectMocks
     EcoNewsAuthorDtoMapper mapper;
 

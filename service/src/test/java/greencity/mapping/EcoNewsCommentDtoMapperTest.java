@@ -16,7 +16,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-public class EcoNewsCommentDtoMapperTest {
+class EcoNewsCommentDtoMapperTest {
     @InjectMocks
     EcoNewsCommentDtoMapper mapper;
 

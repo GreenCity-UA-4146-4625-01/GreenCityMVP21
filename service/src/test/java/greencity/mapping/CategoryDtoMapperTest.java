@@ -3,6 +3,7 @@ package greencity.mapping;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import greencity.dto.category.CategoryDto;
 import greencity.entity.Category;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;

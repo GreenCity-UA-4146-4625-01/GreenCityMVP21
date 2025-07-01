@@ -21,7 +21,7 @@ class HabitStatusCalendarMapperTest {
     HabitStatusCalendarMapper habitStatusCalendarMapper;
 
     @Test
-    @DisplayName("Should convert HabitStatusCalendarVO} to HabitStatusCalendar.")
+    @DisplayName("Should convert HabitStatusCalendarVO to HabitStatusCalendar.")
     void shouldConvertHabitStatusCalendarVOToHabitStatusCalendar() {
         HabitStatusCalendarVO habitStatusCalendarVO = HabitStatusCalendarVO.builder()
                 .id(1L)

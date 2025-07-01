@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+
 import java.util.List;
 
 @RestController
@@ -20,7 +21,7 @@ import java.util.List;
 public class CategoryController {
     private CategoryService categoryService;
 
-    /**
+    /***
      * The method which returns new {@code Category}.
      *
      * @param dto - CategoryDto dto for adding with all parameters.

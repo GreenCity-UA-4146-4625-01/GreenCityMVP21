@@ -45,6 +45,8 @@ class CustomShoppingListItemControllerTest {
     @MockBean
     private ModelMapper modelMapper;
 
+    private static final Long USER_ID = 1L;
+
     @Test
     void getAllAvailableCustomShoppingListItems_Returns200AndListTest() throws Exception {
 
@@ -107,7 +109,6 @@ class CustomShoppingListItemControllerTest {
 
     @Test
     void updateItemStatusTest() throws Exception {
-        Long userId = 1L;
         Long itemId = 2L;
         String status = "ACTIVE";
 
@@ -117,7 +118,7 @@ class CustomShoppingListItemControllerTest {
                 .status(ShoppingListItemStatus.valueOf(status))
                 .build();
 
-        when(customShoppingListItemService.updateItemStatus(userId, itemId, status))
+        when(customShoppingListItemService.updateItemStatus(USER_ID, itemId, status))
                 .thenReturn(expectedResponse);
 
         mockMvc.perform(patch("/custom/shopping-list-items/1/custom-shopping-list-items")
@@ -132,13 +133,12 @@ class CustomShoppingListItemControllerTest {
 
     @Test
     void updateItemStatusToDoneTest() throws Exception {
-        Long userId = 1L;
         Long itemId = 2L;
 
         doNothing().when(customShoppingListItemService)
-                .updateItemStatusToDone(userId, itemId);
+                .updateItemStatusToDone(USER_ID, itemId);
 
-        mockMvc.perform(patch("/custom/shopping-list-items/{userId}/done", userId)
+        mockMvc.perform(patch("/custom/shopping-list-items/{userId}/done", USER_ID)
                         .param("itemId", itemId.toString())
                         .with(csrf()))
                 .andExpect(status().isOk());
@@ -147,14 +147,13 @@ class CustomShoppingListItemControllerTest {
     @Test
     void bulkDeleteCustomShoppingListItemsTest() throws Exception {
         String ids = "1,2";
-        Long userId = 1L;
 
         List<Long> expectedIds = List.of(1L, 2L);
 
         when(customShoppingListItemService.bulkDelete(ids))
                 .thenReturn(expectedIds);
 
-        mockMvc.perform(delete("/custom/shopping-list-items/{userId}/custom-shopping-list-items", userId)
+        mockMvc.perform(delete("/custom/shopping-list-items/{userId}/custom-shopping-list-items", USER_ID)
                         .param("ids", ids)
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -166,26 +165,25 @@ class CustomShoppingListItemControllerTest {
 
     @Test
     void getAllCustomShoppingItemsByStatusTest() throws Exception {
-        Long userId = 1L;
         String status = "ACTIVE";
 
         CustomShoppingListItemResponseDto responseDto = CustomShoppingListItemResponseDto.builder()
-                .id(userId)
+                .id(USER_ID)
                 .text("Test item")
                 .status(ShoppingListItemStatus.ACTIVE)
                 .build();
 
         List<CustomShoppingListItemResponseDto> responseDtoList = List.of(responseDto);
 
-        when(customShoppingListItemService.findAllUsersCustomShoppingListItemsByStatus(userId, status))
+        when(customShoppingListItemService.findAllUsersCustomShoppingListItemsByStatus(USER_ID, status))
                 .thenReturn(responseDtoList);
 
-        mockMvc.perform(get("/custom/shopping-list-items/{userId}/custom-shopping-list-items", userId)
+        mockMvc.perform(get("/custom/shopping-list-items/{userId}/custom-shopping-list-items", USER_ID)
                         .param("status", status)
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").value(userId))
+                .andExpect(jsonPath("$[0].id").value(USER_ID))
                 .andExpect(jsonPath("$[0].text").value("Test item"))
                 .andExpect(jsonPath("$[0].status").value(status));
     }

@@ -41,7 +41,9 @@ class UserVOMapperTest {
                 .expiryDate(expected.getVerifyEmail().getExpiryDate())
                 .token(expected.getVerifyEmail().getToken())
                 .build() : null)
+            .dateOfRegistration(expected.getDateOfRegistration())
             .showShoppingList(expected.getShowShoppingList())
+            .refreshTokenKey(expected.getRefreshTokenKey())
             .showEcoPlace(expected.getShowEcoPlace())
             .showLocation(expected.getShowLocation())
             .ownSecurity(expected.getOwnSecurity() != null ? OwnSecurity.builder()
@@ -55,6 +57,7 @@ class UserVOMapperTest {
             .lastActivityTime(expected.getLastActivityTime())
             .city(expected.getCity())
             .build();
+
         assertEquals(expected, mapper.convert(userToBeConverted));
     }
 }

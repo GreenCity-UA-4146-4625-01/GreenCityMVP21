@@ -6,6 +6,7 @@ import greencity.dto.verifyemail.VerifyEmailVO;
 import greencity.entity.User;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
+import java.util.Collections;
 
 @Component
 public class UserVOMapper extends AbstractConverter<User, UserVO> {
@@ -30,6 +31,11 @@ public class UserVOMapper extends AbstractConverter<User, UserVO> {
                 .expiryDate(user.getVerifyEmail().getExpiryDate())
                 .token(user.getVerifyEmail().getToken())
                 .build() : null)
+            .userFriends(Collections.singletonList(
+                UserVO.builder()
+                    .id(75L)
+                    .name("Andrew")
+                    .build()))
             .refreshTokenKey(user.getRefreshTokenKey())
             .ownSecurity(user.getOwnSecurity() != null ? OwnSecurityVO.builder()
                 .id(user.getOwnSecurity().getId())
@@ -45,6 +51,7 @@ public class UserVOMapper extends AbstractConverter<User, UserVO> {
             .showShoppingList(user.getShowShoppingList())
             .showEcoPlace(user.getShowEcoPlace())
             .showLocation(user.getShowLocation())
+            .lastActivityTime(user.getLastActivityTime())
             .build();
     }
 }

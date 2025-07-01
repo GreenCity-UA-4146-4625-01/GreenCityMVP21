@@ -25,20 +25,20 @@ class EcoNewsCommentDtoMapperTest {
     @BeforeAll
     static void setup() {
         authorUser = User.builder()
-                .id(1L)
-                .name("User")
-                .profilePicturePath("http://localhost/image.png")
-                .build();
+            .id(1L)
+            .name("User")
+            .profilePicturePath("http://localhost/image.png")
+            .build();
     }
 
     @Test
     void convertSuccessDeletedComment() {
         EcoNewsComment comment = EcoNewsComment.builder()
-                .id(1L)
-                .createdDate(LocalDateTime.now().minusDays(1))
-                .modifiedDate(LocalDateTime.now().minusDays(1))
-                .deleted(true)
-                .build();
+            .id(1L)
+            .createdDate(LocalDateTime.now().minusDays(1))
+            .modifiedDate(LocalDateTime.now().minusDays(1))
+            .deleted(true)
+            .build();
 
         EcoNewsCommentDto dto = mapper.convert(comment);
         assertEquals(CommentStatus.DELETED, dto.getStatus());
@@ -51,14 +51,14 @@ class EcoNewsCommentDtoMapperTest {
         LocalDateTime createdDate = LocalDateTime.now().minusDays(1);
 
         EcoNewsComment comment = EcoNewsComment.builder()
-                .id(1L)
-                .createdDate(createdDate)
-                .modifiedDate(createdDate)
-                .text("text")
-                .user(authorUser)
-                .usersLiked(Set.of(authorUser))
-                .currentUserLiked(true)
-                .build();
+            .id(1L)
+            .createdDate(createdDate)
+            .modifiedDate(createdDate)
+            .text("text")
+            .user(authorUser)
+            .usersLiked(Set.of(authorUser))
+            .currentUserLiked(true)
+            .build();
 
         EcoNewsCommentDto dto = mapper.convert(comment);
         assertEquals(CommentStatus.ORIGINAL, dto.getStatus());
@@ -72,14 +72,14 @@ class EcoNewsCommentDtoMapperTest {
     @Test
     void convertSuccessEditedComment() {
         EcoNewsComment comment = EcoNewsComment.builder()
-                .id(1L)
-                .createdDate(LocalDateTime.now().minusDays(1))
-                .modifiedDate(LocalDateTime.now())
-                .text("text")
-                .user(authorUser)
-                .usersLiked(Set.of(authorUser))
-                .currentUserLiked(true)
-                .build();
+            .id(1L)
+            .createdDate(LocalDateTime.now().minusDays(1))
+            .modifiedDate(LocalDateTime.now())
+            .text("text")
+            .user(authorUser)
+            .usersLiked(Set.of(authorUser))
+            .currentUserLiked(true)
+            .build();
 
         EcoNewsCommentDto dto = mapper.convert(comment);
         assertEquals(CommentStatus.EDITED, dto.getStatus());

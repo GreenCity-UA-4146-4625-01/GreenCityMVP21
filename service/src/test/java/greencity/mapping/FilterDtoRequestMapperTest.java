@@ -16,13 +16,13 @@ public class FilterDtoRequestMapperTest {
     FilterDtoRequestMapper mapper;
 
     @Test
-    void convert_validInput_returnsCorrectFilter(){
+    void convert_validInput_returnsCorrectFilter() {
         var dto = UserFilterDtoRequest.builder()
-                .name("UserFilter")
-                .searchCriteria("email")
-                .userRole("ADMIN")
-                .userStatus("ACTIVE")
-                .build();
+            .name("UserFilter")
+            .searchCriteria("email")
+            .userRole("ADMIN")
+            .userStatus("ACTIVE")
+            .build();
 
         Filter result = mapper.convert(dto);
 
@@ -33,21 +33,21 @@ public class FilterDtoRequestMapperTest {
     }
 
     @Test
-    void convert_nullInput_ThrowsNullPointerException(){
+    void convert_nullInput_ThrowsNullPointerException() {
 
-        assertThrows(NullPointerException.class, ()->{
+        assertThrows(NullPointerException.class, () -> {
             mapper.convert((UserFilterDtoRequest) null);
         });
     }
 
     @Test
-    void convert_emptyFields_stillReturnsFilter(){
+    void convert_emptyFields_stillReturnsFilter() {
         var dto = UserFilterDtoRequest.builder()
-                .name("")
-                .searchCriteria("")
-                .userRole("")
-                .userStatus("")
-                .build();
+            .name("")
+            .searchCriteria("")
+            .userRole("")
+            .userStatus("")
+            .build();
 
         Filter result = mapper.convert(dto);
 

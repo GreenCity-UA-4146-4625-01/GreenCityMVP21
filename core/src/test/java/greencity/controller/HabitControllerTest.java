@@ -41,51 +41,48 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Unit test for {@link HabitController}.
  *
- * <p><b>Tested endpoints:</b></p>
+ * <p>
+ * <b>Tested endpoints:</b>
+ * </p>
  *
  * <ul>
- *     {@code GET /habit/{id}} – Get habit by ID (localized)
- *      <li>
- *          {@link HabitControllerTest#shouldReturnExistingDtoWhenHabitIsFound()} ()}
- *      <li>
- *          {@link HabitControllerTest#shouldReturn400WhenPassedWrongId()}
- *      </li>
+ * {@code GET /habit/{id}} – Get habit by ID (localized)
+ * <li>{@link HabitControllerTest#shouldReturnExistingDtoWhenHabitIsFound()} ()}
+ * <li>{@link HabitControllerTest#shouldReturn400WhenPassedWrongId()}</li>
  * </ul>
  *
- * <ul>{@code GET /habit} – Get all habits for current user
- *      <li>
- *          {@link HabitControllerTest#shouldReturnPageableDtoOfHabitDto()}
- *      </li>
+ * <ul>
+ * {@code GET /habit} – Get all habits for current user
+ * <li>{@link HabitControllerTest#shouldReturnPageableDtoOfHabitDto()}</li>
  * </ul>
- * <ul>{@code GET /habit/{id}/shopping-list} – Get shopping list items for a habit
- *      <li>
- *          {@link HabitControllerTest#shouldReturnShoppingListItemDto()}
- *      </li>
+ * <ul>
+ * {@code GET /habit/{id}/shopping-list} – Get shopping list items for a habit
+ * <li>{@link HabitControllerTest#shouldReturnShoppingListItemDto()}</li>
  * </ul>
- * <ul>{@code GET /habit/tags/search} – Get habits by tags and language code
- *      <li>
- *          {@link HabitControllerTest#shouldReturnPageableDtoByTags()}
- *      </li>
+ * <ul>
+ * {@code GET /habit/tags/search} – Get habits by tags and language code
+ * <li>{@link HabitControllerTest#shouldReturnPageableDtoByTags()}</li>
  * </ul>
- * <ul>{@code GET /habit/search} – Filter habits by tags, isCustomHabit, complexities
- *      <li>
- *          {@link HabitControllerTest#shouldReturnPageWithSearchResult()}
- *      </li>
+ * <ul>
+ * {@code GET /habit/search} – Filter habits by tags, isCustomHabit,
+ * complexities
+ * <li>{@link HabitControllerTest#shouldReturnPageWithSearchResult()}</li>
  * </ul>
- * <ul>{@code GET /habit/tags} – Get all habit tags
- *      <li>
- *          {@link HabitControllerTest#shouldReturnAllHabitTags()}
- *      </li>
+ * <ul>
+ * {@code GET /habit/tags} – Get all habit tags
+ * <li>{@link HabitControllerTest#shouldReturnAllHabitTags()}</li>
  * </ul>
- * <ul>{@code POST /habit/custom} – Add new custom habit with multipart image
- *      <li>
- *          {@link HabitControllerTest#shouldAddNewCustomHabitWithMultipartImage()}
- *      </li>
+ * <ul>
+ * {@code POST /habit/custom} – Add new custom habit with multipart image
+ * <li>{@link HabitControllerTest#shouldAddNewCustomHabitWithMultipartImage()}
+ * </li>
  * </ul>
- * <ul>{@code GET /habit/{HABIT_ID}/friends/profile-pictures} – Get profile pictures of friends assigned to habit
- *      <li>
- *          {@link HabitControllerTest#shouldReturnProfilePicturesOfFriendsAssignedToHabit()}
- *      </li>
+ * <ul>
+ * {@code GET /habit/{HABIT_ID}/friends/profile-pictures} – Get profile pictures
+ * of friends assigned to habit
+ * <li>
+ * {@link HabitControllerTest#shouldReturnProfilePicturesOfFriendsAssignedToHabit()}
+ * </li>
  * </ul>
  */
 
@@ -93,7 +90,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser(username = "usergreencity@gmail.com")
 public class HabitControllerTest {
 
-    public static final String IMG_EXAMPLE = "https://csb10032000a548f571.blob.core.windows.net/allfiles/304ff73c-7e6d-4a17-be7d-59fc3666d351931fb71c088a926a1e04b6896d109fa2.jpg";
+    public static final String IMG_EXAMPLE =
+        "https://csb10032000a548f571.blob.core.windows.net/allfiles/304ff73c-7e6d-4a17-be7d-59fc3666d351931fb71c088a926a1e04b6896d109fa2.jpg";
     private static final String BASE_URL = "/habit";
     private final Locale LOCALE = Locale.ENGLISH;
     private final Long HABIT_ID = 1L;
@@ -109,7 +107,7 @@ public class HabitControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(habitController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver()).build();
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver()).build();
     }
 
     @Test
@@ -122,11 +120,11 @@ public class HabitControllerTest {
         when(habitService.getByIdAndLanguageCode(HABIT_ID, LOCALE.getLanguage())).thenReturn(expectedHabitDto);
 
         mockMvc.perform(get(BASE_URL + "/{HABIT_ID}", HABIT_ID)
-                        .header("Accept-Language", LOCALE.getLanguage())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.habitTranslation.languageCode").value(LOCALE.getLanguage()))
-                .andExpect(jsonPath("$.id").value(HABIT_ID));
+            .header("Accept-Language", LOCALE.getLanguage())
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.habitTranslation.languageCode").value(LOCALE.getLanguage()))
+            .andExpect(jsonPath("$.id").value(HABIT_ID));
 
         verify(habitService).getByIdAndLanguageCode(HABIT_ID, LOCALE.getLanguage());
     }
@@ -137,9 +135,9 @@ public class HabitControllerTest {
         String habitIdStr = "abc";
 
         mockMvc.perform(get(BASE_URL + "/{HABIT_ID}", habitIdStr)
-                        .header("Accept-Language", LOCALE.getLanguage())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+            .header("Accept-Language", LOCALE.getLanguage())
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
 
         verifyNoInteractions(habitService);
     }
@@ -150,15 +148,17 @@ public class HabitControllerTest {
         List<HabitDto> habits = List.of(new HabitDto().setImage(IMG_EXAMPLE));
         PageableDto<HabitDto> page = new PageableDto<>(habits, 1, 0, 1);
 
-        when(habitService.getAllHabitsByLanguageCode(any(UserVO.class), any(Pageable.class), eq(LOCALE.getLanguage()))).thenReturn(page);
+        when(habitService.getAllHabitsByLanguageCode(any(UserVO.class), any(Pageable.class), eq(LOCALE.getLanguage())))
+            .thenReturn(page);
 
         mockMvc.perform(get(BASE_URL)
-                        .header("Accept-Language", LOCALE.getLanguage())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("@.page[0].image").value(IMG_EXAMPLE));
+            .header("Accept-Language", LOCALE.getLanguage())
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("@.page[0].image").value(IMG_EXAMPLE));
 
-        verify(habitService).getAllHabitsByLanguageCode(any(UserVO.class), any(Pageable.class), eq(LOCALE.getLanguage()));
+        verify(habitService).getAllHabitsByLanguageCode(any(UserVO.class), any(Pageable.class),
+            eq(LOCALE.getLanguage()));
     }
 
     @Test
@@ -173,16 +173,16 @@ public class HabitControllerTest {
         dto2.setText("Glass bottle");
 
         when(habitService.getShoppingListForHabit(HABIT_ID, LOCALE.getLanguage()))
-                .thenReturn(List.of(dto1, dto2));
+            .thenReturn(List.of(dto1, dto2));
 
         mockMvc.perform(get(BASE_URL + "/{HABIT_ID}/shopping-list", HABIT_ID)
-                        .header("Accept-Language", LOCALE.getLanguage())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(10L))
-                .andExpect(jsonPath("$[0].text").value("Reusable bag"))
-                .andExpect(jsonPath("$[1].id").value(11L))
-                .andExpect(jsonPath("$[1].text").value("Glass bottle"));
+            .header("Accept-Language", LOCALE.getLanguage())
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(10L))
+            .andExpect(jsonPath("$[0].text").value("Reusable bag"))
+            .andExpect(jsonPath("$[1].id").value(11L))
+            .andExpect(jsonPath("$[1].text").value("Glass bottle"));
 
         verify(habitService).getShoppingListForHabit(HABIT_ID, LOCALE.getLanguage());
     }
@@ -204,16 +204,17 @@ public class HabitControllerTest {
 
         PageableDto<HabitDto> pageableDto = new PageableDto<>(List.of(dto1, dto2), 1, 1, 2);
 
-        when(habitService.getAllByTagsAndLanguageCode(any(Pageable.class), eq(tags), eq(LOCALE.getLanguage()))).thenReturn(pageableDto);
+        when(habitService.getAllByTagsAndLanguageCode(any(Pageable.class), eq(tags), eq(LOCALE.getLanguage())))
+            .thenReturn(pageableDto);
 
         mockMvc.perform(get(BASE_URL + "/tags/search")
-                        .param("tags", "ECO_NEWS", "EVENT")
-                        .header("Accept-Language", LOCALE.getLanguage())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("@.page[0].id").value(1L))
-                .andExpect(jsonPath("@.page[0].image").value(IMG_EXAMPLE))
-                .andExpect(jsonPath("@.page[0].tags").value("EVENT"));
+            .param("tags", "ECO_NEWS", "EVENT")
+            .header("Accept-Language", LOCALE.getLanguage())
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("@.page[0].id").value(1L))
+            .andExpect(jsonPath("@.page[0].image").value(IMG_EXAMPLE))
+            .andExpect(jsonPath("@.page[0].tags").value("EVENT"));
 
         verify(habitService).getAllByTagsAndLanguageCode(any(Pageable.class), eq(tags), eq(LOCALE.getLanguage()));
     }
@@ -238,29 +239,29 @@ public class HabitControllerTest {
         PageableDto<HabitDto> pageableDto = new PageableDto<>(List.of(dto1, dto2), 2, 0, 1);
 
         when(habitService.getAllByDifferentParameters(
-                any(UserVO.class),
-                any(Pageable.class),
-                eq(Optional.of(tags)),
-                eq(Optional.of(isCustom)),
-                eq(Optional.of(complexities)),
-                eq(LOCALE.getLanguage()))).thenReturn(pageableDto);
+            any(UserVO.class),
+            any(Pageable.class),
+            eq(Optional.of(tags)),
+            eq(Optional.of(isCustom)),
+            eq(Optional.of(complexities)),
+            eq(LOCALE.getLanguage()))).thenReturn(pageableDto);
 
         mockMvc.perform(get(BASE_URL + "/search")
-                        .param("tags", "EVENT")
-                        .param("isCustomHabit", "false")
-                        .param("complexities", "1")
-                        .header("Accept-Language", LOCALE.getLanguage())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("@.page[0].id").value(1L))
-                .andExpect(jsonPath("@.page[0].image").value(IMG_EXAMPLE))
-                .andExpect(jsonPath("@.page[0].tags").value("EVENT"))
-                .andExpect(jsonPath("@.page[1].id").value(2L))
-                .andExpect(jsonPath("@.page[1].image").value(IMG_EXAMPLE))
-                .andExpect(jsonPath("@.page[1].tags").value("ECO_NEWS"));
+            .param("tags", "EVENT")
+            .param("isCustomHabit", "false")
+            .param("complexities", "1")
+            .header("Accept-Language", LOCALE.getLanguage())
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("@.page[0].id").value(1L))
+            .andExpect(jsonPath("@.page[0].image").value(IMG_EXAMPLE))
+            .andExpect(jsonPath("@.page[0].tags").value("EVENT"))
+            .andExpect(jsonPath("@.page[1].id").value(2L))
+            .andExpect(jsonPath("@.page[1].image").value(IMG_EXAMPLE))
+            .andExpect(jsonPath("@.page[1].tags").value("ECO_NEWS"));
 
         verify(habitService).getAllByDifferentParameters(any(UserVO.class), any(Pageable.class), eq(Optional.of(tags)),
-                eq(Optional.of(isCustom)), eq(Optional.of(complexities)), eq(LOCALE.getLanguage()));
+            eq(Optional.of(isCustom)), eq(Optional.of(complexities)), eq(LOCALE.getLanguage()));
     }
 
     @Test
@@ -271,11 +272,11 @@ public class HabitControllerTest {
         when(tagsService.findAllHabitsTags(LOCALE.getLanguage())).thenReturn(list);
 
         mockMvc.perform(get(BASE_URL + "/tags")
-                        .header("Accept-Language", LOCALE.getLanguage())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0]").value("ECO_NEWS"))
-                .andExpect(jsonPath("$[1]").value("EVENT"));
+            .header("Accept-Language", LOCALE.getLanguage())
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0]").value("ECO_NEWS"))
+            .andExpect(jsonPath("$[1]").value("EVENT"));
 
         verify(tagsService).findAllHabitsTags(LOCALE.getLanguage());
     }
@@ -293,7 +294,8 @@ public class HabitControllerTest {
 
         MockMultipartFile jsonPart = new MockMultipartFile("request", "", "application/json", jsonRequest.getBytes());
 
-        MockMultipartFile imagePart = new MockMultipartFile("image", "image.jpg", MediaType.IMAGE_JPEG_VALUE, "image-bytes".getBytes());
+        MockMultipartFile imagePart =
+            new MockMultipartFile("image", "image.jpg", MediaType.IMAGE_JPEG_VALUE, "image-bytes".getBytes());
 
         AddCustomHabitDtoResponse responseDto = new AddCustomHabitDtoResponse();
         responseDto.setId(1L);
@@ -302,16 +304,16 @@ public class HabitControllerTest {
         when(habitService.addCustomHabit(any(), any(), eq("usergreencity@gmail.com"))).thenReturn(responseDto);
 
         mockMvc.perform(multipart(BASE_URL + "/custom")
-                        .file(jsonPart)
-                        .file(imagePart)
-                        .with(csrf())
-                        .principal(() -> "usergreencity@gmail.com")
-                        .header("Accept-Language", LOCALE.getLanguage())
-                        .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.image").value(IMG_EXAMPLE));
+            .file(jsonPart)
+            .file(imagePart)
+            .with(csrf())
+            .principal(() -> "usergreencity@gmail.com")
+            .header("Accept-Language", LOCALE.getLanguage())
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id").value(1L))
+            .andExpect(jsonPath("$.image").value(IMG_EXAMPLE));
 
         verify(habitService).addCustomHabit(any(), any(), eq("usergreencity@gmail.com"));
     }
@@ -320,30 +322,31 @@ public class HabitControllerTest {
     @DisplayName("GET /habit/{HABIT_ID}/friends/profile-pictures – should return profile pictures of friends assigned to habit")
     void shouldReturnProfilePicturesOfFriendsAssignedToHabit() throws Exception {
         List<UserProfilePictureDto> userProfilePictureDtos = List.of(
-                UserProfilePictureDto.builder()
-                        .id(1L)
-                        .name("Greg")
-                        .profilePicturePath(IMG_EXAMPLE)
-                        .build(),
-                UserProfilePictureDto.builder()
-                        .id(2L)
-                        .name("Dora")
-                        .profilePicturePath(IMG_EXAMPLE)
-                        .build());
+            UserProfilePictureDto.builder()
+                .id(1L)
+                .name("Greg")
+                .profilePicturePath(IMG_EXAMPLE)
+                .build(),
+            UserProfilePictureDto.builder()
+                .id(2L)
+                .name("Dora")
+                .profilePicturePath(IMG_EXAMPLE)
+                .build());
 
-        when(habitService.getFriendsAssignedToHabitProfilePictures(eq(HABIT_ID), any())).thenReturn(userProfilePictureDtos);
+        when(habitService.getFriendsAssignedToHabitProfilePictures(eq(HABIT_ID), any()))
+            .thenReturn(userProfilePictureDtos);
 
         mockMvc.perform(get(BASE_URL + "/{HABIT_ID}/friends/profile-pictures", HABIT_ID)
-                        .header("Accept-Language", LOCALE.getLanguage())
-                        .with(csrf())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].name").value("Greg"))
-                .andExpect(jsonPath("$[0].profilePicturePath").value(IMG_EXAMPLE))
-                .andExpect(jsonPath("$[1].id").value(2L))
-                .andExpect(jsonPath("$[1].name").value("Dora"))
-                .andExpect(jsonPath("$[1].profilePicturePath").value(IMG_EXAMPLE));
+            .header("Accept-Language", LOCALE.getLanguage())
+            .with(csrf())
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(1L))
+            .andExpect(jsonPath("$[0].name").value("Greg"))
+            .andExpect(jsonPath("$[0].profilePicturePath").value(IMG_EXAMPLE))
+            .andExpect(jsonPath("$[1].id").value(2L))
+            .andExpect(jsonPath("$[1].name").value("Dora"))
+            .andExpect(jsonPath("$[1].profilePicturePath").value(IMG_EXAMPLE));
 
         verify(habitService).getFriendsAssignedToHabitProfilePictures(eq(HABIT_ID), any());
     }

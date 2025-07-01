@@ -22,9 +22,9 @@ class CategoryDtoResponseMapperTest {
         category.setName("TestName");
 
         CategoryDtoResponse expectedCategoryDtoResponse = CategoryDtoResponse.builder()
-                .id(category.getId())
-                .name(category.getName())
-                .build();
+            .id(category.getId())
+            .name(category.getName())
+            .build();
 
         assertEquals(expectedCategoryDtoResponse, (categoryDtoResponseMapper.convert(category)));
         assertEquals("TestName", categoryDtoResponseMapper.convert(category).getName());

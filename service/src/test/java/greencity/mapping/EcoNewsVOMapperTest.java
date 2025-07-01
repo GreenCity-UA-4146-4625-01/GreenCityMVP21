@@ -57,17 +57,15 @@ class EcoNewsVOMapperTest {
     void convertSuccessWithTags() {
         EcoNews news = createEcoNews();
         news.setTags(List.of(
-                Tag.builder()
+            Tag.builder()
+                .id(1L)
+                .tagTranslations(List.of(
+                    TagTranslation.builder()
+                        .name("name")
                         .id(1L)
-                        .tagTranslations(List.of(
-                                TagTranslation.builder()
-                                        .name("name")
-                                        .id(1L)
-                                        .language(ModelUtils.getLanguage())
-                                        .build()
-                        ))
-                        .build()
-        ));
+                        .language(ModelUtils.getLanguage())
+                        .build()))
+                .build()));
 
         EcoNewsVO vo = mapper.convert(news);
         assertEquals(1, vo.getTags().size());
@@ -106,8 +104,7 @@ class EcoNewsVOMapperTest {
     void convertSuccessWithComments() {
         EcoNews news = createEcoNews();
         news.setEcoNewsComments(List.of(
-                ModelUtils.getEcoNewsComment()
-        ));
+            ModelUtils.getEcoNewsComment()));
 
         EcoNewsVO vo = mapper.convert(news);
         assertEquals(1, vo.getEcoNewsComments().size());

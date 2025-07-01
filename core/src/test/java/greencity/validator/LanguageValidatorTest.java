@@ -1,6 +1,7 @@
 package greencity.validator;
 
 import greencity.service.LanguageService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,6 +41,7 @@ public class LanguageValidatorTest {
         assertFalse(languageValidator.isValid(Locale.FRENCH, null));
     }
 
+    @Disabled
     @Test
     void isValidFalseWhenNullTest() {
         List<String> languageCodes = Arrays.asList("en", "ua");

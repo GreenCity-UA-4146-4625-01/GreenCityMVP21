@@ -3,7 +3,6 @@ package greencity.dto.econews;
 import greencity.constant.ServiceValidationConstants;
 import jakarta.validation.constraints.*;
 import lombok.*;
-
 import java.util.List;
 
 @AllArgsConstructor

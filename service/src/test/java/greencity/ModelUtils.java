@@ -489,7 +489,7 @@ public class ModelUtils {
     }
 
     public static UpdateEcoNewsDto getUpdateEcoNewsDto() {
-        return new UpdateEcoNewsDto("1L", "title","text", Collections.singletonList("tag"),
+        return new UpdateEcoNewsDto("1L", "title", "text", Collections.singletonList("tag"),
             "source", "abc");
     }
 

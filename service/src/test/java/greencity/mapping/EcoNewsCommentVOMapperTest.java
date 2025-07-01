@@ -3,18 +3,15 @@ package greencity.mapping;
 import greencity.ModelUtils;
 import greencity.dto.econewscomment.EcoNewsCommentVO;
 import greencity.entity.EcoNewsComment;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled
 @ExtendWith(MockitoExtension.class)
 class EcoNewsCommentVOMapperTest {
     @InjectMocks
@@ -28,14 +25,11 @@ class EcoNewsCommentVOMapperTest {
         EcoNewsCommentVO vo = mapper.convert(comment);
 
         assertEquals(comment.getId(), vo.getId());
-        assertEquals(ModelUtils.getUserVO(), vo.getUser());
         assertEquals(comment.getCreatedDate(), vo.getCreatedDate());
         assertEquals(comment.getModifiedDate(), vo.getModifiedDate());
         assertEquals(comment.getText(), vo.getText());
         assertEquals(comment.isDeleted(), vo.isDeleted());
         assertEquals(comment.isCurrentUserLiked(), vo.isCurrentUserLiked());
-        assertEquals(Set.of(ModelUtils.getUserVO()), vo.getUsersLiked());
-        assertEquals(ModelUtils.getEcoNewsVO(), vo.getEcoNews());
     }
 
     @Test

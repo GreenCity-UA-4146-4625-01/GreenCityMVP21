@@ -476,7 +476,16 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
     @Override
     public EcoNewsGenericDto update(UpdateEcoNewsDto updateEcoNewsDto, MultipartFile image, UserVO user) {
-        Long id = Long.valueOf(updateEcoNewsDto.getId().replaceAll("[lL]$", ""));
+        Long id;
+        try {
+            String sanitizedId = updateEcoNewsDto.getId().replaceAll("[lL]$", "").trim();
+            if (sanitizedId.isEmpty()) {
+                throw new BadRequestException("Invalid ID format");
+            }
+            id = Long.valueOf(sanitizedId);
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Invalid ID format: " + updateEcoNewsDto.getId());
+        }
         EcoNews toUpdate = modelMapper.map(findById(id), EcoNews.class);
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(toUpdate.getAuthor().getId())) {
             throw new BadRequestException(ErrorMessage.USER_HAS_NO_PERMISSION);

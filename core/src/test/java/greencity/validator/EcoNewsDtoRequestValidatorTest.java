@@ -27,15 +27,15 @@ class EcoNewsDtoRequestValidatorTest {
         AddEcoNewsDtoRequest dto = new AddEcoNewsDtoRequest();
         dto.setTags(Arrays.asList("tag1", "tag2"));
         dto.setSource("https://example.com");
-        assertThat(validator.isValid(dto,context)).isTrue();
+        assertThat(validator.isValid(dto, context)).isTrue();
     }
 
     @Test
     void isValid_validTagsAndNullSource_returnsTrue() {
-         AddEcoNewsDtoRequest dto = new AddEcoNewsDtoRequest();
-         dto.setTags(Arrays.asList("tag1", "tag2"));
-         dto.setSource(null);
-         assertThat(validator.isValid(dto, context)).isTrue();
+        AddEcoNewsDtoRequest dto = new AddEcoNewsDtoRequest();
+        dto.setTags(Arrays.asList("tag1", "tag2"));
+        dto.setSource(null);
+        assertThat(validator.isValid(dto, context)).isTrue();
     }
 
     @Test
@@ -52,9 +52,9 @@ class EcoNewsDtoRequestValidatorTest {
         dto.setTags(Collections.emptyList());
         dto.setSource(null);
 
-        assertThatThrownBy(()-> validator.isValid(dto, context))
-                .isInstanceOf(WrongCountOfTagsException.class)
-                .hasMessageContaining(ErrorMessage.WRONG_COUNT_OF_TAGS_EXCEPTION);
+        assertThatThrownBy(() -> validator.isValid(dto, context))
+            .isInstanceOf(WrongCountOfTagsException.class)
+            .hasMessageContaining(ErrorMessage.WRONG_COUNT_OF_TAGS_EXCEPTION);
     }
 
     @Test
@@ -63,9 +63,9 @@ class EcoNewsDtoRequestValidatorTest {
         dto.setTags(Arrays.asList("tag1", "tag2", "tag3", "tag4"));
         dto.setSource(null);
 
-        assertThatThrownBy(()-> validator.isValid(dto, context))
-                .isInstanceOf(WrongCountOfTagsException.class)
-                .hasMessageContaining(ErrorMessage.WRONG_COUNT_OF_TAGS_EXCEPTION);
+        assertThatThrownBy(() -> validator.isValid(dto, context))
+            .isInstanceOf(WrongCountOfTagsException.class)
+            .hasMessageContaining(ErrorMessage.WRONG_COUNT_OF_TAGS_EXCEPTION);
     }
 
     @Test
@@ -75,7 +75,7 @@ class EcoNewsDtoRequestValidatorTest {
         dto.setSource("not-a-valid-url");
 
         assertThatThrownBy(() -> validator.isValid(dto, context))
-                .isInstanceOf(InvalidURLException.class)
-                .hasMessageContaining(ErrorMessage.MALFORMED_URL);
+            .isInstanceOf(InvalidURLException.class)
+            .hasMessageContaining(ErrorMessage.MALFORMED_URL);
     }
 }

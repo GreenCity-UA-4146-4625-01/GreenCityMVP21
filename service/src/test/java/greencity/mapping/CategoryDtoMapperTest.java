@@ -35,8 +35,8 @@ class CategoryDtoMapperTest {
         categoryDto.setName("TestName");
 
         Category expectedCategory = Category.builder()
-                .name("TestName")
-                .build();
+            .name("TestName")
+            .build();
 
         assertEquals(expectedCategory, categoryDtoMapper.convert(categoryDto));
         assertEquals("TestName", categoryDtoMapper.convert(categoryDto).getName());

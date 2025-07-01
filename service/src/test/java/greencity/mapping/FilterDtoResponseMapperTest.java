@@ -24,6 +24,7 @@ public class FilterDtoResponseMapperTest {
         requestMapper = new FilterDtoRequestMapper();
         responseMapper = new FilterDtoResponseMapper();
     }
+
     @Test
     void convertRequestDto_toEntity_fullFields_mapsCorrectly() {
 
@@ -33,9 +34,7 @@ public class FilterDtoResponseMapperTest {
         dto.setUserRole("role");
         dto.setUserStatus("status");
 
-
         Filter entity = requestMapper.convert(dto);
-
 
         assertThat(entity).isNotNull();
         assertThat(entity.getName()).isEqualTo(dto.getName());
@@ -62,16 +61,13 @@ public class FilterDtoResponseMapperTest {
         });
     }
 
-
-
     @Test
     void convertResponseEntity_toDto_fullValues_mapsCorrectly() {
         Filter entity = Filter.builder()
-                .id(10L)
-                .name("FilterName")
-                .values("criteria;role;status")
-                .build();
-
+            .id(10L)
+            .name("FilterName")
+            .values("criteria;role;status")
+            .build();
 
         UserFilterDtoResponse dto = responseMapper.convert(entity);
 
@@ -91,10 +87,10 @@ public class FilterDtoResponseMapperTest {
     @Test
     void convertResponseEntity_valuesNull_throwsNullPointerException() {
         Filter entity = Filter.builder()
-                .id(1L)
-                .name("NullValues")
-                .values(null)
-                .build();
+            .id(1L)
+            .name("NullValues")
+            .values(null)
+            .build();
 
         assertThrows(NullPointerException.class, () -> responseMapper.convert(entity));
     }
@@ -102,10 +98,10 @@ public class FilterDtoResponseMapperTest {
     @Test
     void convertResponseEntity_valuesEmptyString_throwsArrayIndexOutOfBoundsException() {
         Filter entity = Filter.builder()
-                .id(2L)
-                .name("EmptyValues")
-                .values("")
-                .build();
+            .id(2L)
+            .name("EmptyValues")
+            .values("")
+            .build();
 
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> responseMapper.convert(entity));
     }
@@ -113,10 +109,10 @@ public class FilterDtoResponseMapperTest {
     @Test
     void convertResponseEntity_valuesWithPartialParts_throwsArrayIndexOutOfBoundsException() {
         Filter entity = Filter.builder()
-                .id(3L)
-                .name("PartialValues")
-                .values("criteriaOnly")
-                .build();
+            .id(3L)
+            .name("PartialValues")
+            .values("criteriaOnly")
+            .build();
 
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> responseMapper.convert(entity));
     }
@@ -124,10 +120,10 @@ public class FilterDtoResponseMapperTest {
     @Test
     void convert_emptyValues_throwsArrayIndexOutOfBoundsException() {
         Filter entity = Filter.builder()
-                .id(4L)
-                .name("")
-                .values(";;")
-                .build();
+            .id(4L)
+            .name("")
+            .values(";;")
+            .build();
 
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> responseMapper.convert(entity));
     }

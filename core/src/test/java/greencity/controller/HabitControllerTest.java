@@ -90,13 +90,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 
 @ExtendWith(MockitoExtension.class)
-@WithMockUser(username = "usergreencity@gmail.com", roles = {"USER"})
+@WithMockUser(username = "usergreencity@gmail.com")
 public class HabitControllerTest {
 
     public static final String IMG_EXAMPLE = "https://csb10032000a548f571.blob.core.windows.net/allfiles/304ff73c-7e6d-4a17-be7d-59fc3666d351931fb71c088a926a1e04b6896d109fa2.jpg";
     private static final String BASE_URL = "/habit";
     private final Locale LOCALE = Locale.ENGLISH;
     private final Long HABIT_ID = 1L;
+
     @InjectMocks
     HabitController habitController;
     @Mock

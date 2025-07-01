@@ -12,6 +12,10 @@ on:
   pull_request:
     branches: [ dev_java21 ]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 env:
   repository: greencity
   userRepoName: core

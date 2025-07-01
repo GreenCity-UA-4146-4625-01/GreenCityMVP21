@@ -476,7 +476,8 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @CacheEvict(value = CacheConstants.NEWEST_ECO_NEWS_CACHE_NAME, allEntries = true)
     @Override
     public EcoNewsGenericDto update(UpdateEcoNewsDto updateEcoNewsDto, MultipartFile image, UserVO user) {
-        EcoNews toUpdate = modelMapper.map(findById(Long.valueOf(updateEcoNewsDto.getId())), EcoNews.class);
+        Long id = Long.valueOf(updateEcoNewsDto.getId().replaceAll("[lL]$", ""));
+        EcoNews toUpdate = modelMapper.map(findById(id), EcoNews.class);
         if (user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(toUpdate.getAuthor().getId())) {
             throw new BadRequestException(ErrorMessage.USER_HAS_NO_PERMISSION);
         }

@@ -27,9 +27,9 @@ class EcoNewsAuthorDtoMapperTest {
     @Test
     void convertSuccess() {
         User author = User.builder()
-                .id(1L)
-                .name("test")
-                .build();
+            .id(1L)
+            .name("test")
+            .build();
 
         EcoNewsAuthorDto expected = new EcoNewsAuthorDto(1L, "test");
         EcoNewsAuthorDto actual = mapper.convert(author);

@@ -35,6 +35,8 @@
         <modelmapper.version>3.2.0</modelmapper.version>
         <checkstyle-maven-plugin.version>3.3.1</checkstyle-maven-plugin.version>
         <formatter.maven.plugin.version>2.23.0</formatter.maven.plugin.version>
+        <sonar.organization>greencity-ua-4146-4625-01</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.exclusions>**/config/*</sonar.exclusions>

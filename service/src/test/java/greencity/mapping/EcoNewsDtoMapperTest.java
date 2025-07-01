@@ -45,17 +45,15 @@ class EcoNewsDtoMapperTest {
     void convertWithTagsEn() {
         EcoNews news = ModelUtils.getEcoNews();
         news.setTags(List.of(
-                Tag.builder()
-                        .id(1L)
-                        .type(TagType.ECO_NEWS)
-                        .tagTranslations(List.of(
-                                TagTranslation.builder()
-                                        .language(ModelUtils.getLanguage())
-                                        .name("Test Tag")
-                                        .build()
-                        ))
-                        .build()
-        ));
+            Tag.builder()
+                .id(1L)
+                .type(TagType.ECO_NEWS)
+                .tagTranslations(List.of(
+                    TagTranslation.builder()
+                        .language(ModelUtils.getLanguage())
+                        .name("Test Tag")
+                        .build()))
+                .build()));
 
         EcoNewsDto dto = mapper.convert(news);
         assertEquals(1, dto.getTags().size());
@@ -66,17 +64,15 @@ class EcoNewsDtoMapperTest {
     void convertWithTagsUa() {
         EcoNews news = ModelUtils.getEcoNews();
         news.setTags(List.of(
-                Tag.builder()
-                        .id(1L)
-                        .type(TagType.ECO_NEWS)
-                        .tagTranslations(List.of(
-                                TagTranslation.builder()
-                                        .language(ModelUtils.getLanguageUa())
-                                        .name("Test Tag")
-                                        .build()
-                        ))
-                        .build()
-        ));
+            Tag.builder()
+                .id(1L)
+                .type(TagType.ECO_NEWS)
+                .tagTranslations(List.of(
+                    TagTranslation.builder()
+                        .language(ModelUtils.getLanguageUa())
+                        .name("Test Tag")
+                        .build()))
+                .build()));
 
         EcoNewsDto dto = mapper.convert(news);
         assertEquals(0, dto.getTags().size());
@@ -87,11 +83,10 @@ class EcoNewsDtoMapperTest {
     void convertWithComments() {
         EcoNews news = ModelUtils.getEcoNews();
         news.setEcoNewsComments(List.of(
-                EcoNewsComment.builder()
-                        .deleted(false)
-                        .text("not deleted")
-                        .build()
-        ));
+            EcoNewsComment.builder()
+                .deleted(false)
+                .text("not deleted")
+                .build()));
 
         EcoNewsDto dto = mapper.convert(news);
         assertEquals(1, dto.getCountComments());
@@ -101,11 +96,10 @@ class EcoNewsDtoMapperTest {
     void convertWithDeletedComments() {
         EcoNews news = ModelUtils.getEcoNews();
         news.setEcoNewsComments(List.of(
-                EcoNewsComment.builder()
-                        .deleted(true)
-                        .text("deleted")
-                        .build()
-        ));
+            EcoNewsComment.builder()
+                .deleted(true)
+                .text("deleted")
+                .build()));
 
         EcoNewsDto dto = mapper.convert(news);
         assertEquals(0, dto.getCountComments());

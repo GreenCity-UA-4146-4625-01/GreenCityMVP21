@@ -44,28 +44,28 @@ class SearchControllerTest {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders
-                .standaloneSetup(searchController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .setValidator(validator)
-                .build();
+            .standaloneSetup(searchController)
+            .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+            .setValidator(validator)
+            .build();
     }
 
     @Test
     void searchSuccess() throws Exception {
         SearchResponseDto responseDto = SearchResponseDto.builder()
-                .ecoNews(List.of())
-                .countOfResults(0L)
-                .build();
+            .ecoNews(List.of())
+            .countOfResults(0L)
+            .build();
 
         when(searchService.search("eco", locale.getLanguage())).thenReturn(responseDto);
 
         mockMvc.perform(get("/search")
-                        .param("searchQuery", "eco")
-                        .header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ecoNews").isArray())
-                .andExpect(jsonPath("$.countOfResults").value(0));
+            .param("searchQuery", "eco")
+            .header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage())
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.ecoNews").isArray())
+            .andExpect(jsonPath("$.countOfResults").value(0));
 
         verify(searchService).search("eco", locale.getLanguage());
     }
@@ -73,8 +73,8 @@ class SearchControllerTest {
     @Test
     void searchFail() throws Exception {
         mockMvc.perform(get("/search")
-                        .header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
-                .andExpect(status().isBadRequest());
+            .header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
+            .andExpect(status().isBadRequest());
 
         verifyNoInteractions(searchService);
     }
@@ -103,8 +103,8 @@ class SearchControllerTest {
     @Test
     void searchEcoNewsFail() throws Exception {
         mockMvc.perform(get("/search/econews")
-                        .header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
-                .andExpect(status().isBadRequest());
+            .header(HttpHeaders.ACCEPT_LANGUAGE, locale.getLanguage()))
+            .andExpect(status().isBadRequest());
 
         verifyNoInteractions(searchService);
     }

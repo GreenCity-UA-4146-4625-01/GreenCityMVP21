@@ -23,11 +23,11 @@ class CustomHabitMapperTest {
         addCustomHabitDtoRequest.setDefaultDuration(1);
 
         Habit expectedHabit = Habit.builder()
-                .image(addCustomHabitDtoRequest.getImage())
-                .complexity(addCustomHabitDtoRequest.getComplexity())
-                .defaultDuration(addCustomHabitDtoRequest.getDefaultDuration())
-                .isCustomHabit(true)
-                .build();
+            .image(addCustomHabitDtoRequest.getImage())
+            .complexity(addCustomHabitDtoRequest.getComplexity())
+            .defaultDuration(addCustomHabitDtoRequest.getDefaultDuration())
+            .isCustomHabit(true)
+            .build();
 
         assertEquals(expectedHabit, customHabitMapper.convert(addCustomHabitDtoRequest));
     }
@@ -37,8 +37,8 @@ class CustomHabitMapperTest {
         AddCustomHabitDtoRequest addCustomHabitDtoRequest = new AddCustomHabitDtoRequest();
 
         Habit expectedHabit = Habit.builder()
-                .isCustomHabit(true)
-                .build();
+            .isCustomHabit(true)
+            .build();
 
         assertEquals(expectedHabit, customHabitMapper.convert(addCustomHabitDtoRequest));
         assertNull(addCustomHabitDtoRequest.getImage());

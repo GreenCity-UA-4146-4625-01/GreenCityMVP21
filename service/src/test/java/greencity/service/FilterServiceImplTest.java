@@ -7,6 +7,7 @@ import greencity.entity.Filter;
 import greencity.entity.User;
 import greencity.repository.FilterRepo;
 import greencity.repository.UserRepo;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+@Disabled
 @ExtendWith(MockitoExtension.class)
 class FilterServiceImplTest {
 

@@ -113,7 +113,6 @@ class RatingStatisticsSpecificationTest {
         verify(cb).equal(currentRatingPath, 5);
     }
 
-
     @Test
     void testEnumFilter() {
         SearchCriteria c = new SearchCriteria("ADD_COMMENT", "ratingCalculationEnum", "enum");
@@ -141,7 +140,6 @@ class RatingStatisticsSpecificationTest {
         verify(cb).disjunction();
         verify(cb, atLeastOnce()).or(any(), any());
     }
-
 
     @Test
     void testUserIdFilterValid() {
@@ -176,6 +174,7 @@ class RatingStatisticsSpecificationTest {
 
         verify(cb, never()).equal(any(), any());
     }
+
     @Test
     void testUserIdFilterInvalidNonNumeric() {
         SearchCriteria c = new SearchCriteria("invalid", "userId", "userId");
@@ -183,6 +182,7 @@ class RatingStatisticsSpecificationTest {
 
         verify(cb, never()).equal(any(), any());
     }
+
     @Test
     void testUserIdFilterInvalidNull() {
         SearchCriteria c = new SearchCriteria(null, "userId", "userId");

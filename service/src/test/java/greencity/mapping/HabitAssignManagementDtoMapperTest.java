@@ -21,20 +21,20 @@ public class HabitAssignManagementDtoMapperTest {
     private HabitAssignManagementDtoMapper mapper;
 
     @Test
-    void convert_validEntity_mapsCorrectly(){
+    void convert_validEntity_mapsCorrectly() {
         ZonedDateTime now = ZonedDateTime.now();
 
         HabitAssign entity = HabitAssign.builder()
-                .id(1L)
-                .status(HabitAssignStatus.INPROGRESS)
-                .createDate(now)
-                .user(User.builder().id(100L).build())
-                .habit(Habit.builder().id(50L).build())
-                .duration(10)
-                .habitStreak(2)
-                .workingDays(5)
-                .lastEnrollmentDate(now)
-                .build();
+            .id(1L)
+            .status(HabitAssignStatus.INPROGRESS)
+            .createDate(now)
+            .user(User.builder().id(100L).build())
+            .habit(Habit.builder().id(50L).build())
+            .duration(10)
+            .habitStreak(2)
+            .workingDays(5)
+            .lastEnrollmentDate(now)
+            .build();
 
         HabitAssignManagementDto dto = mapper.convert(entity);
 
@@ -50,8 +50,7 @@ public class HabitAssignManagementDtoMapperTest {
     }
 
     @Test
-    void convert_nullInput_throwsNullPointerException(){
-        assertThrows(NullPointerException.class, ()-> mapper.convert((HabitAssign) null));
+    void convert_nullInput_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> mapper.convert((HabitAssign) null));
     }
 }
-

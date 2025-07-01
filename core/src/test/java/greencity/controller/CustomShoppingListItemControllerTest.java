@@ -48,12 +48,12 @@ class CustomShoppingListItemControllerTest {
     @Test
     void getAllAvailableCustomShoppingListItems_Returns200AndListTest() throws Exception {
 
-        CustomShoppingListItemResponseDto item1 = new CustomShoppingListItemResponseDto().builder()
+        CustomShoppingListItemResponseDto item1 = CustomShoppingListItemResponseDto.builder()
                 .id(1L)
                 .text("Item1")
                 .build();
 
-        CustomShoppingListItemResponseDto item2 = new CustomShoppingListItemResponseDto().builder()
+        CustomShoppingListItemResponseDto item2 = CustomShoppingListItemResponseDto.builder()
                 .id(2L)
                 .text("Item2")
                 .build();
@@ -82,7 +82,7 @@ class CustomShoppingListItemControllerTest {
         BulkSaveCustomShoppingListItemDto bulkSaveRequestDto = new BulkSaveCustomShoppingListItemDto();
         bulkSaveRequestDto.setCustomShoppingListItemSaveRequestDtoList(List.of(saveRequestDto));
 
-        CustomShoppingListItemResponseDto responseDto = new CustomShoppingListItemResponseDto().builder()
+        CustomShoppingListItemResponseDto responseDto = CustomShoppingListItemResponseDto.builder()
                 .id(1L)
                 .text("Item1")
                 .status(ShoppingListItemStatus.ACTIVE)
@@ -169,7 +169,7 @@ class CustomShoppingListItemControllerTest {
         Long userId = 1L;
         String status = "ACTIVE";
 
-        CustomShoppingListItemResponseDto responseDto = new CustomShoppingListItemResponseDto().builder()
+        CustomShoppingListItemResponseDto responseDto = CustomShoppingListItemResponseDto.builder()
                 .id(userId)
                 .text("Test item")
                 .status(ShoppingListItemStatus.ACTIVE)

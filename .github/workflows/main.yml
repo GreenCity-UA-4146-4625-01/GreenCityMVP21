@@ -65,6 +65,7 @@ jobs:
           name: Tests Report
           path: ${{ env.userRepoName }}/target/surefire-reports/*.xml
           reporter: java-junit
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Rename user jar to app
         run: mv $userRepoName/target/*.jar $userRepoName/target/$onbootJarName

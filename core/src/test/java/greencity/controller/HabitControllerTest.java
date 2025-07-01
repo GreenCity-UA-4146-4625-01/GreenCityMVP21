@@ -97,7 +97,6 @@ public class HabitControllerTest {
     private static final String BASE_URL = "/habit";
     private final Locale LOCALE = Locale.ENGLISH;
     private final Long HABIT_ID = 1L;
-
     @InjectMocks
     HabitController habitController;
     @Mock

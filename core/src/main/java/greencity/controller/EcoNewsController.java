@@ -27,6 +27,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
+
 import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
@@ -48,7 +49,7 @@ public class EcoNewsController {
      */
     @Operation(summary = "Get three last eco news.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-        @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)})
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)})
     @GetMapping("/newest")
     public ResponseEntity<List<EcoNewsDto>> getThreeLastEcoNews() {
         return ResponseEntity.status(HttpStatus.OK).body(ecoNewsService.getThreeLastEcoNews());
@@ -69,6 +70,7 @@ public class EcoNewsController {
             @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "415", description = HttpStatuses.UNSUPPORTED_MEDIA_TYPE)
+    })
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<EcoNewsGenericDto> save(
         @Parameter(description = SwaggerExampleModel.ADD_ECO_NEWS_REQUEST,
@@ -292,6 +294,10 @@ public class EcoNewsController {
      * @author Kovaliv Taras
      */
     @Operation(summary = "Find all eco news tags")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+    })
     @GetMapping("/tags/all")
     @ApiLocale
     public ResponseEntity<List<TagDto>> findAllEcoNewsTags(@Parameter(hidden = true) @ValidLanguage Locale locale) {
@@ -305,6 +311,9 @@ public class EcoNewsController {
      * @author Mamchuk Orest
      */
     @Operation(summary = "Find count of published eco news")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
+    })
     @GetMapping("/count")
     public ResponseEntity<Long> findAmountOfPublishedNews(@RequestParam Long userId) {
         return ResponseEntity.status(HttpStatus.OK).body(ecoNewsService.getAmountOfPublishedNewsByUserId(userId));

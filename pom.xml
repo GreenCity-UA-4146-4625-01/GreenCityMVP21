@@ -108,7 +108,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>${checkstyle-maven-plugin.version}</version>
-<!--                 <executions>
+                <executions>
                     <execution>
                         <id>check</id>
                         <phase>validate</phase>
@@ -116,7 +116,7 @@
                             <goal>check</goal>
                         </goals>
                     </execution>
-                </executions> -->
+                </executions> 
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
                 </configuration>

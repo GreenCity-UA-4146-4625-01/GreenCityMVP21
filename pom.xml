@@ -88,7 +88,7 @@
                     <forkedProcessExitTimeoutInSeconds>120</forkedProcessExitTimeoutInSeconds>
                 </configuration>
             </plugin>
-            <plugin>
+<!--             <plugin>
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
                 <version>${formatter.maven.plugin.version}</version>
@@ -103,7 +103,7 @@
                     <configFile>${project.basedir}/../formatter.xml</configFile>
                     <lineEnding>LF</lineEnding>
                 </configuration>
-            </plugin>
+            </plugin> -->
 <!--             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>

@@ -9,11 +9,11 @@ public class LanguageTranslationDtoMapper extends AbstractConverter<HabitFactTra
     @Override
     protected LanguageTranslationDTO convert(HabitFactTranslation habitFactTranslation) {
         return LanguageTranslationDTO.builder()
-            .content(habitFactTranslation.getContent())
-            .language(LanguageDTO.builder()
-                .id(habitFactTranslation.getLanguage().getId())
-                .code(habitFactTranslation.getLanguage().getCode())
-                .build())
-            .build();
+                .content(habitFactTranslation.getContent())
+                .language(LanguageDTO.builder()
+                        .id(habitFactTranslation.getLanguage().getId())
+                        .code(habitFactTranslation.getLanguage().getCode())
+                        .build())
+                .build();
     }
 }

@@ -14,28 +14,26 @@ import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-public class HabitStatisticDtoMapperTest {
+class HabitStatisticDtoMapperTest {
 
     @Test
     void convertTest() {
 
-        HabitAssign habitAssign = mock(HabitAssign.class);
-        when(habitAssign.getId()).thenReturn(1L);
+        HabitAssign habitAssign = HabitAssign.builder()
+                .id(1L)
+                .build();
 
-        HabitStatistic habitStatistic = mock(HabitStatistic.class);
-        when(habitStatistic.getId()).thenReturn(1L);
-        when(habitStatistic.getAmountOfItems()).thenReturn(2);
-        when(habitStatistic.getCreateDate()).thenReturn(
-                ZonedDateTime.of(
+        HabitStatistic habitStatistic = HabitStatistic.builder()
+                .id(1L)
+                .amountOfItems(2)
+                .createDate(ZonedDateTime.of(
                         LocalDateTime.of(2025, 7, 2, 15, 30),
                         ZoneId.of("Europe/Berlin")
-                )
-        );
-        when(habitStatistic.getHabitRate()).thenReturn(HabitRate.DEFAULT);
-        when(habitStatistic.getHabitAssign()).thenReturn(habitAssign);
+                ))
+                .habitRate(HabitRate.DEFAULT)
+                .habitAssign(habitAssign)
+                .build();
 
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.addConverter(new HabitStatisticDtoMapper());
@@ -44,10 +42,10 @@ public class HabitStatisticDtoMapperTest {
 
         assertNotNull(habitStatisticDto);
         assertEquals(1L, habitStatisticDto.getId());
-        assertEquals(habitStatisticDto.getAmountOfItems(), 2);
+        assertEquals(2, habitStatisticDto.getAmountOfItems());
         assertEquals(habitStatisticDto.getCreateDate(), ZonedDateTime.of(LocalDateTime.of(2025, 7, 2, 15, 30),
                 ZoneId.of("Europe/Berlin")));
-        assertEquals(habitStatisticDto.getHabitRate(), HabitRate.DEFAULT);
+        assertEquals(HabitRate.DEFAULT, habitStatisticDto.getHabitRate());
         assertEquals(1L, habitStatisticDto.getHabitAssignId());
     }
 }

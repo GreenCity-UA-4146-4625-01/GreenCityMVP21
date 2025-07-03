@@ -15,46 +15,49 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-public class HabitDtoMapperTest {
+class HabitDtoMapperTest {
 
     @Test
     void convertTest() {
 
-        Language language = mock(Language.class);
-        when(language.getCode()).thenReturn("en");
+        Language language = Language.builder()
+                .code("en")
+                .build();
 
-        TagTranslation tagTranslation = mock(TagTranslation.class);
-        when(tagTranslation.getLanguage()).thenReturn(language);
-        when(tagTranslation.getName()).thenReturn("tagName");
+        Tag tag = Tag.builder()
+                .tagTranslations(List.of(
+                        TagTranslation.builder()
+                                .language(language)
+                                .name("tagName")
+                                .build()
+                ))
+                .build();
 
-        Tag tag = mock(Tag.class);
-        when(tag.getTagTranslations()).thenReturn(List.of(tagTranslation));
+        ShoppingListItem shoppingListItem = ShoppingListItem.builder()
+                .id(1L)
+                .translations(List.of(
+                        ShoppingListItemTranslation.builder()
+                                .language(language)
+                                .content("content")
+                                .build()
+                ))
+                .build();
 
-        ShoppingListItemTranslation shoppingListItemTranslation = mock(ShoppingListItemTranslation.class);
-        when(shoppingListItemTranslation.getLanguage()).thenReturn(language);
-        when(shoppingListItemTranslation.getContent()).thenReturn("shopping list item content");
-
-        ShoppingListItem shoppingListItem = mock(ShoppingListItem.class);
-        when(shoppingListItem.getId()).thenReturn(1L);
-        when(shoppingListItem.getTranslations()).thenReturn(List.of(shoppingListItemTranslation));
-
-        Habit habit = mock(Habit.class);
-        when(habit.getId()).thenReturn(1L);
-        when(habit.getImage()).thenReturn("image");
-        when(habit.getDefaultDuration()).thenReturn(15);
-        when(habit.getTags()).thenReturn(Set.of(tag));
-        when(habit.getShoppingListItems()).thenReturn(Set.of(shoppingListItem));
-
-        HabitTranslation habitTranslation = mock(HabitTranslation.class);
-        when(habitTranslation.getLanguage()).thenReturn(language);
-        when(habitTranslation.getHabit()).thenReturn(habit);
-        when(habitTranslation.getHabit().getComplexity()).thenReturn(3);
-        when(habitTranslation.getDescription()).thenReturn("habit description");
-        when(habitTranslation.getHabitItem()).thenReturn("habitItem");
-        when(habitTranslation.getName()).thenReturn("habitName");
+        HabitTranslation habitTranslation = HabitTranslation.builder()
+                .language(language)
+                .habit(Habit.builder()
+                        .id(1L)
+                        .image("image")
+                        .defaultDuration(15)
+                        .complexity(3)
+                        .tags(Set.of(tag))
+                        .shoppingListItems(Set.of(shoppingListItem))
+                        .build())
+                .description("habit description")
+                .habitItem("habitItem")
+                .name("habitName")
+                .build();
 
         ModelMapper modelMapper = new ModelMapper();
         HabitDtoMapper mapper = new HabitDtoMapper();
@@ -81,6 +84,6 @@ public class HabitDtoMapperTest {
         assertEquals(1, habitDto.getShoppingListItems().size());
         assertEquals(1L, habitDto.getShoppingListItems().get(0).getId());
         assertEquals(ShoppingListItemStatus.ACTIVE.toString(), habitDto.getShoppingListItems().get(0).getStatus());
-        assertEquals("shopping list item content", habitDto.getShoppingListItems().get(0).getText());
+        assertEquals("content", habitDto.getShoppingListItems().get(0).getText());
     }
 }

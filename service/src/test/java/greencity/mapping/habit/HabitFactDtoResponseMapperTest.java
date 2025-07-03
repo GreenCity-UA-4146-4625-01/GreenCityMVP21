@@ -4,7 +4,6 @@ import greencity.dto.habit.HabitVO;
 import greencity.dto.habitfact.HabitFactDtoResponse;
 import greencity.dto.habitfact.HabitFactTranslationVO;
 import greencity.dto.habitfact.HabitFactVO;
-import greencity.dto.language.LanguageDTO;
 import greencity.dto.language.LanguageVO;
 import greencity.enums.FactOfDayStatus;
 import greencity.mapping.HabitFactDtoResponseMapper;
@@ -15,37 +14,35 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-public class HabitFactDtoResponseMapperTest {
+class HabitFactDtoResponseMapperTest {
 
     @Test
     void habitFactDtoResponseMapperTest() {
 
-        LanguageVO languageVO = mock(LanguageVO.class);
-        when(languageVO.getId()).thenReturn(1L);
-        when(languageVO.getCode()).thenReturn("en");
+        LanguageVO languageVO = LanguageVO.builder()
+                .id(1L)
+                .code("en")
+                .build();
 
-        HabitVO habitVO = mock(HabitVO.class);
-        when(habitVO.getId()).thenReturn(1L);
-        when(habitVO.getImage()).thenReturn("habitVoImage");
-        when(habitVO.getComplexity()).thenReturn(1);
+        HabitVO habitVO = HabitVO.builder()
+                .id(1L)
+                .image("habitVoImage")
+                .complexity(1)
+                .build();
 
-        HabitFactTranslationVO habitFactTranslationVO = mock(HabitFactTranslationVO.class);
-        when(habitFactTranslationVO.getId()).thenReturn(10L);
-        when(habitFactTranslationVO.getContent()).thenReturn("habitFactTranslationContent");
-        when(habitFactTranslationVO.getFactOfDayStatus()).thenReturn(FactOfDayStatus.POTENTIAL);
+        HabitFactTranslationVO habitFactTranslationVO = HabitFactTranslationVO.builder()
+                .id(10L)
+                .content("habitFactTranslationContent")
+                .factOfDayStatus(FactOfDayStatus.POTENTIAL)
+                .language(languageVO)
+                .build();
 
-        var language = mock(LanguageDTO.class);
-        when(language.getId()).thenReturn(1L);
-        when(language.getCode()).thenReturn("en");
-        when(habitFactTranslationVO.getLanguage()).thenReturn(languageVO);
-
-        HabitFactVO habitFactVO = mock(HabitFactVO.class);
-        when(habitFactVO.getId()).thenReturn(1L);
-        when(habitFactVO.getHabit()).thenReturn(habitVO);
-        when(habitFactVO.getTranslations()).thenReturn(List.of(habitFactTranslationVO));
+        HabitFactVO habitFactVO = HabitFactVO.builder()
+                .id(1L)
+                .habit(habitVO)
+                .translations(List.of(habitFactTranslationVO))
+                .build();
 
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.addConverter(new HabitFactDtoResponseMapper());

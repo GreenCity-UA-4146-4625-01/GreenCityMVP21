@@ -13,33 +13,33 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-public class HabitManagementDtoMapperTest {
+class HabitManagementDtoMapperTest {
 
     @Test
     void convertTest() {
 
-        Language language = mock(Language.class);
-        when(language.getCode()).thenReturn("en");
+        Language language = Language.builder()
+                .code("en")
+                .build();
 
-        HabitTranslation habitTranslation = mock(HabitTranslation.class);
-        when(habitTranslation.getId()).thenReturn(1L);
-        when(habitTranslation.getDescription()).thenReturn("description");
-        when(habitTranslation.getHabitItem()).thenReturn("habitItem");
-        when(habitTranslation.getName()).thenReturn("habitName");
-        when(habitTranslation.getLanguage()).thenReturn(language);
-
-        Habit habit = mock(Habit.class);
-        when(habit.getId()).thenReturn(1L);
-        when(habit.getImage()).thenReturn("image");
-        when(habit.getDefaultDuration()).thenReturn(10);
+        HabitTranslation habitTranslation = HabitTranslation.builder()
+                .id(1L)
+                .description("description")
+                .habitItem("habitItem")
+                .name("habitName")
+                .language(language)
+                .build();
 
         List<HabitTranslation> habitTranslations = new LinkedList<>();
         habitTranslations.add(habitTranslation);
 
-        when(habit.getHabitTranslations()).thenReturn(habitTranslations);
+        Habit habit = Habit.builder()
+                .id(1L)
+                .image("image")
+                .defaultDuration(10)
+                .habitTranslations(habitTranslations)
+                .build();
 
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.addConverter(new HabitManagementDtoMapper());

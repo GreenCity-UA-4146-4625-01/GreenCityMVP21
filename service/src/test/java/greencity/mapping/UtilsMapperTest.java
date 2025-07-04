@@ -55,5 +55,6 @@ class UtilsMapperTest {
         assertEquals(3, results.size());
         assertTrue(results.stream().anyMatch(t -> t.getId().equals(tagVOS.getFirst().getId())));
         assertTrue(results.stream().anyMatch(t -> t.getId().equals(tagVOS.get(1).getId())));
+        assertTrue(results.stream().anyMatch(t -> t.getId().equals(tagVOS.get(2).getId())));
     }
 }

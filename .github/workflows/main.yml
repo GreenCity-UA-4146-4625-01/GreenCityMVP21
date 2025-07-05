@@ -14,6 +14,7 @@ env:
   userRepoName: core
   onbootJarName: app.jar
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,6 +34,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+
       - name: Build, test & analyze with SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,12 +47,12 @@ jobs:
            -Dsonar.binaries=target/classes \
            -Dsonar.login=$SONAR_TOKEN
 
+
       - name: Rename user jar to app
         run: mv $userRepoName/target/*.jar $userRepoName/target/$onbootJarName
 
       - name: Set short SHA for further steps
         run: echo "GITHUB_SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
 
 # # This is a basic workflow to help you get started with Actions
 

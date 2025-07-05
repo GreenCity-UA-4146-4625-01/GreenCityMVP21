@@ -4,6 +4,7 @@ import greencity.dto.habittranslation.HabitTranslationDto;
 import greencity.entity.HabitTranslation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,11 +13,11 @@ public class HabitTranslationDtoMapper extends AbstractConverter<HabitTranslatio
     @Override
     protected HabitTranslationDto convert(HabitTranslation habitTranslation) {
         return HabitTranslationDto.builder()
-            .description(habitTranslation.getDescription())
-            .habitItem(habitTranslation.getHabitItem())
-            .name(habitTranslation.getName())
-            .languageCode(habitTranslation.getLanguage().getCode())
-            .build();
+                .description(habitTranslation.getDescription())
+                .habitItem(habitTranslation.getHabitItem())
+                .name(habitTranslation.getName())
+                .languageCode(habitTranslation.getLanguage().getCode())
+                .build();
     }
 
     /**

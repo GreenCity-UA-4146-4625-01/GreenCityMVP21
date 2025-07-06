@@ -27,7 +27,7 @@ class HabitFactSpecificationTest {
     private CriteriaBuilder builder;
 
     @Mock
-    private CriteriaQuery MockCriteriaQuery;
+    private CriteriaQuery mockCriteriaQuery;
 
     @Mock
     private Path<Object> id;

@@ -85,8 +85,8 @@ class HabitFactSpecificationTest {
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     void toPredicate_HabitIdWithJoin() {
-        List<SearchCriteria> searchCriteriaList = new ArrayList<>();
-        searchCriteriaList.add(SearchCriteria.builder()
+        List<SearchCriteria> searchCriteriaList = List.of(
+        SearchCriteria.builder()
                 .key("habitId")
                 .type("habitId")
                 .value(5L)
@@ -107,8 +107,8 @@ class HabitFactSpecificationTest {
 
     @Test
     void toPredicate_WithTranslationJoin(){
-        List<SearchCriteria> searchCriteriaList = new ArrayList<>();
-        searchCriteriaList.add(SearchCriteria.builder()
+        List<SearchCriteria> searchCriteriaList = List.of(
+        SearchCriteria.builder()
                 .key("content")
                 .type("content")
                 .value("Smth")
@@ -140,8 +140,8 @@ class HabitFactSpecificationTest {
 
     @Test
     void toPredicate_ContentNull(){
-        List<SearchCriteria> searchCriteriaList = new ArrayList<>();
-        searchCriteriaList.add(SearchCriteria.builder()
+        List<SearchCriteria> searchCriteriaList = List.of(
+        SearchCriteria.builder()
                 .key("content")
                 .type("content")
                 .value(" ")
@@ -162,18 +162,18 @@ class HabitFactSpecificationTest {
 
     @Test
     void toPredicate_multipleCriteria(){
-        List<SearchCriteria> searchCriteriaList = new ArrayList<>();
-        searchCriteriaList.add(SearchCriteria.builder()
+        List<SearchCriteria> searchCriteriaList = List.of(
+        SearchCriteria.builder()
                 .key("id")
                 .type("id")
                 .value(2L)
-                .build());
-        searchCriteriaList.add(SearchCriteria.builder()
+                .build(),
+        SearchCriteria.builder()
                 .key("habitId")
                 .type("habitId")
                 .value(5L)
-                .build());
-        searchCriteriaList.add(SearchCriteria.builder()
+                .build(),
+        SearchCriteria.builder()
                 .key("content")
                 .type("content")
                 .value("Smth")

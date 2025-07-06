@@ -316,8 +316,10 @@ class RestClientTest {
     @Test
     void addEcoNews() {
         EcoNewsForSendEmailDto message = ModelUtils.getEcoNewsForSendEmailDto();
+        String accessToken = "string";
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        httpHeaders.set(AUTHORIZATION, accessToken);
         HttpEntity<EcoNewsForSendEmailDto> entity = new HttpEntity<>(message, httpHeaders);
         when(restTemplate.exchange(greenCityUserServerAddress
             + RestTemplateLinks.ADD_ECO_NEWS, HttpMethod.POST, entity, Object.class))

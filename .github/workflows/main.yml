@@ -54,6 +54,7 @@ jobs:
       - name: Set short SHA for further steps
         run: echo "GITHUB_SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
+
 # # This is a basic workflow to help you get started with Actions
 
 # name: CI/CD GreenCity
@@ -146,12 +147,16 @@ jobs:
       
 # #       - name: Set up Postgres
 # #         run: kubectl scale deploy postgres --replicas=1 -n test
+
       
-# #       - name: Kubernetes tests
-# #         run: |
-# #           cd chart-test
-# #           go test -v ./...
+      # #       - name: Set up Postgres
+      # #         run: kubectl scale deploy postgres --replicas=1 -n test
       
+      # #       - name: Kubernetes tests
+      # #         run: |
+      # #           cd chart-test
+      # #           go test -v ./...
+
 # #       - name: Post Set up Postgres
 # #         if: success() || failure()
 # #         run: kubectl scale deploy postgres --replicas=0 -n test
@@ -164,4 +169,4 @@ jobs:
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #           BRANCH: gh-pages
 #           FOLDER: .
-#           CLEAN: true 
+#           CLEAN: true

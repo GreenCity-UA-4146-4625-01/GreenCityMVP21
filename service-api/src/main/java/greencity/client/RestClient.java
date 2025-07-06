@@ -348,6 +348,7 @@ public class RestClient {
     public void addEcoNews(EcoNewsForSendEmailDto message) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", message.getUnsubscribeToken());
         HttpEntity<EcoNewsForSendEmailDto> entity = new HttpEntity<>(message, headers);
         restTemplate.exchange(greenCityUserServerAddress
             + RestTemplateLinks.ADD_ECO_NEWS, HttpMethod.POST, entity, Object.class)

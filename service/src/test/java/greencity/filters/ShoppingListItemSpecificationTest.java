@@ -33,6 +33,7 @@ public class ShoppingListItemSpecificationTest {
     @Mock
     private Path<Object> id;
 
+    //Path<Long> used in toPredicate_WithShoppingListItemTranslationJoin. And other which use content to check.
     @Mock
     private Path<Long> Id_for_second_test;
 

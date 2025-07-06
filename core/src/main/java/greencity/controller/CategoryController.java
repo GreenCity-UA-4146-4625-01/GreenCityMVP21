@@ -7,12 +7,11 @@ import greencity.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -30,7 +29,7 @@ public class CategoryController {
      */
     @Operation(summary = "Save category")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+        @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED),
         @ApiResponse(responseCode = "303", description = HttpStatuses.SEE_OTHER),
         @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
         @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST)
@@ -48,8 +47,8 @@ public class CategoryController {
      */
     @Operation(summary = "View a list of available categories")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved list"),
-            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved list"),
+        @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
     })
     @GetMapping
     public ResponseEntity<List<CategoryDto>> findAllCategory() {

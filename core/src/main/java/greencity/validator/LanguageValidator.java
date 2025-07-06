@@ -20,6 +20,6 @@ public class LanguageValidator implements ConstraintValidator<ValidLanguage, Loc
 
     @Override
     public boolean isValid(Locale value, ConstraintValidatorContext context) {
-        return codes.contains(value.getLanguage());
+        return value != null && codes != null && codes.contains(value.getLanguage());
     }
 }

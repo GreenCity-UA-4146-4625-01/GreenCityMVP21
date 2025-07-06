@@ -21,11 +21,11 @@ public class HabitStatusCalendarVOMapper extends AbstractConverter<HabitStatusCa
     @Override
     protected HabitStatusCalendarVO convert(HabitStatusCalendar habitStatusCalendar) {
         return HabitStatusCalendarVO.builder()
-            .id(habitStatusCalendar.getId())
-            .enrollDate(habitStatusCalendar.getEnrollDate())
-            .habitAssignVO(HabitAssignVO.builder()
-                .id(habitStatusCalendar.getHabitAssign().getId())
-                .build())
-            .build();
+                .id(habitStatusCalendar.getId())
+                .enrollDate(habitStatusCalendar.getEnrollDate())
+                .habitAssignVO(HabitAssignVO.builder()
+                        .id(habitStatusCalendar.getHabitAssign().getId())
+                        .build())
+                .build();
     }
 }

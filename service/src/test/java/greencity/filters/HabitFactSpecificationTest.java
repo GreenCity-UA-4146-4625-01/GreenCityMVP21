@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 class HabitFactSpecificationTest {
 
     @Mock
-    private Root<HabitFact> HabitFactRoot;
+    private Root<HabitFact> habitFactRoot;
 
     @Mock
     private CriteriaBuilder builder;

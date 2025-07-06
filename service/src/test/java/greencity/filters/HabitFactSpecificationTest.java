@@ -29,9 +29,11 @@ class HabitFactSpecificationTest {
     @Mock
     private CriteriaQuery mockCriteriaQuery;
 
+    // For tests which checks id(without join)
     @Mock
     private Path<Object> id;
 
+    // For tests which checks id with join
     @Mock
     private Path<Long> habitIdPath;
 
@@ -40,10 +42,13 @@ class HabitFactSpecificationTest {
 
     @Mock
     private Join<HabitFact,Habit> habitJoin;
-
+    
+    // For content tests 
+    
     @Mock
     private Path<String> contentPath;
 
+    //Translation join 
     @Mock
     private Predicate likePredicate;
 
@@ -99,7 +104,7 @@ class HabitFactSpecificationTest {
         Predicate conjunctionPredicate = mock(Predicate.class);
         when(builder.conjunction()).thenReturn(conjunctionPredicate);
         when(builder.and(conjunctionPredicate, mockPredicate)).thenReturn(mockPredicate);
-        Predicate result = specification.toPredicate(HabitFactRoot, MockCriteriaQuery, builder);
+        Predicate result = specification.toPredicate(HabitFactRoot, mockCriteriaQuery, builder);
         assertNotNull(result);
         assertEquals(mockPredicate,result);
 
@@ -116,7 +121,7 @@ class HabitFactSpecificationTest {
         specification = new HabitFactSpecification(searchCriteriaList);
 
         Root<HabitFactTranslation> habitFactTranslationRoot = mock(Root.class);
-        when(MockCriteriaQuery.from(HabitFactTranslation.class)).thenReturn(habitFactTranslationRoot);
+        when(mockCriteriaQuery.from(HabitFactTranslation.class)).thenReturn(habitFactTranslationRoot);
 
         when(habitFactTranslationRoot.get(HabitFactTranslation_.content)).thenReturn(contentPath);
         when(habitFactTranslationRoot.get(HabitFactTranslation_.habitFact).get(HabitFact_.id)).thenReturn(habitIdPath);
@@ -133,7 +138,7 @@ class HabitFactSpecificationTest {
         when(builder.and(likePredicate, equalPredicate)).thenReturn(andPredicate);
         when(builder.and(conjunctionPredicate, andPredicate)).thenReturn(andPredicate);
 
-        Predicate result = specification.toPredicate(HabitFactRoot, MockCriteriaQuery, builder);
+        Predicate result = specification.toPredicate(HabitFactRoot, mockCriteriaQuery, builder);
         assertNotNull(result);
         assertEquals(andPredicate, result);
     }
@@ -150,13 +155,13 @@ class HabitFactSpecificationTest {
         Predicate conjunction = mock(Predicate.class);
         when(builder.conjunction()).thenReturn(conjunction);
         Root<HabitFactTranslation> habitFactTranslationRoot = mock(Root.class);
-        when(MockCriteriaQuery.from(HabitFactTranslation.class)).thenReturn(habitFactTranslationRoot);
+        when(mockCriteriaQuery.from(HabitFactTranslation.class)).thenReturn(habitFactTranslationRoot);
 
-        specification.toPredicate(HabitFactRoot, MockCriteriaQuery, builder);
+        specification.toPredicate(HabitFactRoot, mockCriteriaQuery, builder);
 
         verify(builder,times(2)).conjunction();
-        verify(MockCriteriaQuery).from(HabitFactTranslation.class);
-        verifyNoMoreInteractions(MockCriteriaQuery);
+        verify(mockCriteriaQuery).from(HabitFactTranslation.class);
+        verifyNoMoreInteractions(mockCriteriaQuery);
     }
 
 
@@ -193,7 +198,7 @@ class HabitFactSpecificationTest {
         when(builder.equal(habitIdPath, 5L)).thenReturn(habitIdEqualPredicate);
 
         Root<HabitFactTranslation> habitFactTranslationRoot = mock(Root.class);
-        when(MockCriteriaQuery.from(HabitFactTranslation.class)).thenReturn(habitFactTranslationRoot);
+        when(mockCriteriaQuery.from(HabitFactTranslation.class)).thenReturn(habitFactTranslationRoot);
         when(habitFactTranslationRoot.get(HabitFactTranslation_.content)).thenReturn(contentPath);
         when(habitFactTranslationRoot.get(HabitFactTranslation_.habitFact).get(HabitFact_.id)).thenReturn(habitIdPath);
         when(HabitFactRoot.get(HabitFact_.id)).thenReturn(habitFactRootIdPath);
@@ -214,7 +219,7 @@ class HabitFactSpecificationTest {
         when(builder.and(firstCombination, habitIdEqualPredicate)).thenReturn(secondCombination);
         when(builder.and(secondCombination, contentAndPredicate)).thenReturn(finalPredicate);
 
-        Predicate result = specification.toPredicate(HabitFactRoot, MockCriteriaQuery, builder);
+        Predicate result = specification.toPredicate(HabitFactRoot, mockCriteriaQuery, builder);
         assertNotNull(result);
         assertEquals(finalPredicate, result);
 

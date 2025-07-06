@@ -53,12 +53,12 @@ class HabitFactSpecificationTest {
 
     @Test
     void toPredicate_Id(){
-        List<SearchCriteria> searchCriteriaList = new ArrayList<>();
-        searchCriteriaList.add(SearchCriteria.builder()
-                .key("id")
-                .type("id")
-                .value(2L)
-                .build());
+        List<SearchCriteria> searchCriteriaList = List.of(
+                SearchCriteria.builder()
+                        .key("id")
+                        .type("id")
+                        .value(2L)
+                        .build());
 
         specification = new HabitFactSpecification(searchCriteriaList);
         Predicate conjunctionPredicate = mock(Predicate.class);

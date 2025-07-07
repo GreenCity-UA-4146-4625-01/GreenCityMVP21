@@ -136,26 +136,26 @@ class ErrorResponseDtoTest {
     void allArgsConstructor_FieldsAreReturnedByGetters() {
         LocalDateTime now = LocalDateTime.of(2025, 7, 7, 12, 0);
         int status = 418;
-        String error   = "I'm a teapot";
+        String error = "I'm a teapot";
         String message = "Short and stout";
-        String path    = "/tea";
+        String path = "/tea";
 
         ErrorResponseDto dto = new ErrorResponseDto(now, status, error, message, path);
 
-        assertEquals(now,      dto.getTimestamp());
-        assertEquals(status,   dto.getStatus());
-        assertEquals(error,    dto.getError());
-        assertEquals(message,  dto.getMessage());
-        assertEquals(path,     dto.getPath());
+        assertEquals(now, dto.getTimestamp());
+        assertEquals(status, dto.getStatus());
+        assertEquals(error, dto.getError());
+        assertEquals(message, dto.getMessage());
+        assertEquals(path, dto.getPath());
     }
 
     @Test
     void builder_ConstructsObjectEquivalentlyToAllArgs() {
         LocalDateTime now = LocalDateTime.of(2025, 7, 7, 13, 30);
         int status = 202;
-        String error   = "Accepted";
+        String error = "Accepted";
         String message = "Request accepted";
-        String path    = "/accept";
+        String path = "/accept";
 
         ErrorResponseDto dto = ErrorResponseDto.builder()
                 .timestamp(now)
@@ -165,10 +165,10 @@ class ErrorResponseDtoTest {
                 .path(path)
                 .build();
 
-        assertEquals(now,      dto.getTimestamp());
-        assertEquals(status,   dto.getStatus());
-        assertEquals(error,    dto.getError());
-        assertEquals(message,  dto.getMessage());
-        assertEquals(path,     dto.getPath());
+        assertEquals(now, dto.getTimestamp());
+        assertEquals(status, dto.getStatus());
+        assertEquals(error, dto.getError());
+        assertEquals(message, dto.getMessage());
+        assertEquals(path, dto.getPath());
     }
 }

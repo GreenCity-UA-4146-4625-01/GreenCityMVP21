@@ -14,11 +14,13 @@ import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
 @RestController
+@RequestMapping("${server.error.path:${error.path:/error}}")
 public class SwaggerErrorController extends BasicErrorController {
 
 
@@ -41,7 +43,7 @@ public class SwaggerErrorController extends BasicErrorController {
      */
 
     @Override
-    @GetMapping(path = "${server.error.path:${error.path:/error}}")
+    @GetMapping
     @Operation(summary = "Basic error handler")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = HttpStatuses.OK,

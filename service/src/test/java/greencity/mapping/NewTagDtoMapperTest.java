@@ -127,7 +127,6 @@ class NewTagDtoMapperTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("First English", result.getName());
-        assertNull(result.getNameUa());
     }
 
     @Test

@@ -91,16 +91,13 @@ class MultipartBase64ImageMapperTest {
 
 
     @Test
-    void convert_ValidImage_ShouldCleanupTempFile() {
+    void convert_ValidImage_ShouldCreateTempFile() {
         String base64Image = validBase64Image;
 
         MultipartFile result = mapper.convert(base64Image);
 
         assertNotNull(result);
-        assertTrue(tempFile.exists());
-
-        if (!tempFile.delete()) {
-            System.err.println("Failed to delete temporary file.");
-        }
+        assertTrue(result.getSize() > 0);
+        assertEquals("mainFile", result.getName());
     }
 }

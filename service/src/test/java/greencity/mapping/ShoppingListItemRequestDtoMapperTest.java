@@ -7,6 +7,8 @@ import greencity.enums.ShoppingListItemStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -43,43 +45,17 @@ class ShoppingListItemRequestDtoMapperTest {
         assertNull(result.getDateCompleted());
     }
 
-    @Test
-    void convert_WithDifferentId_ShouldSetCorrectId() {
-        Long expectedId = 999L;
+    @ParameterizedTest
+    @ValueSource(longs = {1L, 999L, Long.MAX_VALUE})
+    void convert_WithVariousIds_ShouldReturnUserShoppingListItemWithCorrectId(Long expectedId) {
         requestDto.setId(expectedId);
 
         UserShoppingListItem result = mapper.convert(requestDto);
 
-        assertNotNull(result);
-        assertNotNull(result.getShoppingListItem());
-        assertEquals(expectedId, result.getShoppingListItem().getId());
-        assertEquals(ShoppingListItemStatus.ACTIVE, result.getStatus());
-    }
-
-    @Test
-    void convert_WithMinimumValidId_ShouldReturnUserShoppingListItem() {
-        Long expectedId = 1L;
-        requestDto.setId(expectedId);
-
-        UserShoppingListItem result = mapper.convert(requestDto);
-
-        assertNotNull(result);
-        assertNotNull(result.getShoppingListItem());
-        assertEquals(expectedId, result.getShoppingListItem().getId());
-        assertEquals(ShoppingListItemStatus.ACTIVE, result.getStatus());
-    }
-
-    @Test
-    void convert_WithLargeId_ShouldReturnUserShoppingListItem() {
-        Long expectedId = Long.MAX_VALUE;
-        requestDto.setId(expectedId);
-
-        UserShoppingListItem result = mapper.convert(requestDto);
-
-        assertNotNull(result);
-        assertNotNull(result.getShoppingListItem());
-        assertEquals(expectedId, result.getShoppingListItem().getId());
-        assertEquals(ShoppingListItemStatus.ACTIVE, result.getStatus());
+        assertNotNull(result, "Result should not be null");
+        assertNotNull(result.getShoppingListItem(), "ShoppingListItem should not be null");
+        assertEquals(expectedId, result.getShoppingListItem().getId(), "ID should match expected value");
+        assertEquals(ShoppingListItemStatus.ACTIVE, result.getStatus(), "Status should be ACTIVE");
     }
 
     @Test
@@ -119,18 +95,6 @@ class ShoppingListItemRequestDtoMapperTest {
         assertNull(shoppingListItem.getUserShoppingListItems());
         assertNull(shoppingListItem.getHabits());
         assertNull(shoppingListItem.getTranslations());
-    }
-
-    @Test
-    void convert_ShouldCreateBuilderBasedObjects() {
-        requestDto.setId(100L);
-
-        UserShoppingListItem result = mapper.convert(requestDto);
-
-        assertNotNull(result);
-        assertNotNull(result.getShoppingListItem());
-        assertNotNull(result.getShoppingListItem().getId());
-        assertNotNull(result.getStatus());
     }
 
     @Test

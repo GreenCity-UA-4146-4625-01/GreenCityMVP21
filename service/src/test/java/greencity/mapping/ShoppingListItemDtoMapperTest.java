@@ -4,13 +4,13 @@ import greencity.dto.shoppinglistitem.ShoppingListItemDto;
 import greencity.entity.ShoppingListItem;
 import greencity.entity.localization.ShoppingListItemTranslation;
 import greencity.enums.ShoppingListItemStatus;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.stream.Stream;
@@ -23,14 +23,10 @@ class ShoppingListItemDtoMapperTest {
 
     @InjectMocks
     private ShoppingListItemDtoMapper shoppingListItemDtoMapper;
+    @Mock
     private ShoppingListItemTranslation shoppingListItemTranslation;
+    @Mock
     private ShoppingListItem shoppingListItem;
-
-    @BeforeEach
-    void setUp() {
-        shoppingListItem = mock(ShoppingListItem.class);
-        shoppingListItemTranslation = mock(ShoppingListItemTranslation.class);
-    }
 
     @ParameterizedTest
     @MethodSource("provideValidInputs")
@@ -95,7 +91,6 @@ class ShoppingListItemDtoMapperTest {
 
         assertNotNull(result);
         assertEquals(ShoppingListItemStatus.ACTIVE.toString(), result.getStatus());
-        assertEquals("ACTIVE", result.getStatus());
     }
 
     @Test

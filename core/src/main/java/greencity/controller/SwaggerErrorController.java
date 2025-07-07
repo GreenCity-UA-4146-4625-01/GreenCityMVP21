@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.ServletWebRequest;
 
 import java.util.Map;
 
@@ -42,7 +41,6 @@ public class SwaggerErrorController extends BasicErrorController {
      * @param request the original {@link HttpServletRequest} in which the error occurred
      * @return a {@link ResponseEntity} with status 200 OK and a JSON body containing
      * a map of error attributes (e.g. "timestamp", "status", "error", "message", "errors", "path")
-     *
      * @author Andrii Synytsia
      */
 
@@ -52,13 +50,14 @@ public class SwaggerErrorController extends BasicErrorController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = HttpStatuses.OK,
                     content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse(responseCode = "500", description = HttpStatuses.INTERNAL_SERVER_ERROR)
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED,
+                    content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+            @ApiResponse(responseCode = "500", description = HttpStatuses.INTERNAL_SERVER_ERROR,
+                    content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
     public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
-        ServletWebRequest webRequest = new ServletWebRequest(request);
         Map<String, Object> body = getErrorAttributes(
-                webRequest.getRequest(),
+                request,
                 ErrorAttributeOptions.of(
                         ErrorAttributeOptions.Include.MESSAGE,
                         ErrorAttributeOptions.Include.BINDING_ERRORS));

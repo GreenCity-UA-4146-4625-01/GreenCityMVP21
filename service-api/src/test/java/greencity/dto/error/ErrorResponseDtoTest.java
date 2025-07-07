@@ -120,4 +120,55 @@ class ErrorResponseDtoTest {
         assertEquals("path", v.getPropertyPath().toString());
         assertEquals("must not be blank", v.getMessage());
     }
+
+    @Test
+    void noArgsConstructor_DefaultValuesAreNullOrZero() {
+        ErrorResponseDto dto = new ErrorResponseDto();
+
+        assertNull(dto.getTimestamp(), "timestamp should be null by default");
+        assertEquals(0, dto.getStatus(), "status should default to 0");
+        assertNull(dto.getError(), "error should be null by default");
+        assertNull(dto.getMessage(), "message should be null by default");
+        assertNull(dto.getPath(), "path should be null by default");
+    }
+
+    @Test
+    void allArgsConstructor_FieldsAreReturnedByGetters() {
+        LocalDateTime now = LocalDateTime.of(2025, 7, 7, 12, 0);
+        int status = 418;
+        String error   = "I'm a teapot";
+        String message = "Short and stout";
+        String path    = "/tea";
+
+        ErrorResponseDto dto = new ErrorResponseDto(now, status, error, message, path);
+
+        assertEquals(now,      dto.getTimestamp());
+        assertEquals(status,   dto.getStatus());
+        assertEquals(error,    dto.getError());
+        assertEquals(message,  dto.getMessage());
+        assertEquals(path,     dto.getPath());
+    }
+
+    @Test
+    void builder_ConstructsObjectEquivalentlyToAllArgs() {
+        LocalDateTime now = LocalDateTime.of(2025, 7, 7, 13, 30);
+        int status = 202;
+        String error   = "Accepted";
+        String message = "Request accepted";
+        String path    = "/accept";
+
+        ErrorResponseDto dto = ErrorResponseDto.builder()
+                .timestamp(now)
+                .status(status)
+                .error(error)
+                .message(message)
+                .path(path)
+                .build();
+
+        assertEquals(now,      dto.getTimestamp());
+        assertEquals(status,   dto.getStatus());
+        assertEquals(error,    dto.getError());
+        assertEquals(message,  dto.getMessage());
+        assertEquals(path,     dto.getPath());
+    }
 }

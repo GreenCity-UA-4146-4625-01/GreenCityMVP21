@@ -40,7 +40,7 @@ public class Event {
     private EventVisibility eventVisibility;
 
     @ElementCollection(targetClass = EventType.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "event_types", joinColumns = @JoinColumn(name = "event_id"))
+    @CollectionTable(name = "event_event_types", joinColumns = @JoinColumn(name = "event_id"))
     @Column(name = "event_type")
     private Set<EventType> eventTypes = new HashSet<>();
 

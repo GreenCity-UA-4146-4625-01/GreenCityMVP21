@@ -4,6 +4,8 @@ import greencity.enums.EventType;
 import greencity.enums.EventVisibility;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -32,7 +34,12 @@ public class Event {
 
     private Long mainImageId;
 
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
     private LocalDateTime creationDate;
+
+    @LastModifiedDate
+    @Column(nullable = false)
     private LocalDateTime lastUpdateDate;
 
     @Enumerated(EnumType.STRING)

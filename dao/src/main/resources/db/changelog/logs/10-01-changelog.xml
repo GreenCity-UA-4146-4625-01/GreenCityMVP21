@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1752173258320-62" author="mykytasirobaba">
+        <dropForeignKeyConstraint baseTableName="social_networks"
+                                  constraintName="FK_social_network_social_network_image"/>
+    </changeSet>
+    <changeSet id="1752173258320-63" author="mykytasirobaba">
+        <dropForeignKeyConstraint baseTableName="social_networks" constraintName="FK_user_social_network"/>
+    </changeSet>
+    <changeSet id="1752173258320-64" author="mykytasirobaba">
+        <dropForeignKeyConstraint baseTableName="web_pages_places" constraintName="FKrm26v5rrc5t54lhcd04dcwkw8"/>
+    </changeSet>
+    <changeSet id="1752173258320-65" author="mykytasirobaba">
+        <dropForeignKeyConstraint baseTableName="habit_status" constraintName="fk_habit_status_habit_assign_id"/>
+    </changeSet>
+    <changeSet id="1752173258320-66" author="mykytasirobaba">
+        <dropForeignKeyConstraint baseTableName="message_like" constraintName="fk_participant_id"/>
+    </changeSet>
+    <changeSet id="1752173258320-67" author="mykytasirobaba">
+        <dropForeignKeyConstraint baseTableName="reasons_for_user_deactivation"
+                                  constraintName="fk_reasons_for_user_deactivation_users_id"/>
+    </changeSet>
+    <changeSet id="1752173258320-68" author="mykytasirobaba">
+        <dropForeignKeyConstraint baseTableName="unread_messages" constraintName="fkh84h4eq2rt6ams9mbbb0keadp"/>
+    </changeSet>
+    <changeSet id="1752173258320-69" author="mykytasirobaba">
+        <dropForeignKeyConstraint baseTableName="user_actions" constraintName="user_actions_users_id_fk"/>
+    </changeSet>
+    <changeSet id="1752173258320-70" author="mykytasirobaba">
+        <dropForeignKeyConstraint baseTableName="users" constraintName="user_language_id"/>
+    </changeSet>
+    <changeSet id="1752173258320-50" author="mykytasirobaba">
+        <createTable tableName="friend_requests">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_friend_requests"/>
+            </column>
+            <column name="sender_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="receiver_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1752173258320-51" author="mykytasirobaba">
+        <createTable tableName="friends">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_friends"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="friend_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1752173258320-52" author="mykytasirobaba">
+        <addPrimaryKey columnNames="eco_news_id, users_id" constraintName="pk_eco_news_users_dislikes"
+                       tableName="eco_news_users_dislikes"/>
+    </changeSet>
+    <changeSet id="1752173258320-53" author="mykytasirobaba">
+        <addPrimaryKey columnNames="eco_news_id, users_id" constraintName="pk_eco_news_users_likes"
+                       tableName="eco_news_users_likes"/>
+    </changeSet>
+    <changeSet id="1752173258320-54" author="mykytasirobaba">
+        <addPrimaryKey columnNames="econews_comment_id, users_liked_id" constraintName="pk_econews_comment_users_liked"
+                       tableName="econews_comment_users_liked"/>
+    </changeSet>
+    <changeSet id="1752173258320-55" author="mykytasirobaba">
+        <addUniqueConstraint columnNames="content" constraintName="uc_habit_fact_translations_content"
+                             tableName="habit_fact_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-56" author="mykytasirobaba">
+        <addUniqueConstraint columnNames="content" constraintName="uc_shopping_list_item_translations_content"
+                             tableName="shopping_list_item_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-57" author="mykytasirobaba">
+        <addUniqueConstraint columnNames="language_id" constraintName="uc_tag_translations_language"
+                             tableName="tag_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-58" author="mykytasirobaba">
+        <addForeignKeyConstraint baseColumnNames="friend_id" baseTableName="friends"
+                                 constraintName="FK_FRIENDS_ON_FRIEND" referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1752173258320-59" author="mykytasirobaba">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="friends" constraintName="FK_FRIENDS_ON_USER"
+                                 referencedColumnNames="id" referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1752173258320-60" author="mykytasirobaba">
+        <addForeignKeyConstraint baseColumnNames="receiver_id" baseTableName="friend_requests"
+                                 constraintName="FK_FRIEND_REQUESTS_ON_RECEIVER" referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1752173258320-61" author="mykytasirobaba">
+        <addForeignKeyConstraint baseColumnNames="sender_id" baseTableName="friend_requests"
+                                 constraintName="FK_FRIEND_REQUESTS_ON_SENDER" referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1752173258320-74" author="mykytasirobaba">
+        <dropTable cascadeConstraints="true" tableName="habit_status"/>
+    </changeSet>
+    <changeSet id="1752173258320-75" author="mykytasirobaba">
+        <dropTable cascadeConstraints="true" tableName="message_like"/>
+    </changeSet>
+    <changeSet id="1752173258320-76" author="mykytasirobaba">
+        <dropTable cascadeConstraints="true" tableName="reasons_for_user_deactivation"/>
+    </changeSet>
+    <changeSet id="1752173258320-77" author="mykytasirobaba">
+        <dropTable cascadeConstraints="true" tableName="social_network_images"/>
+    </changeSet>
+    <changeSet id="1752173258320-78" author="mykytasirobaba">
+        <dropTable cascadeConstraints="true" tableName="social_networks"/>
+    </changeSet>
+    <changeSet id="1752173258320-79" author="mykytasirobaba">
+        <dropTable cascadeConstraints="true" tableName="unread_messages"/>
+    </changeSet>
+    <changeSet id="1752173258320-80" author="mykytasirobaba">
+        <dropTable cascadeConstraints="true" tableName="user_actions"/>
+    </changeSet>
+    <changeSet id="1752173258320-81" author="mykytasirobaba">
+        <dropTable cascadeConstraints="true" tableName="web_pages_places"/>
+    </changeSet>
+    <changeSet id="1752173258320-82" author="mykytasirobaba">
+        <dropPrimaryKey constraintName="eco_news_tags_pkey" tableName="eco_news_tags"/>
+    </changeSet>
+    <changeSet id="1752173258320-90" author="mykytasirobaba">
+        <dropColumn columnName="id" tableName="habit_shopping_list_items"/>
+
+        <dropColumn columnName="status" tableName="habit_shopping_list_items"/>
+    </changeSet>
+    <changeSet id="1752173258320-91" author="mykytasirobaba">
+        <dropColumn columnName="estimate_id" tableName="comments"/>
+
+        <dropColumn columnName="place_id" tableName="comments"/>
+    </changeSet>
+    <changeSet id="1752173258320-92" author="mykytasirobaba">
+        <dropColumn columnName="language_id" tableName="users"/>
+
+        <dropColumn columnName="phone_number" tableName="users"/>
+
+        <dropColumn columnName="uuid" tableName="users"/>
+    </changeSet>
+    <changeSet id="1752173258320-97" author="mykytasirobaba">
+        <dropSequence sequenceName="address_id_seq"/>
+    </changeSet>
+    <changeSet id="1752173258320-98" author="mykytasirobaba">
+        <dropSequence sequenceName="bag_id_seq"/>
+    </changeSet>
+    <changeSet id="1752173258320-99" author="mykytasirobaba">
+        <dropSequence sequenceName="orders_id_seq"/>
+    </changeSet>
+    <changeSet id="1752173258320-100" author="mykytasirobaba">
+        <dropSequence sequenceName="ubs_user_id_seq"/>
+    </changeSet>
+    <changeSet id="1752173258320-1" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="int" columnName="amount_of_items" tableName="habit_statistics"/>
+    </changeSet>
+    <changeSet id="1752173258320-2" author="mykytasirobaba">
+        <modifyDataType columnName="content" newDataType="VARCHAR(4000)" tableName="habit_fact_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-3" author="mykytasirobaba">
+        <addNotNullConstraint columnDataType="VARCHAR(4000)" columnName="content" tableName="habit_fact_translations"
+                              validate="true"/>
+    </changeSet>
+    <changeSet id="1752173258320-4" author="mykytasirobaba">
+        <modifyDataType columnName="content" newDataType="VARCHAR(4000)" tableName="shopping_list_item_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-5" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="double" columnName="current_rating" tableName="rating_statistics"/>
+    </changeSet>
+    <changeSet id="1752173258320-6" author="mykytasirobaba">
+        <modifyDataType columnName="description" newDataType="VARCHAR(255)" tableName="habit_translation"/>
+    </changeSet>
+    <changeSet id="1752173258320-7" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="eco_news_id" tableName="econews_comment"/>
+    </changeSet>
+    <changeSet id="1752173258320-8" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="date" columnName="enroll_date" tableName="habit_status_calendar"/>
+    </changeSet>
+    <changeSet id="1752173258320-9" author="mykytasirobaba">
+        <modifyDataType columnName="event" newDataType="VARCHAR(255)" tableName="rating_statistics"/>
+    </changeSet>
+    <changeSet id="1752173258320-10" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="event" tableName="rating_statistics"/>
+    </changeSet>
+    <changeSet id="1752173258320-11" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="datetime" columnName="expiry_date" tableName="verify_emails"/>
+    </changeSet>
+    <changeSet id="1752173258320-12" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="int" columnName="fact_of_day_status"
+                               tableName="habit_fact_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-13" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="habit_assign_id" tableName="habit_statistics"/>
+    </changeSet>
+    <changeSet id="1752173258320-14" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="habit_assign_id" tableName="habit_status_calendar"/>
+    </changeSet>
+    <changeSet id="1752173258320-15" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="habit_assign_id" tableName="user_shopping_list"/>
+    </changeSet>
+    <changeSet id="1752173258320-16" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="habit_fact_id" tableName="habit_fact_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-17" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="habit_id" tableName="custom_shopping_list_items"/>
+    </changeSet>
+    <changeSet id="1752173258320-18" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="habit_id" tableName="habit_facts"/>
+    </changeSet>
+    <changeSet id="1752173258320-19" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="habit_id" tableName="habit_translation"/>
+    </changeSet>
+    <changeSet id="1752173258320-20" author="mykytasirobaba">
+        <addNotNullConstraint columnDataType="VARCHAR(255)" columnName="habit_item" tableName="habit_translation"
+                              validate="true"/>
+    </changeSet>
+    <changeSet id="1752173258320-21" author="mykytasirobaba">
+        <addNotNullConstraint columnDataType="BOOLEAN" columnName="is_custom_habit" tableName="habits" validate="true"/>
+    </changeSet>
+    <changeSet id="1752173258320-22" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="language_id" tableName="habit_fact_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-23" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="language_id" tableName="habit_translation"/>
+    </changeSet>
+    <changeSet id="1752173258320-24" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="language_id"
+                               tableName="shopping_list_item_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-25" author="mykytasirobaba">
+        <modifyDataType columnName="name" newDataType="VARCHAR(255)" tableName="filters"/>
+    </changeSet>
+    <changeSet id="1752173258320-26" author="mykytasirobaba">
+        <addNotNullConstraint columnDataType="VARCHAR(255)" columnName="name" tableName="habit_translation"
+                              validate="true"/>
+    </changeSet>
+    <changeSet id="1752173258320-27" author="mykytasirobaba">
+        <modifyDataType columnName="name" newDataType="VARCHAR(20)" tableName="tag_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-28" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="double" columnName="points_changed" tableName="rating_statistics"/>
+    </changeSet>
+    <changeSet id="1752173258320-29" author="mykytasirobaba">
+        <modifyDataType columnName="profile_picture" newDataType="VARCHAR(255)" tableName="users"/>
+    </changeSet>
+    <changeSet id="1752173258320-30" author="mykytasirobaba">
+        <addNotNullConstraint columnDataType="BOOLEAN" columnName="progress_notification_has_displayed"
+                              tableName="habit_assign" validate="true"/>
+    </changeSet>
+    <changeSet id="1752173258320-31" author="mykytasirobaba">
+        <modifyDataType columnName="rate" newDataType="VARCHAR(255)" tableName="habit_statistics"/>
+    </changeSet>
+    <changeSet id="1752173258320-32" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="rate" tableName="habit_statistics"/>
+    </changeSet>
+    <changeSet id="1752173258320-33" author="mykytasirobaba">
+        <modifyDataType columnName="role" newDataType="VARCHAR(255)" tableName="users"/>
+    </changeSet>
+    <changeSet id="1752173258320-34" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="shopping_list_item_id"
+                               tableName="shopping_list_item_translations"/>
+    </changeSet>
+    <changeSet id="1752173258320-35" author="mykytasirobaba">
+        <modifyDataType columnName="short_info" newDataType="VARCHAR(255)" tableName="eco_news"/>
+    </changeSet>
+    <changeSet id="1752173258320-36" author="mykytasirobaba">
+        <modifyDataType columnName="status" newDataType="VARCHAR(255)" tableName="custom_shopping_list_items"/>
+    </changeSet>
+    <changeSet id="1752173258320-37" author="mykytasirobaba">
+        <modifyDataType columnName="status" newDataType="VARCHAR(255)" tableName="habit_assign"/>
+    </changeSet>
+    <changeSet id="1752173258320-38" author="mykytasirobaba">
+        <modifyDataType columnName="status" newDataType="VARCHAR(255)" tableName="user_shopping_list"/>
+    </changeSet>
+    <changeSet id="1752173258320-39" author="mykytasirobaba">
+        <modifyDataType columnName="text" newDataType="VARCHAR(255)" tableName="eco_news"/>
+    </changeSet>
+    <changeSet id="1752173258320-40" author="mykytasirobaba">
+        <modifyDataType columnName="title" newDataType="VARCHAR(255)" tableName="eco_news"/>
+    </changeSet>
+    <changeSet id="1752173258320-41" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="token" tableName="verify_emails"/>
+    </changeSet>
+    <changeSet id="1752173258320-42" author="mykytasirobaba">
+        <modifyDataType columnName="type" newDataType="VARCHAR(255)" tableName="filters"/>
+    </changeSet>
+    <changeSet id="1752173258320-43" author="mykytasirobaba">
+        <modifyDataType columnName="type" newDataType="VARCHAR(255)" tableName="tags"/>
+    </changeSet>
+    <changeSet id="1752173258320-44" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="user_id" tableName="custom_shopping_list_items"/>
+    </changeSet>
+    <changeSet id="1752173258320-45" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="user_id" tableName="econews_comment"/>
+    </changeSet>
+    <changeSet id="1752173258320-46" author="mykytasirobaba">
+        <addNotNullConstraint columnDataType="BIGINT" columnName="user_id" tableName="filters" validate="true"/>
+    </changeSet>
+    <changeSet id="1752173258320-47" author="mykytasirobaba">
+        <dropNotNullConstraint columnDataType="bigint" columnName="user_id" tableName="rating_statistics"/>
+    </changeSet>
+    <changeSet id="1752173258320-49" author="mykytasirobaba">
+        <addPrimaryKey columnNames="habit_id, shopping_list_item_id" constraintName="pk_habit_shopping_list_items"
+                       tableName="habit_shopping_list_items"/>
+    </changeSet>
+
+</databaseChangeLog>

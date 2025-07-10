@@ -37,6 +37,7 @@ public class FriendRequest {
     private User receiver;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
     private FriendRequestStatus status;
 
     @Column(name = "created_at", nullable = false)

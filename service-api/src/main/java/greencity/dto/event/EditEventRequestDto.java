@@ -1,0 +1,52 @@
+package greencity.dto.event;
+
+import greencity.enums.EventType;
+import greencity.enums.EventVisibility;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import org.hibernate.validator.constraints.URL;
+
+import java.util.List;
+import java.util.Set;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@ToString
+@Builder
+@EqualsAndHashCode
+public class EditEventRequestDto {
+    @NotNull
+    private Long eventId;
+
+    @NotBlank
+    @Size(max = 70)
+    private String title;
+
+    @NotBlank @Size(min = 20, max = 63206)
+    private String description;
+
+    @NotNull
+    private EventVisibility visibility;
+
+    @NotEmpty
+    private Set<EventType> eventTypes;
+
+    private List<EventLocationDto> locations;
+
+    private List<@URL String> onlineLinks;
+
+    @Size(min = 1, max = 7)
+    @Valid
+    private List<EventDateTimeDto> eventDateTimes;
+
+    @Size(max = 5)
+    private List<EventImageDto> images;
+
+    private Long mainImageId;
+}

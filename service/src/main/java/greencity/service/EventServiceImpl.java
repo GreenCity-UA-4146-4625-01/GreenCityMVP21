@@ -32,7 +32,7 @@ public class EventServiceImpl implements EventService {
     public EventResponseDto createEvent(CreateEventRequestDto createEventRequestDto) {
         Event save = modelMapper.map(createEventRequestDto, Event.class);
         eventRepo.save(save);
-        return modelMapper.map(createEventRequestDto, EventResponseDto.class);
+        return modelMapper.map(save, EventResponseDto.class);
     }
 
     /**

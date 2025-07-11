@@ -31,14 +31,14 @@ class EventServiceImplTest {
     @InjectMocks
     EventServiceImpl eventService;
 
-    private CreateEventRequestDto createEventRequestDto = ModelUtils.getCreateEventRequestDto();
-    private EventResponseDto eventResponseDto = ModelUtils.getEventResponseDto();
-    private Event event = ModelUtils.createEvent();
+    private final CreateEventRequestDto createEventRequestDto = ModelUtils.getCreateEventRequestDto();
+    private final EventResponseDto eventResponseDto = ModelUtils.getEventResponseDto();
+    private final Event event = ModelUtils.createEvent();
 
     @Test
     void createEvent() {
         when(modelMapper.map(createEventRequestDto, Event.class)).thenReturn(event);
-        when(modelMapper.map(createEventRequestDto, EventResponseDto.class)).thenReturn(eventResponseDto);
+        when(modelMapper.map(event, EventResponseDto.class)).thenReturn(eventResponseDto);
         when(eventRepo.save(event)).thenReturn(event);
 
         EventResponseDto result = eventService.createEvent(createEventRequestDto);

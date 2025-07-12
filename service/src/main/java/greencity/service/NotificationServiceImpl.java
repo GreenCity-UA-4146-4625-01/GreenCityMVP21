@@ -1,52 +1,60 @@
 package greencity.service;
 
-import greencity.dto.notification.NewCommentNotificationDto;
-import greencity.dto.notification.NewLikeNotificationDto;
-import greencity.dto.notification.NewReplyNotificationDto;
-import greencity.dto.notification.NotificationDto;
+import greencity.dto.notification.*;
 import greencity.entity.Notification;
 import greencity.entity.User;
 import greencity.enums.NotificationType;
 import greencity.repository.NotificationRepo;
 import greencity.repository.UserRepo;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service implementation for managing user notifications.
+ */
 @Service
+@RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepo notificationRepo;
     private final UserRepo userRepository;
     private final ModelMapper modelMapper;
 
-    public NotificationServiceImpl(NotificationRepo notificationRepo,
-                                   UserRepo userRepository,
-                                   ModelMapper modelMapper) {
-        this.notificationRepo = notificationRepo;
-        this.userRepository = userRepository;
-        this.modelMapper = modelMapper;
-    }
-
+    /**
+     * Creates a notification when a new comment is added.
+     *
+     * @param dto DTO with info about the new comment notification
+     */
     @Override
     public void createNewCommentNotification(NewCommentNotificationDto dto) {
         createNotification(dto.receiver().getId(), NotificationType.NEW_COMMENT, dto.objectId());
     }
 
+    /**
+     * Creates a notification when a reply is added.
+     *
+     * @param dto DTO with info about the new reply notification
+     */
     @Override
     public void createNewReplyNotification(NewReplyNotificationDto dto) {
         createNotification(dto.receiver().getId(), NotificationType.NEW_REPLY, dto.objectId());
     }
 
+    /**
+     * Creates a notification when a like is received.
+     *
+     * @param dto DTO with info about the new like notification
+     */
     @Override
     public void createNewLikeNotification(NewLikeNotificationDto dto) {
         createNotification(dto.receiver().getId(), NotificationType.NEW_LIKE, dto.objectId());
     }
 
     private void createNotification(Long receiverId, NotificationType type, long objectId) {
-        User receiver = userRepository.findById(receiverId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User receiver = findUserById(receiverId);
 
         Notification notification = Notification.builder()
                 .type(type)
@@ -58,16 +66,26 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepo.save(notification);
     }
 
+    /**
+     * Retrieves all notifications for a specific user.
+     *
+     * @param userId ID of the user
+     * @return List of notification DTOs
+     */
     @Override
     public List<NotificationDto> getAllNotificationsForUser(Long userId) {
-        User receiver = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User receiver = findUserById(userId);
 
         return notificationRepo.findAllByReceiver(receiver).stream()
                 .map(notification -> modelMapper.map(notification, NotificationDto.class))
                 .toList();
     }
 
+    /**
+     * Marks a notification as read.
+     *
+     * @param notificationId ID of the notification to mark
+     */
     @Override
     public void markAsRead(Long notificationId) {
         notificationRepo.findById(notificationId).ifPresent(notification -> {
@@ -76,18 +94,53 @@ public class NotificationServiceImpl implements NotificationService {
         });
     }
 
+    /**
+     * Marks all notifications for a user as read.
+     *
+     * @param userId ID of the user
+     */
     @Override
     public void markAllAsRead(Long userId) {
-        User receiver = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
+        User receiver = findUserById(userId);
         List<Notification> unread = notificationRepo.findUnreadByReceiver(receiver);
         unread.forEach(notification -> notification.setRead(true));
         notificationRepo.saveAll(unread);
     }
 
+    /**
+     * Deletes a notification by ID.
+     *
+     * @param notificationId ID of the notification to delete
+     */
     @Override
     public void deleteNotification(Long notificationId) {
         notificationRepo.deleteById(notificationId);
+    }
+
+    /**
+     * Bulk deletion of notifications by IDs.
+     *
+     * @param ids list of notification IDs to delete
+     */
+    @Override
+    public void deleteNotifications(List<Long> ids) {
+        notificationRepo.deleteAllById(ids);
+    }
+
+    /**
+     * Bulk mark notifications as read.
+     *
+     * @param ids list of notification IDs to mark
+     */
+    @Override
+    public void markNotificationsAsRead(List<Long> ids) {
+        List<Notification> notifications = notificationRepo.findAllById(ids);
+        notifications.forEach(n -> n.setRead(true));
+        notificationRepo.saveAll(notifications);
+    }
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 }

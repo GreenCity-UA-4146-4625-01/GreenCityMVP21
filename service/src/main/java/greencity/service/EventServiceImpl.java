@@ -33,8 +33,8 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public EventResponseDto createEvent(CreateEventRequestDto createEventRequestDto) {
-        Event save = modelMapper.map(createEventRequestDto, Event.class);
-        eventRepo.save(save);
+        Event create = modelMapper.map(createEventRequestDto, Event.class);
+        Event save = eventRepo.save(create);
         return modelMapper.map(save, EventResponseDto.class);
     }
 

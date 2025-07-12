@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.entity.Event;
@@ -7,6 +8,8 @@ import greencity.exception.exceptions.NotFoundException;
 import greencity.repository.EventRepo;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,15 +53,29 @@ public class EventServiceImpl implements EventService {
     }
 
     /**
-     * Retrieves all events available in the system.
+     * Retrieves a paginated list of all events available in the system.
+     * This method fetches events from the repository according to the provided pagination
+     * information, converts each {@link Event} entity to an {@link EventResponseDto},
+     * and wraps the result along with pagination metadata into a {@link PageableDto}.
      *
-     * @return a list of {@link EventResponseDto} objects; the list may be empty if no events exist
+     * @param pageable the pagination information (page number, size, sorting)
+     * @return a {@link PageableDto} containing a list of {@link EventResponseDto} objects for the requested page,
+     *         along with pagination details such as total elements, current page number, and total pages.
+     *         The list may be empty if no events exist for the given page.
      */
     @Override
-    public List<EventResponseDto> getAllEvents() {
-        List<Event> events = eventRepo.findAll();
-        return events.stream()
+    public PageableDto<EventResponseDto> getAllEvents(Pageable pageable) {
+        Page<Event> eventPage = eventRepo.findAll(pageable);
+
+        List<EventResponseDto> content = eventPage.stream()
                 .map(event -> modelMapper.map(event, EventResponseDto.class))
                 .toList();
+
+        return new PageableDto<>(
+                content,
+                eventPage.getTotalElements(),
+                eventPage.getNumber(),
+                eventPage.getTotalPages()
+        );
     }
 }

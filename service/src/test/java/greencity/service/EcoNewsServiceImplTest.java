@@ -498,7 +498,7 @@ class EcoNewsServiceImplTest {
         when(ecoNewsRepo.findById(1L)).thenReturn(Optional.of(ecoNews));
         when(ecoNewsService.findById(1L)).thenReturn(ecoNewsVO);
         when(modelMapper.map(ecoNewsVO, EcoNews.class)).thenReturn(ecoNews);
-        assertThrows(BadRequestException.class, () -> ecoNewsService.update(updateEcoNewsDto, null, user));
+        assertThrows(UserHasNoPermissionToAccessException.class, () -> ecoNewsService.update(updateEcoNewsDto, null, user));
     }
 
     @Test

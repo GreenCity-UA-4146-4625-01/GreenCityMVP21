@@ -5,8 +5,6 @@ import greencity.dto.notification.NotificationDto;
 
 import java.util.List;
 
-public interface NotificationService {
-
     public interface NotificationService {
 
         /**
@@ -14,9 +12,7 @@ public interface NotificationService {
          *
          * @param dto DTO containing data for creating a notification (type, object, receiver)
          */
-        void createNewCommentNotification(NewCommentNotificationDto dto);
-        void createNewReplyNotification(NewReplyNotificationDto dto);
-        void createNewLikeNotification(NewLikeNotificationDto dto);
+        void createNotification(NotificationDto dto);
 
         /**
          * Retrieves all notifications for a given user.
@@ -56,12 +52,6 @@ public interface NotificationService {
          */
         void deleteNotification(Long notificationId);
 
-        /**
-         * Deletes multiple notifications by their IDs.
-         * Useful for bulk deletion or clearing notifications.
-         *
-         * @param notificationIds List of notification IDs
-         */
     }
-}
+
 

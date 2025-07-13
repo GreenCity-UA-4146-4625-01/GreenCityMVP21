@@ -29,40 +29,9 @@ public class NotificationServiceImpl implements NotificationService {
      * @param dto DTO with info about the new comment notification
      */
     @Override
-    public void createNewCommentNotification(NewCommentNotificationDto dto) {
-        createNotification(dto.receiver().getId(), NotificationType.NEW_COMMENT, dto.objectId());
-    }
-
-    /**
-     * Creates a notification when a reply is added.
-     *
-     * @param dto DTO with info about the new reply notification
-     */
-    @Override
-    public void createNewReplyNotification(NewReplyNotificationDto dto) {
-        createNotification(dto.receiver().getId(), NotificationType.NEW_REPLY, dto.objectId());
-    }
-
-    /**
-     * Creates a notification when a like is received.
-     *
-     * @param dto DTO with info about the new like notification
-     */
-    @Override
-    public void createNewLikeNotification(NewLikeNotificationDto dto) {
-        createNotification(dto.receiver().getId(), NotificationType.NEW_LIKE, dto.objectId());
-    }
-
-    private void createNotification(Long receiverId, NotificationType type, long objectId) {
-        User receiver = findUserById(receiverId);
-
-        Notification notification = Notification.builder()
-                .type(type)
-                .objectId(objectId)
-                .receiver(receiver)
-                .isRead(false)
-                .build();
-
+    public void createNotification(NotificationDto dto) {
+        Notification notification = modelMapper.convert(dto, Notification.class);
+        notification.setReceiver(findUserById(dto.receiver().getId());
         notificationRepo.save(notification);
     }
 
@@ -95,6 +64,18 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     /**
+     * Bulk mark notifications as read.
+     *
+     * @param ids list of notification IDs to mark
+     */
+    @Override
+    public void markAsReadBulk(List<Long> ids) {
+        List<Notification> notifications = notificationRepo.findAllById(ids);
+        notifications.forEach(n -> n.setRead(true));
+        notificationRepo.saveAll(notifications);
+    }
+
+    /**
      * Marks all notifications for a user as read.
      *
      * @param userId ID of the user
@@ -117,30 +98,5 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepo.deleteById(notificationId);
     }
 
-    /**
-     * Bulk deletion of notifications by IDs.
-     *
-     * @param ids list of notification IDs to delete
-     */
-    @Override
-    public void deleteNotifications(List<Long> ids) {
-        notificationRepo.deleteAllById(ids);
-    }
 
-    /**
-     * Bulk mark notifications as read.
-     *
-     * @param ids list of notification IDs to mark
-     */
-    @Override
-    public void markNotificationsAsRead(List<Long> ids) {
-        List<Notification> notifications = notificationRepo.findAllById(ids);
-        notifications.forEach(n -> n.setRead(true));
-        notificationRepo.saveAll(notifications);
-    }
-
-    private User findUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-    }
 }

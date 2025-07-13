@@ -7,8 +7,6 @@ import greencity.dto.event.UploadEventImageDto;
 import greencity.dto.event.UploadEventImagesDto;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.BadRequestException;
-import jakarta.validation.Valid;
-
 
 import java.util.List;
 

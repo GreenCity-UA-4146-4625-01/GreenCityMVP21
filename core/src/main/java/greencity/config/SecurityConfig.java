@@ -280,7 +280,7 @@ public class SecurityConfig {
                     "/user/update/role")
                 .hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.PATCH, "events/**")
-                .authenticated()
+                .hasAnyRole(ADMIN, USER)
                 .requestMatchers(HttpMethod.DELETE,
                     "/facts/{factId}",
                     "/comments")

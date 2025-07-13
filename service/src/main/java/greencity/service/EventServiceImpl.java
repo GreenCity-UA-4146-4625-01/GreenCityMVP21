@@ -1,35 +1,21 @@
 package greencity.service;
 
-import greencity.dto.event.CreateEventRequestDto;
-import greencity.dto.event.EditEventRequestDto;
-import greencity.dto.event.EventDateTimeDto;
-import greencity.dto.event.EventResponseDto;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
-import greencity.enums.Role;
-import greencity.exception.exceptions.AccessDeniedException;
-import greencity.exception.exceptions.NotFoundException;
-import greencity.mapping.EditEventRequestDtoMapper;
-import greencity.repository.EventRepo;
-import greencity.validator.EventDateTimeDtoValidator;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import greencity.dto.event.EventImageDto;
-import greencity.dto.event.EventResponseDto;
-import greencity.dto.event.UploadEventImageDto;
-import greencity.dto.event.UploadEventImagesDto;
-import greencity.entity.Event;
 import greencity.entity.EventImage;
+import greencity.enums.Role;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventImageRepo;
 import greencity.repository.EventRepo;
+import greencity.validator.EventDateTimeDtoValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -42,7 +28,6 @@ public class EventServiceImpl implements EventService {
     private final ModelMapper modelMapper;
     private final EventRepo eventRepo;
     private final FileService fileService;
-    private final EditEventRequestDtoMapper editEventRequestDtoMapper;
     private final EventDateTimeDtoValidator eventDateTimeDtoValidator;
     private final EventImageRepo eventImageRepo;
 
@@ -88,13 +73,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EditEventRequestDto updateEventById(Long eventId, EditEventRequestDto dto, UserVO user) {
+    public EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, UserVO user) {
 
-        Event event = eventRepository.findEventById(eventId)
+        Event event = eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
         if (!user.getRole().equals(Role.ROLE_ADMIN) && !event.getCreator().getId().equals(user.getId())) {
-            throw new AccessDeniedException("You are bot allowed to edit this event");
+            throw new UserHasNoPermissionToAccessException("You are bot allowed to edit this event");
         }
 
         if (dto.getEventDateTimes() != null) {
@@ -104,22 +89,11 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        Event updatedEvent = editEventRequestDtoMapper.convert(dto);
+        Event updatedEvent = modelMapper.map(dto, Event.class);
 
-        event.setTitle(updatedEvent.getTitle());
-        event.setDescription(updatedEvent.getDescription());
-        event.setEventTypes(updatedEvent.getEventTypes());
-        event.setOnlineLinks(updatedEvent.getOnlineLinks());
-        event.setEventVisibility(updatedEvent.getEventVisibility());
-        event.setMainImageId(updatedEvent.getMainImageId());
+        Event saved = eventRepo.save(updatedEvent);
 
-        event.setEventLocations(updatedEvent.getEventLocations());
-        event.setEventDateTimes(updatedEvent.getEventDateTimes());
-        event.setEventImages(updatedEvent.getEventImages());
-
-        eventRepository.save(event);
-
-        return dto;
+        return modelMapper.map(saved, EventResponseDto.class);
     }
   
     /**

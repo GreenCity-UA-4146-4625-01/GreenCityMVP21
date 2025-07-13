@@ -1,16 +1,10 @@
 package greencity.service;
 
-import greencity.dto.event.CreateEventRequestDto;
-import greencity.dto.event.EditEventRequestDto;
-import greencity.dto.event.EventResponseDto;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
-import greencity.exception.exceptions.AccessDeniedException;
-import greencity.dto.event.EventImageDto;
-import greencity.dto.event.EventResponseDto;
-import greencity.dto.event.UploadEventImageDto;
-import greencity.dto.event.UploadEventImagesDto;
-import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 
 import java.util.List;
 
@@ -43,7 +37,6 @@ public interface EventService {
      */
     List<EventResponseDto> getAllEvents();
 
-
     /**
      * Updates an existing event with the specified identifier using the provided data.
      *
@@ -52,9 +45,10 @@ public interface EventService {
      * @param user    the user performing the update operation; must not be {@code null}
      * @return the {@link EditEventRequestDto} representing the updated event
      * @throws NotFoundException if the event with the specified ID does not exist
-     * @throws AccessDeniedException if the user is not Admin or Owner
+     * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
      */
-    EditEventRequestDto updateEventById(Long eventId, EditEventRequestDto dto, UserVO user);
+    EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, UserVO user);
+
     /**
      * Uploads a single image for a specific event.
      * <p>

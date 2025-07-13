@@ -15,6 +15,8 @@ public class EventImageDto {
     @NotNull
     private Long imageId;
 
+    private String url;
+
     @Max(1)
     private Boolean isMain;
 }

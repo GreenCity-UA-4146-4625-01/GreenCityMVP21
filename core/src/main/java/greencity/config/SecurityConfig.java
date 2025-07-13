@@ -279,6 +279,8 @@ public class SecurityConfig {
                     "/user/role",
                     "/user/update/role")
                 .hasAnyRole(ADMIN)
+                .requestMatchers(HttpMethod.PATCH, "events/**")
+                .authenticated()
                 .requestMatchers(HttpMethod.DELETE,
                     "/facts/{factId}",
                     "/comments")

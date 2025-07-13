@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1752432718277-1" author="mykytasirobaba">
+        <createSequence incrementBy="50" sequenceName="events_seq" startValue="1"/>
+    </changeSet>
+    <changeSet id="1752432718277-2" author="mykytasirobaba">
+        <createTable tableName="event_event_types">
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_type" type="SMALLINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1752432718277-3" author="mykytasirobaba">
+        <createTable tableName="event_online_links">
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="online_link" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1752432718277-4" author="mykytasirobaba">
+        <createTable tableName="events">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_events"/>
+            </column>
+            <column name="title" type="VARCHAR(70)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(63206)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="main_image_id" type="BIGINT"/>
+            <column name="creation_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_update_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_visibility" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1752432718277-5" author="mykytasirobaba">
+        <addForeignKeyConstraint baseColumnNames="creator_id" baseTableName="events"
+                                 constraintName="FK_EVENTS_ON_CREATOR" referencedColumnNames="id"
+                                 referencedTableName="users"/>
+    </changeSet>
+    <changeSet id="1752432718277-6" author="mykytasirobaba">
+        <addForeignKeyConstraint baseColumnNames="event_id" baseTableName="event_event_types"
+                                 constraintName="fk_event_event_types_on_event" referencedColumnNames="id"
+                                 referencedTableName="events"/>
+    </changeSet>
+    <changeSet id="1752432718277-7" author="mykytasirobaba">
+        <addForeignKeyConstraint baseColumnNames="event_id" baseTableName="event_online_links"
+                                 constraintName="fk_event_online_links_on_event" referencedColumnNames="id"
+                                 referencedTableName="events"/>
+    </changeSet>
+
+</databaseChangeLog>

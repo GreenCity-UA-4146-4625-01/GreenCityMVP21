@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1752432770848-1" author="mykytasirobaba">
+        <createTable tableName="event_date_times">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_event_date_times"/>
+            </column>
+            <column name="event_id" type="BIGINT"/>
+            <column name="date" type="DATE"/>
+            <column name="start_time" type="TIME"/>
+            <column name="end_time" type="TIME"/>
+            <column name="all_day" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1752432770848-2" author="mykytasirobaba">
+        <addForeignKeyConstraint baseColumnNames="event_id" baseTableName="event_date_times"
+                                 constraintName="FK_EVENT_DATE_TIMES_ON_EVENT" referencedColumnNames="id"
+                                 referencedTableName="events"/>
+    </changeSet>
+
+</databaseChangeLog>

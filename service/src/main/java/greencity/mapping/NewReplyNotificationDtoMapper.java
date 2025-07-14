@@ -12,7 +12,7 @@ public class NewReplyNotificationDtoMapper extends AbstractConverter<NewReplyNot
         if (dto == null) return null;
 
         return Notification.builder()
-                .isRead(dto.isRead())
+                .isRead(false)
                 .type(NotificationType.NEW_REPLY)
                 .objectId(dto.objectId())
                 .receiver(User.builder()

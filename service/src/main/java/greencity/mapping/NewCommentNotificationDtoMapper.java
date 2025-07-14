@@ -12,7 +12,7 @@ public class NewCommentNotificationDtoMapper extends AbstractConverter<NewCommen
         if (dto == null) return null;
 
         return Notification.builder()
-                .isRead(dto.isRead())
+                .isRead(false)
                 .type(NotificationType.NEW_COMMENT)
                 .objectId(dto.objectId())
                 .receiver(User.builder()

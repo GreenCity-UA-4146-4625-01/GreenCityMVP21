@@ -85,8 +85,8 @@ class HabitFactSpecificationTest {
         }
         verify(builder).equal(id, test_Id);
         verify(habitFactRoot).get("id");
-        assertNotNull(allPredicates);
-        assertEquals(andPredicate, allPredicates);
+        verify(builder).conjunction();
+        verify(builder).and(conjunctionPredicate, equalPredicate);
     }
 
     @Test
@@ -143,7 +143,49 @@ class HabitFactSpecificationTest {
         assertNotNull(result);
         assertEquals(andPredicate, result);
     }
+    
+    @Test
+    void toPredicate_IdNull() {
+        List<SearchCriteria> searchCriteriaList = List.of(
+                SearchCriteria.builder()
+                        .key("id")
+                        .type("id")
+                        .value(null)
+                        .build());
 
+        specification = new HabitFactSpecification(searchCriteriaList);
+
+        Predicate conjunction = mock(Predicate.class);
+
+        when(builder.conjunction()).thenReturn(conjunction);
+
+        specification.toPredicate(habitFactRoot, mockCriteriaQuery, builder);
+
+        verify(builder).conjunction();
+        verifyNoMoreInteractions(builder, mockCriteriaQuery);
+    }
+
+    @Test
+    void toPredicate_HabitIdNull() {
+        List<SearchCriteria> searchCriteriaList = List.of(
+                SearchCriteria.builder()
+                        .key("habitId")
+                        .type("habitId")
+                        .value(null)
+                        .build());
+
+        specification = new HabitFactSpecification(searchCriteriaList);
+
+        Predicate conjunction = mock(Predicate.class);
+
+        when(builder.conjunction()).thenReturn(conjunction);
+
+        specification.toPredicate(habitFactRoot, mockCriteriaQuery, builder);
+
+        verify(builder).conjunction();
+        verifyNoMoreInteractions(builder, mockCriteriaQuery);
+    }
+    
     @Test
     void toPredicate_ContentEmpty(){
         List<SearchCriteria> searchCriteriaList = List.of(

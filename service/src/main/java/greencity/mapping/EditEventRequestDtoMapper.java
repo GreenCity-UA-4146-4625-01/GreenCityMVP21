@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 public class EditEventRequestDtoMapper extends AbstractConverter<EditEventRequestDto, Event> {
     @Override
-    protected Event convert(EditEventRequestDto dto) {
+    public Event convert(EditEventRequestDto dto) {
         if (dto == null) return null;
 
         Event event = Event.builder()

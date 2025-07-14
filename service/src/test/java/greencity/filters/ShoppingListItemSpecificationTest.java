@@ -36,10 +36,10 @@ public class ShoppingListItemSpecificationTest {
 
     //Path<Long> used in toPredicate_WithShoppingListItemTranslationJoin. And other which use content to check.
     @Mock
-    private Path<Long> id_For_Second_Test;
+    private Path<Long> idForSecondTest;
 
     @Mock
-    private Path<Long> id_Root_For_Second_Test;
+    private Path<Long> idRootForSecondTest;
 
     @Mock
     private Join<ShoppingListItem,ShoppingListItemTranslation> translationJoin;
@@ -52,9 +52,9 @@ public class ShoppingListItemSpecificationTest {
     ShoppingListItemSpecification specification;
 
     @Test
-    void toPredicateId(){
+    void shouldCreateEqualPredicateForIdCriteria() {
         List<greencity.filters.SearchCriteria> searchCriteriaList = List.of(
-        SearchCriteria.builder()
+            SearchCriteria.builder()
                 .key("id")
                 .type("id")
                 .value(4L)
@@ -72,24 +72,18 @@ public class ShoppingListItemSpecificationTest {
         when(builder.and(conjunctionPredicate, equalPredicate)).thenReturn(andPredicate);
         Predicate allPredicates = builder.conjunction();
         
-        for (int i = 0; i < searchCriteriaList.size(); i++) {
-            SearchCriteria criteria = searchCriteriaList.get(i);
-            if (criteria.getType().equals("id")) {
-                allPredicates = builder.and(allPredicates,
-                        specification.getNumericPredicate(shoppingListItemRoot, builder, criteria));
-            }
-        }
-        
+        Predicate result = specification.toPredicate(shoppingListItemRoot, mockCriteriaQuery, builder); 
+
+        assertNotNull(result);
+        assertEquals(andPredicate, result);
         verify(builder).equal(id, 4L);
         verify(shoppingListItemRoot).get("id");
-        assertNotNull(allPredicates);
-        assertEquals(andPredicate, allPredicates);
     }
 
-        @Test
-    void toPredicate_WithShoppingListItemTranslationJoin(){
+    @Test
+    void shouldCreateJoinPredicateForContentCriteria() {
         List<SearchCriteria> searchCriteriaList = List.of(
-        SearchCriteria.builder()
+            SearchCriteria.builder()
                 .key("content")
                 .type("content")
                 .value("Smth")
@@ -100,31 +94,30 @@ public class ShoppingListItemSpecificationTest {
         
         when(mockCriteriaQuery.from(ShoppingListItemTranslation.class)).thenReturn(shoppingListItemTranslationRoot);
         when(shoppingListItemTranslationRoot.get(ShoppingListItemTranslation_.content)).thenReturn(contentPath);
-        when(shoppingListItemTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem).get(ShoppingListItem_.id)).thenReturn(id_For_Second_Test);
-        when(shoppingListItemRoot.get(ShoppingListItem_.id)).thenReturn(id_Root_For_Second_Test);
-        
-        Predicate likePredicate=mock(Predicate.class);
+        when(shoppingListItemTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem).get(ShoppingListItem_.id)).thenReturn(idForSecondTest); 
+        when(shoppingListItemRoot.get(ShoppingListItem_.id)).thenReturn(idRootForSecondTest);
+
+        Predicate likePredicate = mock(Predicate.class);
         Predicate equalPredicate = mock(Predicate.class);
         Predicate andPredicate = mock(Predicate.class);
         Predicate conjunctionPredicate = mock(Predicate.class);
         
         when(builder.conjunction()).thenReturn(conjunctionPredicate);
-        when(builder.like(contentPath,"%Smth%")).thenReturn(likePredicate);
-        when(builder.equal(id_For_Second_Test,id_Root_For_Second_Test)).thenReturn((equalPredicate));
-        when(builder.and(likePredicate,equalPredicate)).thenReturn(andPredicate);
-        when(builder.and(conjunctionPredicate,andPredicate)).thenReturn(andPredicate);
+        when(builder.like(contentPath, "%Smth%")).thenReturn(likePredicate); 
+        when(builder.equal(idForSecondTest, idRootForSecondTest)).thenReturn(equalPredicate); 
+        when(builder.and(likePredicate, equalPredicate)).thenReturn(andPredicate); 
+        when(builder.and(conjunctionPredicate, andPredicate)).thenReturn(andPredicate); 
         
-        Predicate result=specification.toPredicate(shoppingListItemRoot,mockCriteriaQuery,builder);
+        Predicate result = specification.toPredicate(shoppingListItemRoot, mockCriteriaQuery, builder);
         
-        assertEquals(andPredicate, result);
         assertNotNull(result);
-        assertEquals(andPredicate,result);
+        assertEquals(andPredicate, result);
     }
 
         @Test
     void toPredicate_ContentNull(){
         List<SearchCriteria> searchCriteriaList = List.of(
-        SearchCriteria.builder()
+            SearchCriteria.builder()
                 .key("content")
                 .type("content")
                 .value(" ")
@@ -137,20 +130,20 @@ public class ShoppingListItemSpecificationTest {
 
         specification.toPredicate(shoppingListItemRoot, mockCriteriaQuery, builder);
 
-        verify(builder,times(2)).conjunction();
+        verify(builder, times(2)).conjunction();
         verify(mockCriteriaQuery).from(ShoppingListItemTranslation.class);
         verifyNoMoreInteractions(mockCriteriaQuery);
     }
 
     @Test
-    void toPredicate_multipleCriteria(){
+    void shouldCombineMultiplePredicatesForMultipleCriteria() {
         List<SearchCriteria> searchCriteriaList = List.of(
-        SearchCriteria.builder()
+            SearchCriteria.builder()
                 .key("id")
                 .type("id")
                 .value(2L)
                 .build(),
-        SearchCriteria.builder()
+            SearchCriteria.builder()
                 .key("content")
                 .type("content")
                 .value("Smth")
@@ -165,18 +158,17 @@ public class ShoppingListItemSpecificationTest {
         when(shoppingListItemRoot.get("id")).thenReturn(id);
         when(builder.equal(id, 2L)).thenReturn(idEqualPredicate);
 
-        Root<ShoppingListItemTranslation> habitFactTranslationRoot = mock(Root.class);
-        when(mockCriteriaQuery.from(ShoppingListItemTranslation.class)).thenReturn(habitFactTranslationRoot);
-        when(habitFactTranslationRoot.get(ShoppingListItemTranslation_.content)).thenReturn(contentPath);
-        when(habitFactTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem).get(ShoppingListItem_.id)).thenReturn(id_For_Second_Test);
-        when(shoppingListItemRoot.get(ShoppingListItem_.id)).thenReturn(id_Root_For_Second_Test);
+        Root<ShoppingListItemTranslation> shoppingListItemTranslationRoot = mock(Root.class); 
+        when(mockCriteriaQuery.from(ShoppingListItemTranslation.class)).thenReturn(shoppingListItemTranslationRoot); 
+        when(shoppingListItemTranslationRoot.get(ShoppingListItemTranslation_.content)).thenReturn(contentPath); 
+        when(shoppingListItemTranslationRoot.get(ShoppingListItemTranslation_.shoppingListItem).get(ShoppingListItem_.id)).thenReturn(idForSecondTest);
 
         Predicate likePredicate = mock(Predicate.class);
         Predicate contentEqualPredicate = mock(Predicate.class);
         Predicate contentAndPredicate = mock(Predicate.class);
 
         when(builder.like(contentPath, "%Smth%")).thenReturn(likePredicate);
-        when(builder.equal(id_For_Second_Test, id_Root_For_Second_Test)).thenReturn(contentEqualPredicate);
+        when(builder.equal(idForSecondTest, idRootForSecondTest)).thenReturn(contentEqualPredicate);
         when(builder.and(likePredicate, contentEqualPredicate)).thenReturn(contentAndPredicate);
 
         Predicate combinedPredicate = mock(Predicate.class);
@@ -192,7 +184,7 @@ public class ShoppingListItemSpecificationTest {
         verify(builder).conjunction();
         verify(builder).equal(id, 2L);
         verify(builder).like(contentPath, "%Smth%");
-        verify(builder).equal(id_For_Second_Test, id_Root_For_Second_Test);
+        verify(builder).equal(idForSecondTest, idRootForSecondTest);
         verify(builder).and(likePredicate, contentEqualPredicate);
         verify(builder).and(conjunctionPredicate, idEqualPredicate);
         verify(builder).and(combinedPredicate, contentAndPredicate);

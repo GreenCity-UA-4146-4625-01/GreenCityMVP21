@@ -72,6 +72,7 @@ public class EventResponseDtoMapper extends AbstractConverter<Event, EventRespon
         for (EventImage i : images) {
             result.add(new EventImageDto(
                     i.getId(),
+                    i.getUrl(),
                     i.getIsMain()
             ));
         }

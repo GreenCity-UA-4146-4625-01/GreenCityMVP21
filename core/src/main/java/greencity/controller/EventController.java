@@ -45,7 +45,7 @@ public class EventController {
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)})
     @PostMapping
-    public ResponseEntity<EventResponseDto> createEvent(@Valid @RequestParam CreateEventRequestDto createEventRequestDto) {
+    public ResponseEntity<EventResponseDto> createEvent(@Valid @RequestBody CreateEventRequestDto createEventRequestDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(createEventRequestDto));
     }
 

@@ -9,6 +9,7 @@ import greencity.dto.econewscomment.AddEcoNewsCommentDtoRequest;
 import greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse;
 import greencity.dto.econewscomment.EcoNewsCommentAuthorDto;
 import greencity.dto.econewscomment.EcoNewsCommentDto;
+import greencity.dto.event.*;
 import greencity.dto.habit.*;
 import greencity.dto.habitfact.*;
 import greencity.dto.habitstatistic.AddHabitStatisticDto;
@@ -394,6 +395,157 @@ public class ModelUtils {
             .image("https://csb10032000a548f571.blob.core.windows.net/allfiles/photo_2021-06-01_15-39-56.jpg")
             .tagIds(Set.of(20L))
             .build();
+    }
+
+    public static EventResponseDto getEventResponseDto() {
+        return EventResponseDto.builder()
+                .eventId(1L)
+                .title("Test")
+                .description("Join us for a week-long festival celebrating sustainability, urban gardening, and eco-friendly living. Expect workshops, talks, and fun activities suitable for all ages.")
+                .visibility(EventVisibility.OPEN)
+                .eventTypes(Set.of(EventType.PLACE, EventType.ONLINE))
+                .eventDateTimes(List.of(
+                        EventDateTimeDto.builder()
+                                .date(LocalDate.of(2025, 8, 1))
+                                .startTime(LocalTime.of(10, 0))
+                                .endTime(LocalTime.of(18, 0))
+                                .allDay(false)
+                                .build(),
+                        EventDateTimeDto.builder()
+                                .date(LocalDate.of(2025, 8, 2))
+                                .startTime(LocalTime.of(10, 0))
+                                .endTime(LocalTime.of(18, 0))
+                                .allDay(false)
+                                .build()
+                ))
+                .locations(List.of(
+                        EventLocationDto.builder()
+                                .address("123 Eco Street, Green City Park")
+                                .latitude(50.4501)
+                                .longitude(30.5234)
+                                .build()
+                ))
+                .onlineLinks(List.of("https://greencityfestival.online"))
+                .images(List.of(
+                        EventImageDto.builder()
+                                .imageId(1L)
+                                .isMain(true)
+                                .build(),
+                        EventImageDto.builder()
+                                .imageId(2L)
+                                .isMain(false)
+                                .build()
+                ))
+                .mainImageId(1L)
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static CreateEventRequestDto getCreateEventRequestDto() {
+        return CreateEventRequestDto.builder()
+                .title("Test")
+                .description("Join us for a week-long festival celebrating sustainability, urban gardening, and eco-friendly living. Expect workshops, talks, and fun activities suitable for all ages.")
+                .visibility(EventVisibility.OPEN)
+                .eventTypes(Set.of(EventType.PLACE, EventType.ONLINE))
+                .locations(List.of(
+                        EventLocationDto.builder()
+                                .address("123 Eco Street, Green City Park")
+                                .latitude(50.4501)
+                                .longitude(30.5234)
+                                .build()
+                ))
+                .onlineLinks(List.of("https://greencityfestival.online"))
+                .eventDateTimes(List.of(
+                        EventDateTimeDto.builder()
+                                .date(LocalDate.of(2025, 8, 1))
+                                .startTime(LocalTime.of(10, 0))
+                                .endTime(LocalTime.of(18, 0))
+                                .allDay(false)
+                                .build(),
+                        EventDateTimeDto.builder()
+                                .date(LocalDate.of(2025, 8, 2))
+                                .startTime(LocalTime.of(9, 30))
+                                .endTime(LocalTime.of(17, 45))
+                                .allDay(false)
+                                .build()
+                ))
+                .images(List.of(
+                        EventImageDto.builder()
+                                .imageId(1L)
+                                .isMain(true)
+                                .build(),
+                        EventImageDto.builder()
+                                .imageId(2L)
+                                .isMain(false)
+                                .build()
+                ))
+                .mainImageId(1L)
+                .build();
+
+    }
+
+    public static Event createEvent() {
+        return Event.builder()
+                .id(1L)
+                .title("Event 1")
+                .description("A global conference on sustainability, innovation, and future technologies for greener cities.")
+                .mainImageId(1001L)
+                .creationDate(LocalDateTime.of(2025, 7, 1, 12, 0))
+                .lastUpdateDate(LocalDateTime.of(2025, 7, 5, 14, 30))
+                .eventVisibility(EventVisibility.OPEN)
+                .eventTypes(Set.of(EventType.PLACE, EventType.ONLINE))
+                .eventLocations(List.of(
+                        EventLocation.builder()
+                                .id(1L)
+                                .address("123 Sustainability Blvd, EcoCity")
+                                .latitude(50.4501)
+                                .longitude(30.5234)
+                                .event(null)
+                                .build()
+                ))
+                .onlineLinks(List.of(
+                        "https://greenconference.org/live",
+                        "https://zoom.us/eco-event-2025"
+                ))
+                .eventImages(List.of(
+                        EventImage.builder()
+                                .id(1L)
+                                .url("https://cdn.greencity.com/events/image1.jpg")
+                                .isMain(true)
+                                .event(null)
+                                .build(),
+                        EventImage.builder()
+                                .id(2L)
+                                .url("https://cdn.greencity.com/events/image2.jpg")
+                                .isMain(false)
+                                .event(null)
+                                .build()
+                ))
+                .eventDateTimes(List.of(
+                        EventDateTime.builder()
+                                .id(1L)
+                                .date(LocalDate.of(2025, 8, 15))
+                                .startTime(LocalTime.of(10, 0))
+                                .endTime(LocalTime.of(18, 0))
+                                .allDay(false)
+                                .event(null)
+                                .build(),
+                        EventDateTime.builder()
+                                .id(2L)
+                                .date(LocalDate.of(2025, 8, 16))
+                                .startTime(LocalTime.of(11, 0))
+                                .endTime(LocalTime.of(17, 0))
+                                .allDay(false)
+                                .event(null)
+                                .build()
+                ))
+                .creator(User.builder()
+                        .id(42L)
+                        .name("Eco Organizer")
+                        .email("organizer@greencity.com")
+                        .build())
+                .build();
+
     }
 
 }

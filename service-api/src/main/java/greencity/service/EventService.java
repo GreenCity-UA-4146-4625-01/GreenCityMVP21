@@ -1,5 +1,13 @@
 package greencity.service;
 
+import greencity.dto.PageableDto;
+import greencity.dto.event.CreateEventRequestDto;
+import greencity.dto.event.EventImageDto;
+import greencity.dto.event.EventResponseDto;
+import greencity.dto.event.UploadEventImageDto;
+import greencity.dto.event.UploadEventImagesDto;
+import greencity.exception.exceptions.NotFoundException;
+import org.springframework.data.domain.Pageable;
 import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.exception.exceptions.BadRequestException;
@@ -31,11 +39,15 @@ public interface EventService {
     EventResponseDto getEventById(Long id);
 
     /**
-     * Retrieves all events available in the system.
+     * Retrieves a paginated list of all events available in the system.
+     * Supports pagination, sorting, and optional filtering if implemented.
      *
-     * @return a list of {@link EventResponseDto} objects; the list may be empty if no events exist
+     * @param pageable the pagination and sorting information (e.g. page number, size, sort order)
+     * @return a {@link PageableDto} containing a list of {@link EventResponseDto} objects;
+     *         the list may be empty if no events match the criteria
      */
-    List<EventResponseDto> getAllEvents();
+    PageableDto<EventResponseDto> getAllEvents(Pageable pageable);
+
 
     /**
      * Updates an existing event with the specified identifier using the provided data.

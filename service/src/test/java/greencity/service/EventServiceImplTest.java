@@ -1,6 +1,7 @@
 package greencity.service;
 
 import greencity.ModelUtils;
+import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EventImageDto;
 import greencity.dto.event.EventResponseDto;
@@ -20,6 +21,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +33,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -90,19 +97,24 @@ class EventServiceImplTest {
     }
 
     @Test
-    void getAllEvents() {
-        when(eventRepo.findAll()).thenReturn(List.of(event, event));
-        when(modelMapper.map(eq(event), eq(EventResponseDto.class)))
-                .thenReturn(EventResponseDto.builder().eventId(1L).title("Event 1").build());
-        when(modelMapper.map(eq(event), eq(EventResponseDto.class)))
-                .thenReturn(EventResponseDto.builder().eventId(1L).title("Event 1").build());
+    void getAllEvents_returnsCorrectPageableDto() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Event> eventPage = new PageImpl<>(List.of(event, event), pageable, 2);
 
-        List<EventResponseDto> result = eventService.getAllEvents();
+        when(eventRepo.findAll(pageable)).thenReturn(eventPage);
+        when(modelMapper.map(event, EventResponseDto.class)).thenReturn(eventResponseDto);
 
-        assertEquals(2, result.size());
-        assertEquals("Event 1", result.get(0).getTitle());
-        assertEquals("Event 1", result.get(1).getTitle());
-        verify(eventRepo).findAll();
+        // when
+        PageableDto<EventResponseDto> result = eventService.getAllEvents(pageable);
+
+        // then
+        assertNotNull(result);
+        assertEquals(2, result.getPage().size());
+        assertEquals("Test", result.getPage().get(0).getTitle());
+        assertEquals("Test", result.getPage().get(1).getTitle());
+        assertEquals(0, result.getCurrentPage());
+        assertEquals(2, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
     }
 
     @Test

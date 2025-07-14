@@ -6,18 +6,24 @@ import greencity.dto.event.EventImageDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.dto.event.UploadEventImageDto;
 import greencity.dto.event.UploadEventImagesDto;
+import greencity.dto.event.*;
+import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventImage;
+import greencity.enums.Role;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventImageRepo;
 import greencity.repository.EventRepo;
+import greencity.validator.EventDateTimeDtoValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -30,6 +36,7 @@ public class EventServiceImpl implements EventService {
     private final ModelMapper modelMapper;
     private final EventRepo eventRepo;
     private final FileService fileService;
+    private final EventDateTimeDtoValidator eventDateTimeDtoValidator;
     private final EventImageRepo eventImageRepo;
 
     /**
@@ -86,6 +93,31 @@ public class EventServiceImpl implements EventService {
         );
     }
 
+    @Override
+    @Transactional
+    public EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, UserVO user) {
+
+        Event event = eventRepo.findEventById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+
+        if (!user.getRole().equals(Role.ROLE_ADMIN) && !event.getCreator().getId().equals(user.getId())) {
+            throw new UserHasNoPermissionToAccessException("You are bot allowed to edit this event");
+        }
+
+        if (dto.getEventDateTimes() != null) {
+
+            for (EventDateTimeDto dateTimeDto : dto.getEventDateTimes()) {
+                eventDateTimeDtoValidator.validateAndFill(dateTimeDto);
+            }
+        }
+
+        Event updatedEvent = modelMapper.map(dto, Event.class);
+
+        Event saved = eventRepo.save(updatedEvent);
+
+        return modelMapper.map(saved, EventResponseDto.class);
+    }
+  
     /**
      * Uploads a single image for a specific event.
      * <p>

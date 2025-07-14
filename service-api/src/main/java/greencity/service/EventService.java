@@ -8,7 +8,11 @@ import greencity.dto.event.UploadEventImageDto;
 import greencity.dto.event.UploadEventImagesDto;
 import greencity.exception.exceptions.NotFoundException;
 import org.springframework.data.domain.Pageable;
+import greencity.dto.event.*;
+import greencity.dto.user.UserVO;
 import greencity.exception.exceptions.BadRequestException;
+import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 
 import java.util.List;
 
@@ -44,6 +48,18 @@ public interface EventService {
      */
     PageableDto<EventResponseDto> getAllEvents(Pageable pageable);
 
+
+    /**
+     * Updates an existing event with the specified identifier using the provided data.
+     *
+     * @param eventId the unique identifier of the event to update; must not be {@code null}
+     * @param dto     the data transfer object containing updated event information; must not be {@code null}
+     * @param user    the user performing the update operation; must not be {@code null}
+     * @return the {@link EditEventRequestDto} representing the updated event
+     * @throws NotFoundException if the event with the specified ID does not exist
+     * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
+     */
+    EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, UserVO user);
 
     /**
      * Uploads a single image for a specific event.

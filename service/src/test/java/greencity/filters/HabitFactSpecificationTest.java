@@ -52,17 +52,19 @@ class HabitFactSpecificationTest {
     @Mock
     private Predicate likePredicate;
 
-    @Mock
-    private Expression<String> as;
     HabitFactSpecification specification;
 
+    private static final Long test_Id=2L;
+    private static final Long test_Habit_Id=5L;
+    private static final String test_Content="Smth";
+    
     @Test
     void toPredicate_Id(){
         List<SearchCriteria> searchCriteriaList = List.of(
                 SearchCriteria.builder()
                         .key("id")
                         .type("id")
-                        .value(2L)
+                        .value(test_Id)
                         .build());
 
         specification = new HabitFactSpecification(searchCriteriaList);
@@ -70,19 +72,19 @@ class HabitFactSpecificationTest {
         Predicate equalPredicate = mock(Predicate.class);
         Predicate andPredicate = mock(Predicate.class);
         when(builder.conjunction()).thenReturn(conjunctionPredicate);
-        when(HabitFactRoot.get("id")).thenReturn(id);
-        when(builder.equal(id, 2L)).thenReturn(equalPredicate);
+        when(habitFactRoot.get("id")).thenReturn(id);
+        when(builder.equal(id, test_Id)).thenReturn(equalPredicate);
         when(builder.and(conjunctionPredicate, equalPredicate)).thenReturn(andPredicate);
         Predicate allPredicates = builder.conjunction();
         for (int i = 0; i < searchCriteriaList.size(); i++) {
             SearchCriteria criteria = searchCriteriaList.get(i);
             if (criteria.getType().equals("id")) {
                 allPredicates = builder.and(allPredicates,
-                        specification.getNumericPredicate(HabitFactRoot, builder, criteria));
+                        specification.getNumericPredicate(habitFactRoot, builder, criteria));
             }
         }
-        verify(builder).equal(id, 2L);
-        verify(HabitFactRoot).get("id");
+        verify(builder).equal(id, test_Id);
+        verify(habitFactRoot).get("id");
         assertNotNull(allPredicates);
         assertEquals(andPredicate, allPredicates);
     }
@@ -94,17 +96,17 @@ class HabitFactSpecificationTest {
         SearchCriteria.builder()
                 .key("habitId")
                 .type("habitId")
-                .value(5L)
+                .value(test_Habit_Id)
                 .build());
         specification = new HabitFactSpecification(searchCriteriaList);
-        when(HabitFactRoot.join(HabitFact_.habit)).thenReturn(habitJoin);
+        when(habitFactRoot.join(HabitFact_.habit)).thenReturn(habitJoin);
         when(habitJoin.get(Habit_.id)).thenReturn(habitIdPath);
         Predicate mockPredicate = mock(Predicate.class);
-        when(builder.equal(habitIdPath, 5L)).thenReturn(mockPredicate);
+        when(builder.equal(habitIdPath, test_Habit_Id)).thenReturn(mockPredicate);
         Predicate conjunctionPredicate = mock(Predicate.class);
         when(builder.conjunction()).thenReturn(conjunctionPredicate);
         when(builder.and(conjunctionPredicate, mockPredicate)).thenReturn(mockPredicate);
-        Predicate result = specification.toPredicate(HabitFactRoot, mockCriteriaQuery, builder);
+        Predicate result = specification.toPredicate(habitFactRoot, mockCriteriaQuery, builder);
         assertNotNull(result);
         assertEquals(mockPredicate,result);
 
@@ -116,7 +118,7 @@ class HabitFactSpecificationTest {
         SearchCriteria.builder()
                 .key("content")
                 .type("content")
-                .value("Smth")
+                .value(test_Content)
                 .build());
         specification = new HabitFactSpecification(searchCriteriaList);
 
@@ -125,9 +127,8 @@ class HabitFactSpecificationTest {
 
         when(habitFactTranslationRoot.get(HabitFactTranslation_.content)).thenReturn(contentPath);
         when(habitFactTranslationRoot.get(HabitFactTranslation_.habitFact).get(HabitFact_.id)).thenReturn(habitIdPath);
-        when(HabitFactRoot.get(HabitFact_.id)).thenReturn(habitFactRootIdPath);
-
-        Predicate likePredicate = mock(Predicate.class);
+        when(habitFactRoot.get(HabitFact_.id)).thenReturn(habitFactRootIdPath);
+        
         Predicate equalPredicate = mock(Predicate.class);
         Predicate andPredicate = mock(Predicate.class);
         Predicate conjunctionPredicate = mock(Predicate.class);
@@ -138,13 +139,13 @@ class HabitFactSpecificationTest {
         when(builder.and(likePredicate, equalPredicate)).thenReturn(andPredicate);
         when(builder.and(conjunctionPredicate, andPredicate)).thenReturn(andPredicate);
 
-        Predicate result = specification.toPredicate(HabitFactRoot, mockCriteriaQuery, builder);
+        Predicate result = specification.toPredicate(habitFactRoot, mockCriteriaQuery, builder);
         assertNotNull(result);
         assertEquals(andPredicate, result);
     }
 
     @Test
-    void toPredicate_ContentNull(){
+    void toPredicate_ContentEmpty(){
         List<SearchCriteria> searchCriteriaList = List.of(
         SearchCriteria.builder()
                 .key("content")
@@ -157,7 +158,7 @@ class HabitFactSpecificationTest {
         Root<HabitFactTranslation> habitFactTranslationRoot = mock(Root.class);
         when(mockCriteriaQuery.from(HabitFactTranslation.class)).thenReturn(habitFactTranslationRoot);
 
-        specification.toPredicate(HabitFactRoot, mockCriteriaQuery, builder);
+        specification.toPredicate(habitFactRoot, mockCriteriaQuery, builder);
 
         verify(builder,times(2)).conjunction();
         verify(mockCriteriaQuery).from(HabitFactTranslation.class);
@@ -171,17 +172,17 @@ class HabitFactSpecificationTest {
         SearchCriteria.builder()
                 .key("id")
                 .type("id")
-                .value(2L)
+                .value(test_Id)
                 .build(),
         SearchCriteria.builder()
                 .key("habitId")
                 .type("habitId")
-                .value(5L)
+                .value(test_Habit_Id)
                 .build(),
         SearchCriteria.builder()
                 .key("content")
                 .type("content")
-                .value("Smth")
+                .value(test_Content)
                 .build());
         specification=new HabitFactSpecification(searchCriteriaList);
 
@@ -189,21 +190,20 @@ class HabitFactSpecificationTest {
         when(builder.conjunction()).thenReturn(conjunctionPredicate);
 
         Predicate idEqualPredicate = mock(Predicate.class);
-        when(HabitFactRoot.get("id")).thenReturn(id);
-        when(builder.equal(id, 2L)).thenReturn(idEqualPredicate);
+        when(habitFactRoot.get("id")).thenReturn(id);
+        when(builder.equal(id, test_Id)).thenReturn(idEqualPredicate);
 
         Predicate habitIdEqualPredicate = mock(Predicate.class);
-        when(HabitFactRoot.join(HabitFact_.habit)).thenReturn(habitJoin);
+        when(habitFactRoot.join(HabitFact_.habit)).thenReturn(habitJoin);
         when(habitJoin.get(Habit_.id)).thenReturn(habitIdPath);
-        when(builder.equal(habitIdPath, 5L)).thenReturn(habitIdEqualPredicate);
+        when(builder.equal(habitIdPath, test_Habit_Id)).thenReturn(habitIdEqualPredicate);
 
         Root<HabitFactTranslation> habitFactTranslationRoot = mock(Root.class);
         when(mockCriteriaQuery.from(HabitFactTranslation.class)).thenReturn(habitFactTranslationRoot);
         when(habitFactTranslationRoot.get(HabitFactTranslation_.content)).thenReturn(contentPath);
         when(habitFactTranslationRoot.get(HabitFactTranslation_.habitFact).get(HabitFact_.id)).thenReturn(habitIdPath);
-        when(HabitFactRoot.get(HabitFact_.id)).thenReturn(habitFactRootIdPath);
+        when(habitFactRoot.get(HabitFact_.id)).thenReturn(habitFactRootIdPath);
 
-        Predicate likePredicate = mock(Predicate.class);
         Predicate contentEqualPredicate = mock(Predicate.class);
         Predicate contentAndPredicate = mock(Predicate.class);
 
@@ -219,13 +219,13 @@ class HabitFactSpecificationTest {
         when(builder.and(firstCombination, habitIdEqualPredicate)).thenReturn(secondCombination);
         when(builder.and(secondCombination, contentAndPredicate)).thenReturn(finalPredicate);
 
-        Predicate result = specification.toPredicate(HabitFactRoot, mockCriteriaQuery, builder);
+        Predicate result = specification.toPredicate(habitFactRoot, mockCriteriaQuery, builder);
         assertNotNull(result);
         assertEquals(finalPredicate, result);
 
         verify(builder).conjunction();
-        verify(builder).equal(id, 2L);
-        verify(builder).equal(habitIdPath, 5L);
+        verify(builder).equal(id, test_Id);
+        verify(builder).equal(habitIdPath, test_Habit_Id);
         verify(builder).like(contentPath, "%Smth%");
         verify(builder).equal(habitIdPath, habitFactRootIdPath);
         verify(builder).and(conjunctionPredicate, idEqualPredicate);
@@ -233,8 +233,6 @@ class HabitFactSpecificationTest {
         verify(builder).and(secondCombination, contentAndPredicate);
 
         }
-
-
 }
 
 

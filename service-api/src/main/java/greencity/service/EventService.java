@@ -2,19 +2,12 @@ package greencity.service;
 
 import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
-import greencity.dto.event.EventImageDto;
+import greencity.dto.event.EditEventRequestDto;
 import greencity.dto.event.EventResponseDto;
-import greencity.dto.event.UploadEventImageDto;
-import greencity.dto.event.UploadEventImagesDto;
-import greencity.exception.exceptions.NotFoundException;
-import org.springframework.data.domain.Pageable;
-import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
-import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Provides the interface to manage {@code Event} entity.
@@ -27,7 +20,7 @@ public interface EventService {
      * @param createEventRequestDto the data transfer object containing information to create the event; must not be {@code null}
      * @return the {@link EventResponseDto} representing the newly created event
      */
-    EventResponseDto createEvent(CreateEventRequestDto createEventRequestDto);
+    EventResponseDto createEvent(CreateEventRequestDto createEventRequestDto, UserVO user);
 
     /**
      * Retrieves an event by its unique identifier.
@@ -44,7 +37,7 @@ public interface EventService {
      *
      * @param pageable the pagination and sorting information (e.g. page number, size, sort order)
      * @return a {@link PageableDto} containing a list of {@link EventResponseDto} objects;
-     *         the list may be empty if no events match the criteria
+     * the list may be empty if no events match the criteria
      */
     PageableDto<EventResponseDto> getAllEvents(Pageable pageable);
 
@@ -56,36 +49,9 @@ public interface EventService {
      * @param dto     the data transfer object containing updated event information; must not be {@code null}
      * @param user    the user performing the update operation; must not be {@code null}
      * @return the {@link EditEventRequestDto} representing the updated event
-     * @throws NotFoundException if the event with the specified ID does not exist
+     * @throws NotFoundException                    if the event with the specified ID does not exist
      * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
      */
     EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, UserVO user);
 
-    /**
-     * Uploads a single image for a specific event.
-     * <p>
-     * The image can optionally be marked as main, but only one main image is allowed per event.
-     * The total number of images per event cannot exceed 5.
-     *
-     * @param dto     the {@link UploadEventImageDto} containing the image and its metadata
-     * @param eventId the ID of the event to associate the image with
-     * @return the {@link EventImageDto} representing the uploaded image
-     * @throws NotFoundException   if the event with the given ID is not found
-     * @throws BadRequestException if the image limit is exceeded or a main image already exists
-     */
-    EventImageDto uploadEventImage(UploadEventImageDto dto, Long eventId);
-
-    /**
-     * Uploads a list of images for a specific event.
-     * <p>
-     * Each image can be marked as main, but only one main image is allowed per event.
-     * The total number of images per event cannot exceed 5.
-     *
-     * @param imagesDto the {@link UploadEventImagesDto} containing a list of image upload data
-     * @param eventId   the ID of the event to associate images with
-     * @return a list of {@link EventImageDto} representing the uploaded images
-     * @throws NotFoundException   if the event with the given ID is not found
-     * @throws BadRequestException if the image limit is exceeded or more than one main image is submitted
-     */
-    List<EventImageDto> uploadEventImages(UploadEventImagesDto imagesDto, Long eventId);
 }

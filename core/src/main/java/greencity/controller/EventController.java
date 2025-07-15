@@ -4,8 +4,6 @@ package greencity.controller;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
-import greencity.dto.event.EventResponseDto;
-import greencity.constant.HttpStatuses;
 import greencity.dto.event.EditEventRequestDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.dto.user.UserVO;
@@ -20,16 +18,19 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Validated
 @RestController
 @RequestMapping("/events")
-@AllArgsConstructor
 @RequiredArgsConstructor
 public class EventController {
     private final EventService eventService;
@@ -41,9 +42,7 @@ public class EventController {
      *
      * @param createEventRequestDto the DTO containing the data required to create a new event; must be valid
      * @return {@link ResponseEntity} with the created {@link EventResponseDto} and HTTP status 201 (Created)
-     *
-     * @apiNote
-     * - Response code 201: Event successfully created.
+     * @apiNote - Response code 201: Event successfully created.
      * - Response code 401: Unauthorized access (user not authenticated).
      * - Response code 403: Forbidden (user does not have permission to create an event).
      */
@@ -53,8 +52,10 @@ public class EventController {
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)})
     @PostMapping
-    public ResponseEntity<EventResponseDto> createEvent(@Valid @RequestBody CreateEventRequestDto createEventRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(createEventRequestDto));
+    public ResponseEntity<EventResponseDto> createEvent(
+            @AuthenticationPrincipal UserVO user,
+            @Valid @RequestBody CreateEventRequestDto createEventRequestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(createEventRequestDto, user));
     }
 
     /**
@@ -63,10 +64,8 @@ public class EventController {
      *
      * @param id the unique identifier of the event to retrieve
      * @return {@link ResponseEntity} containing the {@link EventResponseDto} with HTTP status 200 (OK)
-     *         if the event is found; otherwise, HTTP status 404 (Not Found) if no event exists with the given ID.
-     *
-     * @apiNote
-     * - Response code 200: Event successfully retrieved.
+     * if the event is found; otherwise, HTTP status 404 (Not Found) if no event exists with the given ID.
+     * @apiNote - Response code 200: Event successfully retrieved.
      * - Response code 404: Event with the specified ID not found.
      */
     @Operation(summary = "Search for an event by ID.")
@@ -85,10 +84,8 @@ public class EventController {
      *
      * @param pageable pagination and sorting information, by default sorted by "creationDate" descending
      * @return {@link ResponseEntity} containing {@link PageableDto} of {@link EventResponseDto} with HTTP status 200 (OK)
-     *         if events are found; if no events are found, the response will still be 200 with an empty list.
-     *
-     * @apiNote
-     * - Response code 200: Events successfully retrieved.
+     * if events are found; if no events are found, the response will still be 200 with an empty list.
+     * @apiNote - Response code 200: Events successfully retrieved.
      * - Response code 404: No events found.
      */
     @Operation(summary = "Search all events")
@@ -103,17 +100,17 @@ public class EventController {
 
     @Operation(summary = "Edit event by ID (accessible for ADMIN and OWNER only)")
     @ApiResponses(value = {
-            @ApiResponse (responseCode = "200", description = HttpStatuses.CREATED),
-            @ApiResponse (responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse (responseCode = "403", description = HttpStatuses.FORBIDDEN),
-            @ApiResponse (responseCode = "404", description = HttpStatuses.NOT_FOUND),
+            @ApiResponse(responseCode = "200", description = HttpStatuses.CREATED),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
     })
     @PatchMapping("/{id}")
     public ResponseEntity<EventResponseDto> editEvent(
             @PathVariable Long id,
             @RequestBody @Valid EditEventRequestDto editEventRequestDto,
             @AuthenticationPrincipal UserVO user
-            ) {
+    ) {
         return ResponseEntity.ok(eventService.updateEventById(id, editEventRequestDto, user));
     }
 }

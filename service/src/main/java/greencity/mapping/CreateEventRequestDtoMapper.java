@@ -1,11 +1,10 @@
 package greencity.mapping;
+
 import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EventDateTimeDto;
-import greencity.dto.event.EventImageDto;
 import greencity.dto.event.EventLocationDto;
 import greencity.entity.Event;
 import greencity.entity.EventDateTime;
-import greencity.entity.EventImage;
 import greencity.entity.EventLocation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -55,19 +54,6 @@ public class CreateEventRequestDtoMapper extends AbstractConverter<CreateEventRe
                 times.add(time);
             }
             event.setEventDateTimes(times);
-        }
-
-        if (dto.getImages() != null) {
-            List<EventImage> images = new ArrayList<>();
-            for (EventImageDto imageDto : dto.getImages()) {
-                EventImage image = EventImage.builder()
-                        .id(imageDto.getImageId())
-                        .isMain(imageDto.getIsMain())
-                        .event(event)
-                        .build();
-                images.add(image);
-            }
-            event.setEventImages(images);
         }
 
         return event;

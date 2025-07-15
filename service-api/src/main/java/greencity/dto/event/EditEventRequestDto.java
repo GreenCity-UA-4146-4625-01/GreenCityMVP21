@@ -46,7 +46,7 @@ public class EditEventRequestDto {
     private List<EventDateTimeDto> eventDateTimes;
 
     @Size(max = 5)
-    private List<EventImageDto> images;
+    private List<UploadEventImageDto> images;
 
     private Long mainImageId;
 }

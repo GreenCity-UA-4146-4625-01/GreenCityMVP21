@@ -1,6 +1,7 @@
 package greencity.controller;
 
 
+import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
@@ -53,7 +54,7 @@ public class EventController {
             @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)})
     @PostMapping
     public ResponseEntity<EventResponseDto> createEvent(
-            @AuthenticationPrincipal UserVO user,
+            @CurrentUser UserVO user,
             @Valid @RequestBody CreateEventRequestDto createEventRequestDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(createEventRequestDto, user));
     }

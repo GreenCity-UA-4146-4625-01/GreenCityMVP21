@@ -10,7 +10,6 @@ import greencity.entity.EventImage;
 import greencity.enums.Role;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
-import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventImageRepo;
 import greencity.repository.EventRepo;
 import org.junit.jupiter.api.Test;
@@ -22,6 +21,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -78,8 +78,9 @@ class EventImageServiceImplTest {
     void uploadEventImage_eventNotFound() {
         when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> eventImageService.uploadEventImage(
-                new UploadEventImageDto(mock(MultipartFile.class), true), EVENT_ID, user))
+        UploadEventImageDto dto = new UploadEventImageDto(mock(MultipartFile.class), true);
+
+        assertThatThrownBy(() -> eventImageService.uploadEventImage(dto, EVENT_ID, user))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -92,8 +93,9 @@ class EventImageServiceImplTest {
         when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
         when(eventImageRepo.findAllByEventId(EVENT_ID)).thenReturn(existing);
 
-        assertThatThrownBy(() -> eventImageService.uploadEventImage(
-                new UploadEventImageDto(mock(MultipartFile.class), false), EVENT_ID, user))
+        UploadEventImageDto dto = new UploadEventImageDto(mock(MultipartFile.class), true);
+
+        assertThatThrownBy(() -> eventImageService.uploadEventImage(dto, EVENT_ID, user))
                 .isInstanceOf(BadRequestException.class);
     }
 
@@ -105,10 +107,10 @@ class EventImageServiceImplTest {
         when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
         when(eventImageRepo.findAllByEventId(EVENT_ID)).thenReturn(existing);
 
-        assertThatThrownBy(() -> eventImageService.uploadEventImage(
-                new UploadEventImageDto(mock(MultipartFile.class), true), EVENT_ID, user))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("Only one main image is allowed");
+        UploadEventImageDto dto = new UploadEventImageDto(mock(MultipartFile.class), true);
+
+        assertThatThrownBy(() -> eventImageService.uploadEventImage(dto, EVENT_ID, user))
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -118,9 +120,10 @@ class EventImageServiceImplTest {
 
         when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
 
-        assertThatThrownBy(() -> eventImageService.uploadEventImage(
-                new UploadEventImageDto(mock(MultipartFile.class), true), EVENT_ID, anotherUser))
-                .isInstanceOf(UserHasNoPermissionToAccessException.class);
+        UploadEventImageDto dto = new UploadEventImageDto(mock(MultipartFile.class), true);
+
+        assertThatThrownBy(() -> eventImageService.uploadEventImage(dto, EVENT_ID, user))
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test

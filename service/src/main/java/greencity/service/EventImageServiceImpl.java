@@ -96,20 +96,20 @@ public class EventImageServiceImpl implements EventImageService {
 
     private Event getEventOrThrow(Long eventId) {
         return eventRepo.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
     }
 
     private void validateImagesCountAndMain(List<EventImage> existingImages, List<UploadEventImageDto> newImages) {
         int totalImages = existingImages.size() + newImages.size();
         if (totalImages > 5) {
-            throw new BadRequestException("Maximum of 5 images allowed per event.");
+            throw new BadRequestException(ErrorMessage.MAX_EVENT_IMAGES_EXCEEDED);
         }
 
         long newMainCount = newImages.stream().filter(img -> Boolean.TRUE.equals(img.getIsMainImage())).count();
 
         long totalMainCount = existingImages.stream().filter(EventImage::getIsMain).count() + newMainCount;
         if (totalMainCount > 1) {
-            throw new BadRequestException("Only one main image is allowed.");
+            throw new BadRequestException(ErrorMessage.ONLY_ONE_MAIN_IMAGE_ALLOWED);
         }
     }
 
@@ -125,7 +125,7 @@ public class EventImageServiceImpl implements EventImageService {
                 .count();
 
         if (mainCount > 1) {
-            throw new BadRequestException("Only one image can be marked as main.");
+            throw new BadRequestException(ErrorMessage.ONLY_ONE_IMAGE_CAN_BE_MARKED_AS_MAIN);
         }
 
         if (mainCount > 0) {

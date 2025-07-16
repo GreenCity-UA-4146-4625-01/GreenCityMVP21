@@ -6,6 +6,7 @@ import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EventDateTimeDto;
 import greencity.dto.event.EventResponseDto;
+import greencity.dto.user.UserVO;
 import greencity.service.EventService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +64,7 @@ class EventControllerTest {
         ));
         EventResponseDto responseDto = ModelUtils.getEventResponseDto();
 
-        when(eventService.createEvent(any(CreateEventRequestDto.class))).thenReturn(responseDto);
+        when(eventService.createEvent(any(CreateEventRequestDto.class), any(UserVO.class))).thenReturn(responseDto);
 
         mockMvc.perform(post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -71,7 +72,7 @@ class EventControllerTest {
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isCreated());
 
-        verify(eventService).createEvent(any(CreateEventRequestDto.class));
+        verify(eventService).createEvent(any(CreateEventRequestDto.class), any(UserVO.class));
     }
 
     @Test

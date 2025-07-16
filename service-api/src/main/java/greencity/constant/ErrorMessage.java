@@ -133,6 +133,10 @@ public final class ErrorMessage {
     public static final String FILTER_NOT_FOUND_BY_ID = "Filter not found";
     public static final String USER_HAS_NO_FRIEND_WITH_ID = "User has no friend with this id: ";
     public static final String INVALID_DURATION = "The duration for such habit is lower than previously set";
+    public static final String EVENT_NOT_FOUND = "Event not found";
+    public static final String MAX_EVENT_IMAGES_EXCEEDED = "Maximum of 5 images allowed per event.";
+    public static final String ONLY_ONE_MAIN_IMAGE_ALLOWED = "Only one main image is allowed.";
+    public static final String ONLY_ONE_IMAGE_CAN_BE_MARKED_AS_MAIN = "Only one image can be marked as main.";
 
     private ErrorMessage() {
     }

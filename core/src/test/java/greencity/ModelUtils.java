@@ -9,9 +9,22 @@ import greencity.dto.econewscomment.AddEcoNewsCommentDtoRequest;
 import greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse;
 import greencity.dto.econewscomment.EcoNewsCommentAuthorDto;
 import greencity.dto.econewscomment.EcoNewsCommentDto;
-import greencity.dto.event.*;
-import greencity.dto.habit.*;
-import greencity.dto.habitfact.*;
+import greencity.dto.event.CreateEventRequestDto;
+import greencity.dto.event.EventDateTimeDto;
+import greencity.dto.event.EventImageDto;
+import greencity.dto.event.EventLocationDto;
+import greencity.dto.event.EventResponseDto;
+import greencity.dto.habit.AddCustomHabitDtoRequest;
+import greencity.dto.habit.HabitAssignCustomPropertiesDto;
+import greencity.dto.habit.HabitAssignPropertiesDto;
+import greencity.dto.habit.HabitVO;
+import greencity.dto.habit.UpdateUserShoppingListDto;
+import greencity.dto.habit.UserShoppingAndCustomShoppingListsDto;
+import greencity.dto.habitfact.HabitFactPostDto;
+import greencity.dto.habitfact.HabitFactTranslationUpdateDto;
+import greencity.dto.habitfact.HabitFactTranslationVO;
+import greencity.dto.habitfact.HabitFactUpdateDto;
+import greencity.dto.habitfact.HabitFactVO;
 import greencity.dto.habitstatistic.AddHabitStatisticDto;
 import greencity.dto.habittranslation.HabitTranslationDto;
 import greencity.dto.language.LanguageDTO;
@@ -23,9 +36,38 @@ import greencity.dto.shoppinglistitem.ShoppingListItemRequestDto;
 import greencity.dto.tag.TagPostDto;
 import greencity.dto.tag.TagTranslationVO;
 import greencity.dto.tag.TagViewDto;
-import greencity.dto.user.*;
-import greencity.entity.*;
-import greencity.enums.*;
+import greencity.dto.user.EcoNewsAuthorDto;
+import greencity.dto.user.HabitIdRequestDto;
+import greencity.dto.user.UserManagementDto;
+import greencity.dto.user.UserProfilePictureDto;
+import greencity.dto.user.UserShoppingListItemAdvanceDto;
+import greencity.dto.user.UserShoppingListItemResponseDto;
+import greencity.dto.user.UserVO;
+import greencity.entity.Category;
+import greencity.entity.EcoNewsComment;
+import greencity.entity.Event;
+import greencity.entity.EventDateTime;
+import greencity.entity.EventImage;
+import greencity.entity.EventLocation;
+import greencity.entity.Habit;
+import greencity.entity.HabitAssign;
+import greencity.entity.HabitStatistic;
+import greencity.entity.HabitStatusCalendar;
+import greencity.entity.HabitTranslation;
+import greencity.entity.ShoppingListItem;
+import greencity.entity.Specification;
+import greencity.entity.User;
+import greencity.entity.UserShoppingListItem;
+import greencity.enums.CommentStatus;
+import greencity.enums.EventType;
+import greencity.enums.EventVisibility;
+import greencity.enums.FactOfDayStatus;
+import greencity.enums.HabitAssignStatus;
+import greencity.enums.HabitRate;
+import greencity.enums.Role;
+import greencity.enums.ShoppingListItemStatus;
+import greencity.enums.TagType;
+import greencity.enums.UserStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,7 +78,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -467,16 +513,6 @@ public class ModelUtils {
                                 .startTime(LocalTime.of(9, 30))
                                 .endTime(LocalTime.of(17, 45))
                                 .allDay(false)
-                                .build()
-                ))
-                .images(List.of(
-                        EventImageDto.builder()
-                                .imageId(1L)
-                                .isMain(true)
-                                .build(),
-                        EventImageDto.builder()
-                                .imageId(2L)
-                                .isMain(false)
                                 .build()
                 ))
                 .mainImageId(1L)

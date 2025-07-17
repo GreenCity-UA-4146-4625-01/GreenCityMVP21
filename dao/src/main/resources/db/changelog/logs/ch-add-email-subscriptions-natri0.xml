@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1752755738888-50"
+               author="laptop">
+        <createTable tableName="email_subscriptions">
+            <column name="id"
+                    type="UUID">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_email_subscriptions"/>
+            </column>
+            <column name="email"
+                    type="VARCHAR(255)"/>
+            <column name="last_sent_email_at"
+                    type="timestamp"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1752755738888-54"
+               author="laptop">
+        <addUniqueConstraint columnNames="email"
+                             constraintName="uc_email_subscriptions_email"
+                             tableName="email_subscriptions"/>
+    </changeSet>
+
+</databaseChangeLog>

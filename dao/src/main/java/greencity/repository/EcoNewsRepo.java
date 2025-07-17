@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +24,15 @@ public interface EcoNewsRepo extends JpaRepository<EcoNews, Long>, JpaSpecificat
      */
     @Query(nativeQuery = true, value = "SELECT * FROM eco_news ORDER BY creation_date DESC LIMIT 3")
     List<EcoNews> getThreeLastEcoNews();
+
+    /**
+     * Retrieve at most 3 eco news that are created after the passed date.
+     *
+     * @param dateTime The minimum creation date of the EcoNews.
+     * @return List of {@link EcoNews}.
+     */
+    @Query("SELECT n FROM EcoNews n WHERE n.creationDate > :dateTime ORDER BY n.creationDate DESC LIMIT 3")
+    List<EcoNews> getThreeEcoNewsCreatedAfter(ZonedDateTime dateTime);
 
     /**
      * Method for deleting eco news by list of ids.

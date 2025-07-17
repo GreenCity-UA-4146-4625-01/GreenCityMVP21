@@ -1,7 +1,9 @@
 package greencity.service;
 
+import greencity.dto.econews.EcoNewsForDigestDto;
 import greencity.dto.subscription.SubscriptionDto;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface EmailSubscriptionService {
@@ -20,10 +22,11 @@ public interface EmailSubscriptionService {
     void deleteSubscription(UUID subscriptionId);
 
     /**
-     * Check if we should send the next e-mail for this subscription, e.g. enough time has passed and there's something
-     * to send.
+     * Retrieve the next batch of EcoNews to send in an email for that subscription.
+     * If this subscription is very recently created and didn't have any emails sent yet, returns the most recent.
+     *
      * @param subscriptionId The subscription id as returned by {@link EmailSubscriptionService#createSubscription(String)}.
-     * @return Whether a new email should be sent soon
+     * @return List of EcoNews to be sent in the next email
      */
-    boolean shouldSendEmail(UUID subscriptionId);
+    List<EcoNewsForDigestDto> getNewsForNextEmail(UUID subscriptionId);
 }

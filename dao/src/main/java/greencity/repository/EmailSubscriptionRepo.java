@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public interface EmailSubscriptionRepo extends JpaRepository<EmailSubscription, UUID> {
@@ -19,4 +21,7 @@ public interface EmailSubscriptionRepo extends JpaRepository<EmailSubscription, 
     @Modifying
     @Query("update EmailSubscription s set s.lastSentEmailAt = current_timestamp where s.id = :subscriptionId")
     void updateSubscriptionLastSentEmailAt(UUID subscriptionId);
+
+    @Query("select s from EmailSubscription s where :maxSentEmailAt < s.lastSentEmailAt order by s.lastSentEmailAt limit 5")
+    List<EmailSubscription> findSubscriptionsWithPendingEmails(Instant maxSentEmailAt);
 }

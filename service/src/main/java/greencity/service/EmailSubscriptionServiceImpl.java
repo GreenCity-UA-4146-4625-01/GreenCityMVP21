@@ -12,8 +12,10 @@ import greencity.exception.exceptions.SubscriptionAlreadyExistsException;
 import greencity.repository.EcoNewsRepo;
 import greencity.repository.EmailSubscriptionRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -26,13 +28,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailSubscriptionServiceImpl implements EmailSubscriptionService {
 
     private final EmailSubscriptionRepo emailSubscriptionRepo;
     private final EcoNewsRepo ecoNewsRepo;
     private final ModelMapper modelMapper;
 
-    @Value("#{systemProperties['subscriptions.time-between-emails']}")
+    @Value("${subscriptions.time-between-emails}")
     private final Duration timeBetweenEmails;
 
     private final RestClient restClient;
@@ -69,13 +72,13 @@ public class EmailSubscriptionServiceImpl implements EmailSubscriptionService {
     }
 
     @Override
-    public void sendEmail(UUID subscriptionId) {
+    public boolean sendEmail(UUID subscriptionId) {
         EmailSubscription subscription = findSubscription(subscriptionId);
 
-        if (!shouldSendNewEmail(subscription)) return;
+        if (!shouldSendNewEmail(subscription)) return false;
 
         List<EcoNewsForDigestDto> news = getNewsForNextEmail(subscription);
-        if (news.isEmpty()) return;
+        if (news.isEmpty()) return false;
 
         emailSubscriptionRepo.updateSubscriptionLastSentEmailAt(subscriptionId);
         restClient.sendSubscriptionDigest(SubscriptionEmailDto.builder()
@@ -83,6 +86,22 @@ public class EmailSubscriptionServiceImpl implements EmailSubscriptionService {
                 .email(subscription.getEmail())
                 .news(news)
                 .build());
+
+        return true;
+    }
+
+    @Scheduled(fixedRateString = "${subscriptions.send-emails-rate}")
+    public void sendEmailsIfNeeded() {
+        log.info("Sending subscription emails...");
+
+        Instant maxLastSent = Instant.now().plus(timeBetweenEmails);
+
+        long numSent = emailSubscriptionRepo.findSubscriptionsWithPendingEmails(maxLastSent).stream()
+                .filter(subscription -> sendEmail(subscription.getId()))
+                .peek(subscription -> log.trace("Sent subscription email: {}", subscription.getId()))
+                .count();
+
+        log.info("Sent {} emails to subscriptions", numSent);
     }
 
     private EmailSubscription findSubscription(UUID subscriptionId) {

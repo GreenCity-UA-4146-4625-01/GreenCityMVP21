@@ -42,6 +42,7 @@ public interface EmailSubscriptionService {
      * Sends an email for this subscription if there's anything to send.
      *
      * @param subscriptionId The subscription id
+     * @return Whether the email was sent
      */
-    void sendEmail(UUID subscriptionId);
+    boolean sendEmail(UUID subscriptionId);
 }

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 public class EcoNewsForDigestDtoMapper extends AbstractConverter<EcoNews, EcoNewsForDigestDto> {
     @Override
     protected EcoNewsForDigestDto convert(EcoNews source) {
+        if (source == null) return null;
+
         String fullText = source.getText();
         String truncatedText = fullText.length() > 100 ? fullText.substring(0, 100) + "..." : fullText;
 

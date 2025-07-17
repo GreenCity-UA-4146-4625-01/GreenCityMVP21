@@ -2,10 +2,21 @@ package greencity.repository;
 
 import greencity.entity.EmailSubscription;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.UUID;
 
 public interface EmailSubscriptionRepo extends JpaRepository<EmailSubscription, UUID> {
 
     EmailSubscription findByEmail(String email);
+
+    /**
+     * Sets the given subscription's {@link EmailSubscription#lastSentEmailAt} to "now".
+     *
+     * @param subscriptionId The id of the subscription
+     */
+    @Modifying
+    @Query("update EmailSubscription s set s.lastSentEmailAt = current_timestamp where s.id = :subscriptionId")
+    void updateSubscriptionLastSentEmailAt(UUID subscriptionId);
 }

@@ -29,4 +29,19 @@ public interface EmailSubscriptionService {
      * @return List of EcoNews to be sent in the next email
      */
     List<EcoNewsForDigestDto> getNewsForNextEmail(UUID subscriptionId);
+
+    /**
+     * Checks if enough time has passed to send the next email for this subscription.
+     *
+     * @param subscriptionId The subscription id
+     * @return Whether enough time has passed
+     */
+    boolean shouldSendNewEmail(UUID subscriptionId);
+
+    /**
+     * Sends an email for this subscription if there's anything to send.
+     *
+     * @param subscriptionId The subscription id
+     */
+    void sendEmail(UUID subscriptionId);
 }

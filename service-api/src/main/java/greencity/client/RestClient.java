@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import greencity.constant.RestTemplateLinks;
 import greencity.dto.PageableAdvancedDto;
 import greencity.dto.econews.EcoNewsForSendEmailDto;
+import greencity.dto.subscription.SubscriptionEmailDto;
 import greencity.dto.user.*;
 import greencity.enums.EmailNotification;
 import greencity.enums.Role;
@@ -352,6 +353,20 @@ public class RestClient {
         HttpEntity<EcoNewsForSendEmailDto> entity = new HttpEntity<>(message, headers);
         restTemplate.exchange(greenCityUserServerAddress
             + RestTemplateLinks.ADD_ECO_NEWS, HttpMethod.POST, entity, Object.class)
+            .getBody();
+    }
+
+    /**
+     * Send a digest of recent EcoNews to a subscribed person.
+     *
+     * @param message The body of the request
+     */
+    public void sendSubscriptionDigest(SubscriptionEmailDto message) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<SubscriptionEmailDto> entity = new HttpEntity<>(message, headers);
+        restTemplate.exchange(greenCityUserServerAddress
+            + RestTemplateLinks.SEND_SUBSCRIPTION_EMAIL, HttpMethod.POST, entity, Object.class)
             .getBody();
     }
 

@@ -1,6 +1,6 @@
 package greencity.controller;
 
-
+import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.Notification;
 import greencity.service.NotificationService;
@@ -21,49 +21,49 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final UserService userService;
 
-    /** Отримати всі нотифікації поточного користувача. */
+    /** Get all notifications for the current user. */
     @GetMapping
     public ResponseEntity<List<NotificationDto>> getNotifications(Principal principal) {
-        Long userId = getCurrentUserId(principal);
+        Long userId = currentUserId(principal);
         return ResponseEntity.ok(notificationService.getAllNotificationsForUser(userId));
     }
 
-    /** одну нотифікацію як прочитану. */
+    /** Mark a single notification as read. */
     @PostMapping("/{id}/markAsRead")
     public ResponseEntity<Void> markAsRead(@PathVariable Long id, Principal principal) {
-        Long userId = getCurrentUserId(principal);
-        ensureNotificationBelongsToUser(id, userId);
+        Long userId = currentUserId(principal);
+        ensureOwner(id, userId);
         notificationService.markAsRead(id);
         return ResponseEntity.noContent().build();
     }
 
-    /** всі нотифікації користувача як прочитані. */
+    /** Mark all notifications of the current user as read. */
     @PostMapping("/markAllAsRead")
     public ResponseEntity<Void> markAllAsRead(Principal principal) {
-        notificationService.markAllAsRead(getCurrentUserId(principal));
+        notificationService.markAllAsRead(currentUserId(principal));
         return ResponseEntity.noContent().build();
     }
 
-    /** список нотифікацій як прочитані. */
+    /** Mark a list of notifications as read (bulk). */
     @PostMapping("/markAsReadBulk")
     public ResponseEntity<Void> markAsReadBulk(@RequestBody @NotEmpty List<Long> ids,
                                                Principal principal) {
-        Long userId = getCurrentUserId(principal);
-        ids.forEach(id -> ensureNotificationBelongsToUser(id, userId));
+        Long userId = currentUserId(principal);
+        ids.forEach(id -> ensureOwner(id, userId));
         notificationService.markAsReadBulk(ids);
         return ResponseEntity.noContent().build();
     }
 
 
-    private Long getCurrentUserId(Principal principal) {
+    private Long currentUserId(Principal principal) {
         return userService.findByEmail(principal.getName()).getId();
     }
 
-    private void ensureNotificationBelongsToUser(Long notificationId, Long userId) {
+    /** Throws 403 if the notification does not belong to the current user. */
+    private void ensureOwner(Long notificationId, Long userId) {
         Notification n = notificationService.findById(notificationId);
         if (!n.getReceiver().getId().equals(userId)) {
-            throw new AccessDeniedException("Access denied to this notification.");
+            throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED_NOTIFICATION);
         }
     }
 }
-

@@ -24,6 +24,6 @@ public interface EmailSubscriptionRepo extends JpaRepository<EmailSubscription, 
     @Query("update EmailSubscription s set s.lastSentEmailAt = current_timestamp where s.id = :subscriptionId")
     void updateSubscriptionLastSentEmailAt(UUID subscriptionId);
 
-    @Query("select s from EmailSubscription s where :maxSentEmailAt < s.lastSentEmailAt order by s.lastSentEmailAt limit 5")
+    @Query("select s from EmailSubscription s where ((:maxSentEmailAt < s.lastSentEmailAt) or (s.lastSentEmailAt is null)) order by s.lastSentEmailAt limit 5")
     List<EmailSubscription> findSubscriptionsWithPendingEmails(ZonedDateTime maxSentEmailAt);
 }

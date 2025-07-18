@@ -155,7 +155,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,
                     "/ownSecurity/signUp",
                     "/ownSecurity/signIn",
-                    "/ownSecurity/changePassword")
+                    "/ownSecurity/changePassword",
+                    "/subscriptions")
+                .permitAll()
+                .requestMatchers(HttpMethod.DELETE,
+                        "/subscriptions/{id}")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/achievements",

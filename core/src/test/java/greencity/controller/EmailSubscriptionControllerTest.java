@@ -76,6 +76,25 @@ class EmailSubscriptionControllerTest {
     }
 
     @Test
+    void subscribeWithNoEmail_returnsBadRequest() throws Exception {
+        mockMvc.perform(post(BASE_URL)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
+
+        verify(emailSubscriptionService, never()).createSubscription(eq(EMAIL));
+    }
+
+    @Test
+    void subscribeWithBadEmail_returnsBadRequest() throws Exception {
+        mockMvc.perform(post(BASE_URL)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .queryParam("email", "not an email"))
+                .andExpect(status().isBadRequest());
+
+        verify(emailSubscriptionService, never()).createSubscription(eq(EMAIL));
+    }
+
+    @Test
     void unsubscribe_returnsNoContent() throws Exception {
         doNothing().when(emailSubscriptionService).deleteSubscription(eq(SUBSCRIPTION_ID));
 
@@ -83,5 +102,13 @@ class EmailSubscriptionControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(emailSubscriptionService).deleteSubscription(eq(SUBSCRIPTION_ID));
+    }
+
+    @Test
+    void unsubscribeWithBadId_returnsBadRequest() throws Exception {
+        mockMvc.perform(delete(BASE_URL + "/not a subscription"))
+                .andExpect(status().isBadRequest());
+
+        verify(emailSubscriptionService, never()).deleteSubscription(any());
     }
 }

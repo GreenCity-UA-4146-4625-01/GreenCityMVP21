@@ -94,7 +94,7 @@ public class EmailSubscriptionServiceImpl implements EmailSubscriptionService {
     public void sendEmailsIfNeeded() {
         log.info("Sending subscription emails...");
 
-        Instant maxLastSent = Instant.now().plus(timeBetweenEmails);
+        Instant maxLastSent = Instant.now().minus(timeBetweenEmails);
 
         long numSent = emailSubscriptionRepo.findSubscriptionsWithPendingEmails(maxLastSent).stream()
                 .filter(subscription -> sendEmail(subscription.getId()))

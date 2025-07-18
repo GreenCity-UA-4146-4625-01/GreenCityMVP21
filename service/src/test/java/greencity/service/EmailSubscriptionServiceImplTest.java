@@ -152,7 +152,10 @@ public class EmailSubscriptionServiceImplTest {
     @Test
     void shouldSendEmail_returnsTrueIfSentLongAgo() {
         when(emailSubscriptionRepo.findById(SUBSCRIPTION_ID)).thenReturn(Optional.of(SUBSCRIPTION));
+
+        SUBSCRIPTION.setLastSentEmailAt(ZonedDateTime.now().minusDays(10));
         assertTrue(emailSubscriptionService.shouldSendNewEmail(SUBSCRIPTION_ID));
+        SUBSCRIPTION.setLastSentEmailAt(null);
     }
 
     @Test

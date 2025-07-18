@@ -1,6 +1,7 @@
 package greencity.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
@@ -18,11 +19,12 @@ import java.util.UUID;
 @Builder
 public class EmailSubscription {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(unique = true)
     @NotEmpty
+    @Email
     private String email;
 
     private ZonedDateTime lastSentEmailAt;

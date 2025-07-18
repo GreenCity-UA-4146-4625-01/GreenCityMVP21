@@ -4,6 +4,7 @@ import greencity.entity.EmailSubscription;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -18,6 +19,7 @@ public interface EmailSubscriptionRepo extends JpaRepository<EmailSubscription, 
      *
      * @param subscriptionId The id of the subscription
      */
+    @Transactional
     @Modifying
     @Query("update EmailSubscription s set s.lastSentEmailAt = current_timestamp where s.id = :subscriptionId")
     void updateSubscriptionLastSentEmailAt(UUID subscriptionId);

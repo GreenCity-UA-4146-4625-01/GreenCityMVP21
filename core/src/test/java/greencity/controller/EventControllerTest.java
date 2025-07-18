@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -64,7 +65,8 @@ class EventControllerTest {
         ));
         EventResponseDto responseDto = ModelUtils.getEventResponseDto();
 
-        when(eventService.createEvent(any(CreateEventRequestDto.class), any(UserVO.class))).thenReturn(responseDto);
+        when(eventService.createEvent(any(CreateEventRequestDto.class), any(UserVO.class), anyList()))
+                .thenReturn(responseDto);
 
         mockMvc.perform(post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -72,7 +74,7 @@ class EventControllerTest {
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isCreated());
 
-        verify(eventService).createEvent(any(CreateEventRequestDto.class), any(UserVO.class));
+        verify(eventService).createEvent(any(CreateEventRequestDto.class), any(UserVO.class), anyList());
     }
 
     @Test

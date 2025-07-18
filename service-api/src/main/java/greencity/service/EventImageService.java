@@ -1,11 +1,8 @@
 package greencity.service;
 
 import greencity.dto.event.EventImageDto;
-import greencity.dto.event.UploadEventImageDto;
-import greencity.dto.event.UploadEventImagesDto;
 import greencity.dto.user.UserVO;
-import greencity.exception.exceptions.NotFoundException;
-import greencity.exception.exceptions.BadRequestException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,32 +12,13 @@ import java.util.List;
 public interface EventImageService {
 
     /**
-     * Uploads a single image for a specific event.
-     * <p>
-     * The image can optionally be marked as main, but only one main image is allowed per event.
-     * The total number of images per event cannot exceed 5.
-     *
-     * @param dto     the {@link UploadEventImageDto} containing the image and its metadata
-     * @param eventId the ID of the event to associate the image with
-     * @param user    the user performing the operation
-     * @return the {@link EventImageDto} representing the uploaded image
-     * @throws NotFoundException   if the event with the given ID is not found
-     * @throws BadRequestException if the image limit is exceeded or a main image already exists
-     */
-    EventImageDto uploadEventImage(UploadEventImageDto dto, Long eventId, UserVO user);
-
-    /**
      * Uploads a list of images for a specific event.
-     * <p>
-     * Each image can be marked as main, but only one main image is allowed per event.
-     * The total number of images per event cannot exceed 5.
+     * Access is allowed only to the event creator or users with the ADMIN role.
      *
-     * @param imagesDto the {@link UploadEventImagesDto} containing a list of image upload data
-     * @param eventId   the ID of the event to associate images with
-     * @param user      the user performing the operation
-     * @return a list of {@link EventImageDto} representing the uploaded images
-     * @throws NotFoundException   if the event with the given ID is not found
-     * @throws BadRequestException if the image limit is exceeded or more than one main image is submitted
+     * @param images  the list of image files to upload (max 5)
+     * @param eventId the ID of the event to which the images belong
+     * @param user    the current authenticated user performing the operation
+     * @return a list of saved {@link EventImageDto} objects
      */
-    List<EventImageDto> uploadEventImages(UploadEventImagesDto imagesDto, Long eventId, UserVO user);
+    List<EventImageDto> uploadEventImages(List<MultipartFile> images, Long eventId, UserVO user);
 }

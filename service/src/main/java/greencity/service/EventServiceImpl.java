@@ -4,9 +4,8 @@ import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EditEventRequestDto;
 import greencity.dto.event.EventDateTimeDto;
+import greencity.dto.event.EventImageDto;
 import greencity.dto.event.EventResponseDto;
-import greencity.dto.event.UploadEventImageDto;
-import greencity.dto.event.UploadEventImagesDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.User;
@@ -21,6 +20,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -43,21 +43,22 @@ public class EventServiceImpl implements EventService {
      */
     @Transactional
     @Override
-    public EventResponseDto createEvent(CreateEventRequestDto createEventRequestDto, UserVO user) {
+    public EventResponseDto createEvent(CreateEventRequestDto createEventRequestDto, UserVO user, List<MultipartFile> images) {
         Event event = modelMapper.map(createEventRequestDto, Event.class);
         event.setCreator(modelMapper.map(user, User.class));
         Event saved = eventRepo.save(event);
 
-        if (createEventRequestDto.getImages() != null && !createEventRequestDto.getImages().isEmpty()) {
-            List<UploadEventImageDto> uploadDtos = createEventRequestDto.getImages();
+        if (images != null && !images.isEmpty()) {
+            List<EventImageDto> eventImageDtos = eventImageService.uploadEventImages(
+                    images, saved.getId(), user);
 
-            eventImageService.uploadEventImages(
-                    UploadEventImagesDto.builder()
-                            .images(uploadDtos)
-                            .build(),
-                    saved.getId(),
-                    user
-            );
+            eventImageDtos.stream()
+                    .filter(EventImageDto::getIsMain)
+                    .findFirst()
+                    .ifPresent(mainImage -> {
+                        saved.setMainImageId(mainImage.getImageId());
+                        eventRepo.save(saved);
+                    });
         }
 
         return modelMapper.map(saved, EventResponseDto.class);
@@ -106,7 +107,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, UserVO user) {
+    public EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user) {
 
         Event event = eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
@@ -122,15 +123,12 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
-            List<UploadEventImageDto> uploadDtos = dto.getImages();
-            eventImageService.uploadEventImages(
-                    UploadEventImagesDto.builder()
-                            .images(uploadDtos)
-                            .build(),
-                    dto.getEventId(),
-                    user
-            );
+        if (images != null && !images.isEmpty()) {
+            List<EventImageDto> uploadedImages = eventImageService.uploadEventImages(images, dto.getEventId(), user);
+            uploadedImages.stream()
+                    .filter(EventImageDto::getIsMain)
+                    .findFirst()
+                    .ifPresent(mainImage -> event.setMainImageId(mainImage.getImageId()));
         }
 
         Event updatedEvent = modelMapper.map(dto, Event.class);

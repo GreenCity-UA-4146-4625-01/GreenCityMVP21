@@ -24,7 +24,6 @@ public class CreateEventRequestDtoMapper extends AbstractConverter<CreateEventRe
                 .description(dto.getDescription())
                 .eventVisibility(dto.getVisibility())
                 .eventTypes(dto.getEventTypes())
-                .mainImageId(dto.getMainImageId())
                 .onlineLinks(dto.getOnlineLinks())
                 .creationDate(LocalDateTime.now())
                 .lastUpdateDate(LocalDateTime.now())

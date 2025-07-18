@@ -1,7 +1,7 @@
 package greencity.controller;
 
-
 import greencity.annotations.CurrentUser;
+import greencity.annotations.ValidImage;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
@@ -13,11 +13,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -25,9 +27,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 
 @Validated
 @RestController
@@ -37,26 +41,31 @@ public class EventController {
     private final EventService eventService;
 
     /**
-     * Creates a new event in the system.
-     * This endpoint accepts a valid {@link CreateEventRequestDto} containing event details,
-     * creates the event, and returns the created event information.
+     * Creates a new event.
+     * <p>
+     * Accepts multipart/form-data with:
+     * - JSON part: {@link CreateEventRequestDto}
+     * - Optional images: list of {@link MultipartFile}, first one is main
+     * <p>
+     * Requires authenticated user via {@link CurrentUser}.
      *
-     * @param createEventRequestDto the DTO containing the data required to create a new event; must be valid
-     * @return {@link ResponseEntity} with the created {@link EventResponseDto} and HTTP status 201 (Created)
-     * @apiNote - Response code 201: Event successfully created.
-     * - Response code 401: Unauthorized access (user not authenticated).
-     * - Response code 403: Forbidden (user does not have permission to create an event).
+     * @param user                  authenticated user
+     * @param createEventRequestDto event details
+     * @param images                optional image files
+     * @return created {@link EventResponseDto} with status 201
      */
     @Operation(summary = "Create a new event.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED),
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN)})
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EventResponseDto> createEvent(
             @CurrentUser UserVO user,
-            @Valid @RequestBody CreateEventRequestDto createEventRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(createEventRequestDto, user));
+            @RequestPart("event") @Valid CreateEventRequestDto createEventRequestDto,
+            @RequestPart(value = "images", required = false) @ValidImage @Size(max = 5) List<MultipartFile> images) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(eventService.createEvent(createEventRequestDto, user, images));
     }
 
     /**
@@ -106,12 +115,13 @@ public class EventController {
             @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
     })
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EventResponseDto> editEvent(
             @PathVariable Long id,
-            @RequestBody @Valid EditEventRequestDto editEventRequestDto,
+            @RequestPart("event") @Valid EditEventRequestDto editEventRequestDto,
+            @RequestPart(value = "images", required = false) @ValidImage List<MultipartFile> images,
             @AuthenticationPrincipal UserVO user
     ) {
-        return ResponseEntity.ok(eventService.updateEventById(id, editEventRequestDto, user));
+        return ResponseEntity.ok(eventService.updateEventById(id, editEventRequestDto, images, user));
     }
 }

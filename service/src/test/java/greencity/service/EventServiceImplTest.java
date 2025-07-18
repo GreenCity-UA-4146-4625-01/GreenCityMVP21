@@ -6,6 +6,7 @@ import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
+import greencity.entity.User;
 import greencity.repository.EventRepo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,15 +18,17 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 @ExtendWith(SpringExtension.class)
 class EventServiceImplTest {
@@ -36,6 +39,9 @@ class EventServiceImplTest {
     @Mock
     EventRepo eventRepo;
 
+    @Mock
+    EventImageService eventImageService;
+
     @InjectMocks
     EventServiceImpl eventService;
 
@@ -43,17 +49,38 @@ class EventServiceImplTest {
     private final EventResponseDto eventResponseDto = ModelUtils.getEventResponseDto();
     private final Event event = ModelUtils.createEvent();
 
-    @Test
-    void createEvent() {
-        when(modelMapper.map(createEventRequestDto, Event.class)).thenReturn(event);
-        when(modelMapper.map(event, EventResponseDto.class)).thenReturn(eventResponseDto);
-        when(eventRepo.save(event)).thenReturn(event);
+    private final UserVO userVO = ModelUtils.getUserVO();
 
-        EventResponseDto result = eventService.createEvent(createEventRequestDto, new UserVO().setId(1L));
+    @Test
+    void createEvent_withImages_success() {
+        List<MultipartFile> images = List.of(mock(MultipartFile.class), mock(MultipartFile.class));
+
+        when(modelMapper.map(createEventRequestDto, Event.class)).thenReturn(event);
+        when(modelMapper.map(userVO, User.class)).thenReturn(event.getCreator());
+        when(eventRepo.save(event)).thenReturn(event);
+        when(modelMapper.map(event, EventResponseDto.class)).thenReturn(eventResponseDto);
+
+        EventResponseDto result = eventService.createEvent(createEventRequestDto, userVO, images);
 
         assertNotNull(result);
         assertEquals("Test", result.getTitle());
         verify(eventRepo).save(event);
+        verify(eventImageService).uploadEventImages(images, event.getId(), userVO);
+    }
+
+    @Test
+    void createEvent_noImages_success() {
+        when(modelMapper.map(createEventRequestDto, Event.class)).thenReturn(event);
+        when(modelMapper.map(userVO, User.class)).thenReturn(event.getCreator());
+        when(eventRepo.save(event)).thenReturn(event);
+        when(modelMapper.map(event, EventResponseDto.class)).thenReturn(eventResponseDto);
+
+        EventResponseDto result = eventService.createEvent(createEventRequestDto, userVO, null);
+
+        assertNotNull(result);
+        assertEquals("Test", result.getTitle());
+        verify(eventRepo).save(event);
+        verify(eventImageService, org.mockito.Mockito.never()).uploadEventImages(any(), anyLong(), any());
     }
 
     @Test
@@ -76,10 +103,8 @@ class EventServiceImplTest {
         when(eventRepo.findAll(pageable)).thenReturn(eventPage);
         when(modelMapper.map(event, EventResponseDto.class)).thenReturn(eventResponseDto);
 
-        // when
         PageableDto<EventResponseDto> result = eventService.getAllEvents(pageable);
 
-        // then
         assertNotNull(result);
         assertEquals(2, result.getPage().size());
         assertEquals("Test", result.getPage().get(0).getTitle());
@@ -88,5 +113,4 @@ class EventServiceImplTest {
         assertEquals(2, result.getTotalElements());
         assertEquals(1, result.getTotalPages());
     }
-
 }

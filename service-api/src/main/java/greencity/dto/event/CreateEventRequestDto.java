@@ -43,8 +43,4 @@ public class CreateEventRequestDto {
     @Valid
     private List<EventDateTimeDto> eventDateTimes;
 
-    @Size(max = 5)
-    private List<UploadEventImageDto> images;
-
-    private Long mainImageId;
 }

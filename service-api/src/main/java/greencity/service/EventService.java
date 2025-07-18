@@ -76,4 +76,15 @@ public interface EventService {
      * @throws BadRequestException if the image limit is exceeded or more than one main image is submitted
      */
     List<EventImageDto> uploadEventImages(UploadEventImagesDto imagesDto, Long eventId);
+
+
+    /**
+     * Deletes an event with the specified identifier by a given user.
+     *
+     * @param id   the unique identifier of the event to delete; must not be {@code null}
+     * @param user the user performing the delete operation; must not be {@code null}
+     * @throws NotFoundException                    if the event with the specified ID does not exist
+     * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
+     */
+    void deleteEventById(Long id, UserVO user);
 }

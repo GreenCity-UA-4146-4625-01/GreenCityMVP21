@@ -1,14 +1,15 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
-import greencity.dto.event.CreateEventRequestDto;
-import greencity.dto.event.EditEventRequestDto;
-import greencity.dto.event.EventResponseDto;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 import java.util.List;
 
@@ -58,4 +59,46 @@ public interface EventService {
      * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
      */
     EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user);
+    EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, UserVO user);
+
+    /**
+     * Uploads a single image for a specific event.
+     * <p>
+     * The image can optionally be marked as main, but only one main image is allowed per event.
+     * The total number of images per event cannot exceed 5.
+     *
+     * @param dto     the {@link UploadEventImageDto} containing the image and its metadata
+     * @param eventId the ID of the event to associate the image with
+     * @return the {@link EventImageDto} representing the uploaded image
+     * @throws NotFoundException   if the event with the given ID is not found
+     * @throws BadRequestException if the image limit is exceeded or a main image already exists
+     */
+    EventImageDto uploadEventImage(UploadEventImageDto dto, Long eventId);
+
+    /**
+     * Uploads a list of images for a specific event.
+     * <p>
+     * Each image can be marked as main, but only one main image is allowed per event.
+     * The total number of images per event cannot exceed 5.
+     *
+     * @param imagesDto the {@link UploadEventImagesDto} containing a list of image upload data
+     * @param eventId   the ID of the event to associate images with
+     * @return a list of {@link EventImageDto} representing the uploaded images
+     * @throws NotFoundException   if the event with the given ID is not found
+     * @throws BadRequestException if the image limit is exceeded or more than one main image is submitted
+     */
+    List<EventImageDto> uploadEventImages(UploadEventImagesDto imagesDto, Long eventId);
+
+
+    /**
+     * Deletes an event with the specified identifier by a given user.
+     *
+     * @param id   the unique identifier of the event to delete; must not be {@code null}
+     * @param user the user performing the delete operation; must not be {@code null}
+     * @throws NotFoundException                    if the event with the specified ID does not exist
+     * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
+     */
+    void deleteEventById(Long id, UserVO user);
+
+
 }

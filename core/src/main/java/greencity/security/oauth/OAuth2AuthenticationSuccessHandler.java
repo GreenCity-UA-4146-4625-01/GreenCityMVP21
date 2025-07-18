@@ -36,8 +36,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     /**
      * Handles successful OAuth2 authentication.
      *
-     * @param request the HTTP request
-     * @param response the HTTP response
+     * @param request        the HTTP request
+     * @param response       the HTTP response
      * @param authentication the authentication object containing OAuth2 user info
      * @throws IOException if redirect fails
      */

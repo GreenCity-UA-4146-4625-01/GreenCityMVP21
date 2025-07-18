@@ -1,5 +1,6 @@
 package greencity.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.dto.user.UserVO;
 import greencity.security.dto.SuccessSignInDto;
 import greencity.security.jwt.JwtTool;
@@ -11,9 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.Base64;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 
 /**
  * Controller for OAuth2 authentication endpoints.

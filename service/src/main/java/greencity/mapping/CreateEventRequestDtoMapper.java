@@ -9,6 +9,7 @@ import greencity.entity.EventLocation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,8 @@ public class CreateEventRequestDtoMapper extends AbstractConverter<CreateEventRe
                 .eventTypes(dto.getEventTypes())
                 .mainImageId(dto.getMainImageId())
                 .onlineLinks(dto.getOnlineLinks())
+                .creationDate(LocalDateTime.now())
+                .lastUpdateDate(LocalDateTime.now())
                 .build();
 
         if (dto.getLocations() != null) {

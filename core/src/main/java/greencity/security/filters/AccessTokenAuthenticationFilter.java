@@ -73,6 +73,14 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
         throws IOException, ServletException {
         String token = extractToken(request);
 
+        String uri = request.getRequestURI();
+
+        // Skip JWT authentication for Google OAuth endpoints
+        if (uri.equals("/api/googleSecurity")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         if (token != null) {
             try {
                 Authentication authentication = authenticationManager

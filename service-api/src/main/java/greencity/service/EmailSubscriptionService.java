@@ -45,4 +45,7 @@ public interface EmailSubscriptionService {
      * @return Whether the email was sent
      */
     boolean sendEmail(UUID subscriptionId);
+
+    /** Sends out any pending subscription emails. */
+    void sendEmailsIfNeeded();
 }

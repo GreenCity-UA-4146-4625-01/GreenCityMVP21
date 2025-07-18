@@ -36,7 +36,7 @@ public class EmailSubscriptionServiceImpl implements EmailSubscriptionService {
     private final ModelMapper modelMapper;
 
     @Value("${subscriptions.time-between-emails}")
-    private final Duration timeBetweenEmails;
+    private Duration timeBetweenEmails;
 
     private final RestClient restClient;
 
@@ -90,11 +90,10 @@ public class EmailSubscriptionServiceImpl implements EmailSubscriptionService {
         return true;
     }
 
-    @Scheduled(fixedRateString = "${subscriptions.send-emails-rate}")
     public void sendEmailsIfNeeded() {
         log.info("Sending subscription emails...");
 
-        Instant maxLastSent = Instant.now().minus(timeBetweenEmails);
+        ZonedDateTime maxLastSent = ZonedDateTime.now().minus(timeBetweenEmails);
 
         long numSent = emailSubscriptionRepo.findSubscriptionsWithPendingEmails(maxLastSent).stream()
                 .filter(subscription -> sendEmail(subscription.getId()))

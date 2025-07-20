@@ -6,6 +6,7 @@ import greencity.security.oauth.OAuth2AuthenticationSuccessHandler;
 import greencity.security.providers.JwtAuthenticationProvider;
 import greencity.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -53,6 +54,12 @@ public class SecurityConfig {
     private final UserService userService;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
+    
+    @Value("${oauth2.failure-redirect-url}")
+    private String oauth2FailureUrl;
+    
+    @Value("${cors.allowed-origins}")
+    private String corsAllowedOrigins;
 
     /**
      * Constructor.
@@ -83,14 +90,13 @@ public class SecurityConfig {
     public SecurityFilterChain applicationSecurity(HttpSecurity http) throws Exception {
         http.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://localhost:4205", "http://localhost:3000"));
+                    config.setAllowedOrigins(Arrays.asList(corsAllowedOrigins.split(",")));
                     config.setAllowedMethods(
                             Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
                     config.setAllowedHeaders(
                             Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Headers",
                                     "X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
                     config.setAllowCredentials(true);
-                    config.setAllowedHeaders(Collections.singletonList("*"));
                     config.setMaxAge(3600L);
                     return config;
                 }))
@@ -291,7 +297,7 @@ public class SecurityConfig {
                         .anyRequest().hasAnyRole(ADMIN))
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2SuccessHandler)
-                        .failureUrl("http://localhost:3000/auth/error?error=oauth2_login_failed"))
+                        .failureUrl(oauth2FailureUrl))
                 .logout(logout -> logout.logoutUrl("/logout")
                         .logoutRequestMatcher(new AntPathRequestMatcher("/management/logout", "GET"))
                         .clearAuthentication(true)

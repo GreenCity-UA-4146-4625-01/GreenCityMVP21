@@ -7,7 +7,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.validator.constraints.URL;
 
 import java.util.List;
@@ -28,7 +34,8 @@ public class EditEventRequestDto {
     @Size(max = 70)
     private String title;
 
-    @NotBlank @Size(min = 20, max = 63206)
+    @NotBlank
+    @Size(min = 20, max = 63206)
     private String description;
 
     @NotNull
@@ -45,8 +52,4 @@ public class EditEventRequestDto {
     @Valid
     private List<EventDateTimeDto> eventDateTimes;
 
-    @Size(max = 5)
-    private List<EventImageDto> images;
-
-    private Long mainImageId;
 }

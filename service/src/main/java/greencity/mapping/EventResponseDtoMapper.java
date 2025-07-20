@@ -1,12 +1,10 @@
 package greencity.mapping;
 
 import greencity.dto.event.EventDateTimeDto;
-import greencity.dto.event.EventImageDto;
 import greencity.dto.event.EventLocationDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.entity.Event;
 import greencity.entity.EventDateTime;
-import greencity.entity.EventImage;
 import greencity.entity.EventLocation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -28,14 +26,13 @@ public class EventResponseDtoMapper extends AbstractConverter<Event, EventRespon
                 .eventDateTimes(mapEventDateTimes(event.getEventDateTimes()))
                 .locations(mapEventLocations(event.getEventLocations()))
                 .onlineLinks(event.getOnlineLinks())
-                .images(mapImages(event.getEventImages()))
                 .mainImageId(event.getMainImageId())
                 .createdAt(event.getCreationDate())
                 .build();
     }
     private List<EventDateTimeDto> mapEventDateTimes(List<EventDateTime> times) {
         if (times == null) {
-            return null;
+            return List.of();
         }
         List<EventDateTimeDto> result = new ArrayList<>();
         for (EventDateTime t : times) {
@@ -51,7 +48,7 @@ public class EventResponseDtoMapper extends AbstractConverter<Event, EventRespon
 
     private List<EventLocationDto> mapEventLocations(List<EventLocation> locations) {
         if (locations == null) {
-            return null;
+            return List.of();
         }
         List<EventLocationDto> result = new ArrayList<>();
         for (EventLocation l : locations) {
@@ -59,21 +56,6 @@ public class EventResponseDtoMapper extends AbstractConverter<Event, EventRespon
                     l.getAddress(),
                     l.getLatitude(),
                     l.getLongitude()
-            ));
-        }
-        return result;
-    }
-
-    private List<EventImageDto> mapImages(List<EventImage> images) {
-        if (images == null) {
-            return null;
-        }
-        List<EventImageDto> result = new ArrayList<>();
-        for (EventImage i : images) {
-            result.add(new EventImageDto(
-                    i.getId(),
-                    i.getUrl(),
-                    i.getIsMain()
             ));
         }
         return result;

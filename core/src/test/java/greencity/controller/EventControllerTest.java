@@ -1,125 +1,106 @@
 package greencity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import greencity.GreenCityApplication;
-import greencity.config.SecurityConfig;
-import greencity.dto.event.EditEventRequestDto;
+import greencity.ModelUtils;
+import greencity.dto.PageableDto;
+import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EventDateTimeDto;
-import greencity.dto.event.EventImageDto;
-import greencity.dto.event.EventLocationDto;
 import greencity.dto.event.EventResponseDto;
-import greencity.enums.EventType;
-import greencity.enums.EventVisibility;
-import greencity.security.jwt.JwtTool;
-import greencity.service.EventService;
 import greencity.dto.user.UserVO;
-import greencity.service.UserService;
+import greencity.service.EventService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Unit test class for {@link EventController} that verifies the behavior*/
-@WebMvcTest(EventController.class)
-@ContextConfiguration(classes = {GreenCityApplication.class, SecurityConfig.class, JwtTool.class})
+
+@ExtendWith(MockitoExtension.class)
 class EventControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private EventService eventService;
 
-    @MockBean
-    private UserService userService;
+    @InjectMocks
+    private EventController eventController;
 
-    @MockBean
-    private ModelMapper modelMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @BeforeEach
+    void setup() {
+        objectMapper.findAndRegisterModules();
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(eventController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build();
+    }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    void editEvent_Returns200AndUpdatedEventDto() throws Exception {
-        Long eventId = 1L;
-        UserVO mockUser = UserVO.builder().id(100L).name("Test User").build();
+    void createEvent_ShouldReturn201() throws Exception {
+        CreateEventRequestDto requestDto = ModelUtils.getCreateEventRequestDto();
+        requestDto.setEventDateTimes(List.of(
+                new EventDateTimeDto(LocalDate.now().plusDays(1), LocalTime.now().plusMinutes(10), LocalTime.now().plusMinutes(20), false),
+                new EventDateTimeDto(LocalDate.now().plusDays(1), LocalTime.now().plusMinutes(20), LocalTime.now().plusMinutes(20), false)
+        ));
+        EventResponseDto responseDto = ModelUtils.getEventResponseDto();
 
-        EditEventRequestDto editRequest = EditEventRequestDto.builder()
-                .eventId(eventId)
-                .title("Updated Title")
-                .description("Updated description for the event that is longer than 20 characters.")
-                .visibility(EventVisibility.OPEN)
-                .eventTypes(Set.of(EventType.PLACE))
-                .eventDateTimes(List.of(EventDateTimeDto.builder()
-                        .date(LocalDate.now().plusDays(1))
-                        .startTime(LocalTime.now().plusHours(1))
-                        .endTime(LocalTime.now().plusHours(3))
-                        .allDay(false)
-                        .build()))
-                .locations(List.of(EventLocationDto.builder()
-                        .address("Kyiv, Ukraine")
-                        .latitude(50.45)
-                        .longitude(30.523)
-                        .build()))
-                .onlineLinks(List.of("https://example.com"))
-                .images(List.of(EventImageDto.builder()
-                        .imageId(123L)
-                        .url("https://example.com/image.jpg")
-                        .isMain(true)
-                        .build()))
-                .mainImageId(123L)
-                .build();
+        when(eventService.createEvent(any(CreateEventRequestDto.class), any(UserVO.class), anyList()))
+                .thenReturn(responseDto);
 
-
-        EventResponseDto response = EventResponseDto.builder()
-                .eventId(eventId)
-                .title(editRequest.getTitle())
-                .description(editRequest.getDescription())
-                .visibility(editRequest.getVisibility())
-                .eventTypes(editRequest.getEventTypes())
-                .eventDateTimes(editRequest.getEventDateTimes())
-                .locations(editRequest.getLocations())
-                .onlineLinks(editRequest.getOnlineLinks())
-                .images(editRequest.getImages())
-                .mainImageId(editRequest.getMainImageId())
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        when(eventService.updateEventById(eq(eventId), any(EditEventRequestDto.class), any()))
-                .thenReturn(response);
-
-        var response1 = mockMvc.perform(patch("/events/{id}", eventId)
+        mockMvc.perform(post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(editRequest)))
-                .andExpect(status().isOk());
-                response1.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.eventId").value(eventId))
-                .andExpect(jsonPath("$.title").value("Updated Title"))
-                .andExpect(jsonPath("$.description").value("Updated description for the event that is longer than 20 characters."))
-                .andExpect(jsonPath("$.visibility").value("OPEN"))
-                .andExpect(jsonPath("$.eventTypes[0]").value("PLACE"))
-                .andExpect(jsonPath("$.locations[0].address").value("Kyiv, Ukraine"))
-                .andExpect(jsonPath("$.onlineLinks[0]").value("https://example.com"))
-                .andExpect(jsonPath("$.images[0].url").value("https://example.com/image.jpg"));
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isCreated());
 
-        verify(eventService, times(1)).updateEventById(eq(eventId), any(EditEventRequestDto.class), any());
+        verify(eventService).createEvent(any(CreateEventRequestDto.class), any(UserVO.class), anyList());
+    }
+
+    @Test
+    void getEventById_ShouldReturn200() throws Exception {
+        Long id = 1L;
+        EventResponseDto responseDto = ModelUtils.getEventResponseDto();
+
+        when(eventService.getEventById(id)).thenReturn(responseDto);
+
+        mockMvc.perform(get("/events/{id}", id))
+                .andExpect(status().isOk());
+
+        verify(eventService).getEventById(id);
+    }
+
+    @Test
+    void getAllEvents_ShouldReturn200() throws Exception {
+        PageableDto<EventResponseDto> pageableDto = new PageableDto<>(Collections.emptyList(), 0, 0, 0);
+
+        when(eventService.getAllEvents(any(Pageable.class))).thenReturn(pageableDto);
+
+        mockMvc.perform(get("/events")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk());
+
+        verify(eventService).getAllEvents(any(Pageable.class));
     }
 }

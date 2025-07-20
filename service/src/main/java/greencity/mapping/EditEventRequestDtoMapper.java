@@ -1,11 +1,10 @@
 package greencity.mapping;
+
 import greencity.dto.event.EditEventRequestDto;
 import greencity.dto.event.EventDateTimeDto;
-import greencity.dto.event.EventImageDto;
 import greencity.dto.event.EventLocationDto;
 import greencity.entity.Event;
 import greencity.entity.EventDateTime;
-import greencity.entity.EventImage;
 import greencity.entity.EventLocation;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
@@ -25,7 +24,6 @@ public class EditEventRequestDtoMapper extends AbstractConverter<EditEventReques
                 .description(dto.getDescription())
                 .eventVisibility(dto.getVisibility())
                 .eventTypes(dto.getEventTypes())
-                .mainImageId(dto.getMainImageId())
                 .onlineLinks(dto.getOnlineLinks())
                 .build();
 
@@ -56,19 +54,6 @@ public class EditEventRequestDtoMapper extends AbstractConverter<EditEventReques
                 times.add(time);
             }
             event.setEventDateTimes(times);
-        }
-
-        if (dto.getImages() != null) {
-            List<EventImage> images = new ArrayList<>();
-            for (EventImageDto imageDto : dto.getImages()) {
-                EventImage image = EventImage.builder()
-                        .id(imageDto.getImageId())
-                        .isMain(imageDto.getIsMain())
-                        .event(event)
-                        .build();
-                images.add(image);
-            }
-            event.setEventImages(images);
         }
 
         return event;

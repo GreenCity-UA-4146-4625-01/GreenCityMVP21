@@ -47,9 +47,6 @@ public class EventResponseDto {
 
     private List<@URL String> onlineLinks;
 
-    @Size(max = 5)
-    private List<@Valid EventImageDto> images;
-
     private Long mainImageId;
 
     @NotNull

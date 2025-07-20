@@ -17,7 +17,6 @@ import greencity.dto.econewscomment.EcoNewsCommentDto;
 import greencity.dto.econewscomment.EcoNewsCommentVO;
 import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EventDateTimeDto;
-import greencity.dto.event.EventImageDto;
 import greencity.dto.event.EventLocationDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.dto.habit.HabitAssignPropertiesDto;
@@ -766,16 +765,6 @@ public class ModelUtils {
                                 .build()
                 ))
                 .onlineLinks(List.of("https://greencityfestival.online"))
-                .images(List.of(
-                        EventImageDto.builder()
-                                .imageId(1L)
-                                .isMain(true)
-                                .build(),
-                        EventImageDto.builder()
-                                .imageId(2L)
-                                .isMain(false)
-                                .build()
-                ))
                 .mainImageId(1L)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -809,7 +798,6 @@ public class ModelUtils {
                                 .allDay(false)
                                 .build()
                 ))
-                .mainImageId(1L)
                 .build();
 
     }

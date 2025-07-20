@@ -24,7 +24,6 @@ public class EditEventRequestDtoMapper extends AbstractConverter<EditEventReques
                 .description(dto.getDescription())
                 .eventVisibility(dto.getVisibility())
                 .eventTypes(dto.getEventTypes())
-                .mainImageId(dto.getMainImageId())
                 .onlineLinks(dto.getOnlineLinks())
                 .build();
 

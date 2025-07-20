@@ -77,7 +77,7 @@ public class AccessTokenAuthenticationFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
 
         // Skip JWT authentication for Google OAuth endpoints
-        if (uri.equals("/api/googleSecurity")) {
+        if (uri.startsWith("/api/googleSecurity")) {
             chain.doFilter(request, response);
             return;
         }

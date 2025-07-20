@@ -3,13 +3,14 @@ package greencity.security.oauth;
 import greencity.dto.user.UserVO;
 import greencity.security.jwt.JwtTool;
 import greencity.service.UserService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.core.env.Environment;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -31,7 +32,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtTool jwtTool;
 
     private final UserService userService;
-    
+
     private final Environment environment;
 
     @Value("${client.address}")
@@ -72,9 +73,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             if (user == null) {
                 String errorUrl = UriComponentsBuilder.fromUriString(clientUrl + "/auth/error")
                         .queryParam("error", "user_not_registered")
-                        .queryParam("message", "Please register using the traditional from first")
+                        .queryParam("message", "Please register using the traditional form first")
                         .build().toUriString();
                 getRedirectStrategy().sendRedirect(request, response, errorUrl);
+                throw new UsernameNotFoundException("User not found: " + email);
             }
 
             String accessToken = jwtTool.createAccessToken(email, user.getRole());
@@ -98,21 +100,23 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             getRedirectStrategy().sendRedirect(request, response, errorUrl);
         }
     }
-    
+
     /**
      * Adds a secure HTTP-only cookie with the specified token.
      *
      * @param response the HTTP response
-     * @param name the cookie name
-     * @param value the token value
-     * @param maxAge the cookie max age in seconds
+     * @param name     the cookie name
+     * @param value    the token value
+     * @param maxAge   the cookie max age in seconds
      */
     private void addTokenCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(maxAge)
+                .sameSite("Strict")
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 }

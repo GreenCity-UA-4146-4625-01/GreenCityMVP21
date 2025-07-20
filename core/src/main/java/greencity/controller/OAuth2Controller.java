@@ -37,7 +37,7 @@ public class OAuth2Controller {
     private final JwtTool jwtTool;
     private final UserService userService;
 
-    @Value("${REACT_APP_GOOGLE_CLIENT_ID}")
+    @Value("${google.clientId}")
     private String googleClientId;
 
     /**

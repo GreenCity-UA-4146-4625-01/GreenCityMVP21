@@ -4,16 +4,13 @@ import greencity.dto.PageableDto;
 import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
-import greencity.entity.EventImage;
+import greencity.entity.EventDateTime;
 import greencity.entity.User;
 import greencity.enums.Role;
-import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
-import greencity.repository.EventImageRepo;
 import greencity.repository.EventRepo;
 import greencity.validator.EventDateTimeDtoValidator;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -32,10 +29,8 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
     private final ModelMapper modelMapper;
     private final EventRepo eventRepo;
-    private final FileService fileService;
     private final EventDateTimeDtoValidator eventDateTimeDtoValidator;
     private final EventImageService eventImageService;
-    private final EventImageRepo eventImageRepo;
 
     /**
      * Creates a new event based on the provided {@link CreateEventRequestDto}.
@@ -107,23 +102,30 @@ public class EventServiceImpl implements EventService {
         );
     }
 
-    @Override
     @Transactional
+    @Override
     public EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user) {
 
         Event event = eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
         if (!user.getRole().equals(Role.ROLE_ADMIN) && !event.getCreator().getId().equals(user.getId())) {
-            throw new UserHasNoPermissionToAccessException("You are bot allowed to edit this event");
+            throw new UserHasNoPermissionToAccessException("You are not allowed to edit this event");
         }
 
+        // Валідація та оновлення eventDateTime
         if (dto.getEventDateTimes() != null) {
-
+            event.getEventDateTimes().clear(); // Видаляє попередні зв'язки, що дозволяє orphanRemoval
             for (EventDateTimeDto dateTimeDto : dto.getEventDateTimes()) {
                 eventDateTimeDtoValidator.validateAndFill(dateTimeDto);
+                EventDateTime eventDateTime = modelMapper.map(dateTimeDto, EventDateTime.class);
+                eventDateTime.setEvent(event); // встановлюємо батьківську сутність
+                event.getEventDateTimes().add(eventDateTime);
             }
         }
+
+        // Оновлення інших полів вручну або через mapper
+        modelMapper.map(dto, event); // Це мапить DTO в уже існуючу сутність
 
         if (images != null && !images.isEmpty()) {
             List<EventImageDto> uploadedImages = eventImageService.uploadEventImages(images, dto.getEventId(), user);
@@ -133,92 +135,10 @@ public class EventServiceImpl implements EventService {
                     .ifPresent(mainImage -> event.setMainImageId(mainImage.getImageId()));
         }
 
-        Event updatedEvent = modelMapper.map(dto, Event.class);
-
-        Event saved = eventRepo.save(updatedEvent);
-
+        Event saved = eventRepo.save(event);
         return modelMapper.map(saved, EventResponseDto.class);
     }
 
-    /**
-     * Uploads a single image for a specific event.
-     * <p>
-     * The image can optionally be marked as main, but only one main image is allowed per event.
-     * The total number of images per event cannot exceed 5.
-     *
-     * @param dto      the {@link UploadEventImageDto} containing the image and its metadata
-     * @param eventId  the ID of the event to associate the image with
-     * @return the {@link EventImageDto} representing the uploaded image
-     * @throws NotFoundException     if the event with the given ID is not found
-     * @throws BadRequestException  if the image limit is exceeded or a main image already exists
-     */
-    @Override
-    public EventImageDto uploadEventImage(@Valid UploadEventImageDto dto, Long eventId) {
-        Event event = getEventOrThrow(eventId);
-        List<EventImage> existingImages = eventImageRepo.findAllByEventId(eventId);
-
-        validateImagesCountAndMain(existingImages, List.of(dto));
-        return saveEventImage(dto, event);
-    }
-
-    /**
-     * Uploads a list of images for a specific event.
-     * <p>
-     * Each image can be marked as main, but only one main image is allowed per event.
-     * The total number of images per event cannot exceed 5.
-     *
-     * @param imagesDto the {@link UploadEventImagesDto} containing a list of image upload data
-     * @param eventId    the ID of the event to associate images with
-     * @return a list of {@link EventImageDto} representing the uploaded images
-     * @throws NotFoundException     if the event with the given ID is not found
-     * @throws BadRequestException  if the image limit is exceeded or more than one main image is submitted
-     */
-    @Override
-    public List<EventImageDto> uploadEventImages(@Valid UploadEventImagesDto imagesDto, Long eventId) {
-        Event event = getEventOrThrow(eventId);
-        List<UploadEventImageDto> dtos = imagesDto.getImages();
-
-        List<EventImage> existingImages = eventImageRepo.findAllByEventId(eventId);
-        validateImagesCountAndMain(existingImages, dtos);
-
-        return dtos.stream()
-                .map(dto -> saveEventImage(dto, event))
-                .toList();
-    }
-
-    private Event getEventOrThrow(Long eventId) {
-        return eventRepo.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
-    }
-
-    private void validateImagesCountAndMain(List<EventImage> existingImages, List<UploadEventImageDto> newImages) {
-        int totalImages = existingImages.size() + newImages.size();
-        if (totalImages > 5) {
-            throw new BadRequestException("Maximum of 5 images allowed per event.");
-        }
-
-        boolean hasExistingMain = existingImages.stream().anyMatch(EventImage::getIsMain);
-        long newMainCount = newImages.stream().filter(img -> Boolean.TRUE.equals(img.getIsMainImage())).count();
-
-        if (hasExistingMain && newMainCount > 0) {
-            throw new BadRequestException("Only one main image is allowed.");
-        }
-
-        if (!hasExistingMain && newMainCount > 1) {
-            throw new BadRequestException("Only one main image is allowed.");
-        }
-    }
-
-    private EventImageDto saveEventImage(UploadEventImageDto dto, Event event) {
-        String url = fileService.upload(dto.getImage());
-        EventImage eventImage = EventImage.builder()
-                .url(url)
-                .isMain(dto.getIsMainImage())
-                .event(event)
-                .build();
-        EventImage saved = eventImageRepo.save(eventImage);
-        return modelMapper.map(saved, EventImageDto.class);
-    }
 
     @Override
     @Transactional

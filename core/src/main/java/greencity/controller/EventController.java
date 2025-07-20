@@ -123,24 +123,9 @@ public class EventController {
             @PathVariable Long id,
             @RequestPart("event") @Valid EditEventRequestDto editEventRequestDto,
             @RequestPart(value = "images", required = false) @ValidImage List<MultipartFile> images,
-            @AuthenticationPrincipal UserVO user
+            @CurrentUser UserVO user
     ) {
         return ResponseEntity.ok(eventService.updateEventById(id, editEventRequestDto, images, user));
-    }
-
-    @Operation(summary = "Delete event by ID (accessible for ADMIN and OWNER only)")
-    @ApiResponses(value = {
-            @ApiResponse (responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse (responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse (responseCode = "403", description = HttpStatuses.FORBIDDEN),
-            @ApiResponse (responseCode = "404", description = HttpStatuses.NOT_FOUND),
-    })
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvent(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserVO user) {
-        eventService.deleteEventById(id, user);
-        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Delete event by ID (accessible for ADMIN and OWNER only)")

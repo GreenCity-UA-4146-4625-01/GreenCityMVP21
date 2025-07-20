@@ -152,4 +152,17 @@ public class EventServiceImpl implements EventService {
 
         eventRepo.delete(event);
     }
+
+    @Override
+    @Transactional
+    public void deleteEventById(Long eventId, UserVO user) {
+        Event event = eventRepo.findEventById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+
+        if (!user.getRole().equals(Role.ROLE_ADMIN) && !event.getCreator().getId().equals(user.getId())) {
+            throw new UserHasNoPermissionToAccessException("You are bot allowed to delete this event");
+        }
+
+        eventRepo.delete(event);
+    }
 }

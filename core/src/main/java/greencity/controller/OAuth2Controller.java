@@ -1,6 +1,9 @@
 package greencity.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import greencity.dto.user.UserVO;
 import greencity.security.dto.SuccessSignInDto;
 import greencity.security.jwt.JwtTool;
@@ -9,10 +12,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Base64;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -22,14 +27,18 @@ import java.util.Map;
  * @version 1.0
  */
 @Tag(name = "OAuth2", description = "OAuth2 authentication endpoints")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "${cors.allowed-origins}")
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Slf4j
 public class OAuth2Controller {
 
     private final JwtTool jwtTool;
     private final UserService userService;
+
+    @Value("${REACT_APP_GOOGLE_CLIENT_ID}")
+    private String googleClientId;
 
     /**
      * Handles Google JWT token authentication.
@@ -44,11 +53,16 @@ public class OAuth2Controller {
     public ResponseEntity<?> googleAuth(@RequestBody Map<String, String> request) {
         String token = request.get("token");
 
+        if (token == null || token.trim().isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("error", "Token is required"));
+        }
+
         // Decode Google JWT token to extract email
         String email = extractEmailFromGoogleToken(token);
 
         try {
             UserVO user = userService.findByEmail(email);
+
 
             String accessToken = jwtTool.createAccessToken(email, user.getRole());
             String refreshToken = jwtTool.createRefreshToken(user);
@@ -62,18 +76,27 @@ public class OAuth2Controller {
                     .build();
 
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
+            log.error("OAuth2 authentication failed for email: {}", email, e);
             return ResponseEntity.status(401).body(Map.of("error", "User not found or authentication failed"));
         }
     }
 
     private String extractEmailFromGoogleToken(String token) {
         try {
-            String[] parts = token.split("\\.");
-            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> claims = mapper.readValue(payload, Map.class);
-            return (String) claims.get("email");
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                    new NetHttpTransport(),
+                    new GsonFactory())
+                    .setAudience(Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(token);
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+                return payload.getEmail();
+            } else {
+                throw new RuntimeException("Invalid Google token");
+            }
         } catch (Exception e) {
             throw new RuntimeException("Invalid Google token", e);
         }

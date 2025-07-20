@@ -49,7 +49,6 @@ public class EventImageServiceImpl implements EventImageService {
      * @throws BadRequestException                  if the total number of images exceeds the allowed limit
      * @throws UserHasNoPermissionToAccessException if the user is neither the event creator nor an admin
      */
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @eventSecurity.isEventOwner(#eventId, #user.id)")
     @Override
     public List<EventImageDto> uploadEventImages(@Valid
                                                  @Size(max = 5, message = "Maximum 5 images allowed")

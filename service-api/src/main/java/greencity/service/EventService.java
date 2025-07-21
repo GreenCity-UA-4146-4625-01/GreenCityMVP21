@@ -69,4 +69,6 @@ public interface EventService {
      * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
      */
     void deleteEventById(Long id, UserVO user);
+  
+    
 }

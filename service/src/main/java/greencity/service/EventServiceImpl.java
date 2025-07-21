@@ -5,6 +5,7 @@ import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventDateTime;
+import greencity.entity.EventLocation;
 import greencity.entity.User;
 import greencity.enums.Role;
 import greencity.exception.exceptions.NotFoundException;
@@ -105,7 +106,6 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user) {
-
         Event event = eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
@@ -113,19 +113,40 @@ public class EventServiceImpl implements EventService {
             throw new UserHasNoPermissionToAccessException("You are not allowed to edit this event");
         }
 
-        // Валідація та оновлення eventDateTime
-        if (dto.getEventDateTimes() != null) {
-            event.getEventDateTimes().clear(); // Видаляє попередні зв'язки, що дозволяє orphanRemoval
-            for (EventDateTimeDto dateTimeDto : dto.getEventDateTimes()) {
-                eventDateTimeDtoValidator.validateAndFill(dateTimeDto);
-                EventDateTime eventDateTime = modelMapper.map(dateTimeDto, EventDateTime.class);
-                eventDateTime.setEvent(event); // встановлюємо батьківську сутність
-                event.getEventDateTimes().add(eventDateTime);
-            }
+        event.setTitle(dto.getTitle());
+        event.setDescription(dto.getDescription());
+        event.setEventVisibility(dto.getVisibility());
+
+        if (dto.getEventTypes() != null) {
+            event.setEventTypes(dto.getEventTypes());
         }
 
-        // Оновлення інших полів вручну або через mapper
-        modelMapper.map(dto, event); // Це мапить DTO в уже існуючу сутність
+        // Оновлення locations
+        if (dto.getLocations() != null) {
+            event.getEventLocations().clear();
+            dto.getLocations().forEach(locationDto -> {
+                EventLocation location = modelMapper.map(locationDto, EventLocation.class);
+                location.setEvent(event);
+                event.getEventLocations().add(location);
+            });
+        }
+
+        // Оновлення eventDateTimes (з валідацією)
+        if (dto.getEventDateTimes() != null) {
+            event.getEventDateTimes().clear();
+            dto.getEventDateTimes().forEach(dateTimeDto -> {
+                eventDateTimeDtoValidator.validateAndFill(dateTimeDto);
+                EventDateTime eventDateTime = modelMapper.map(dateTimeDto, EventDateTime.class);
+                eventDateTime.setEvent(event);
+                event.getEventDateTimes().add(eventDateTime);
+            });
+        }
+
+        // Оновлення onlineLinks
+        if (dto.getOnlineLinks() != null) {
+            event.getOnlineLinks().clear();
+            dto.getOnlineLinks().forEach(link -> event.getOnlineLinks().add(link));
+        }
 
         if (images != null && !images.isEmpty()) {
             List<EventImageDto> uploadedImages = eventImageService.uploadEventImages(images, dto.getEventId(), user);
@@ -135,8 +156,8 @@ public class EventServiceImpl implements EventService {
                     .ifPresent(mainImage -> event.setMainImageId(mainImage.getImageId()));
         }
 
-        Event saved = eventRepo.save(event);
-        return modelMapper.map(saved, EventResponseDto.class);
+        Event updatedEvent = eventRepo.save(event);
+        return modelMapper.map(updatedEvent, EventResponseDto.class);
     }
 
 
@@ -150,18 +171,8 @@ public class EventServiceImpl implements EventService {
             throw new UserHasNoPermissionToAccessException("You are bot allowed to delete this event");
         }
 
-        eventRepo.delete(event);
-    }
-
-    @Override
-    @Transactional
-    public void deleteEventById(Long eventId, UserVO user) {
-        Event event = eventRepo.findEventById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
-
-        if (!user.getRole().equals(Role.ROLE_ADMIN) && !event.getCreator().getId().equals(user.getId())) {
-            throw new UserHasNoPermissionToAccessException("You are bot allowed to delete this event");
-        }
+        event.getEventDateTimes().size();
+        event.getEventImages().size();
 
         eventRepo.delete(event);
     }

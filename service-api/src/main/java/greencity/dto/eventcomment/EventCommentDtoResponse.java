@@ -28,6 +28,10 @@ public class EventCommentDtoResponse {
     @NotNull
     private LocalDateTime modifiedDate;
 
+    private int replies;
+
+    private int likes;
+
     private Set<EventShortInfoUserVO> mentionedUser;
 }
 

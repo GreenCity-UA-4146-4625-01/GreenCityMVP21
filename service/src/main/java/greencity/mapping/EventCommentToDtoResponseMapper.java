@@ -10,6 +10,20 @@ import org.modelmapper.AbstractConverter;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Mapper class converting {@link EventComment} entity to {@link EventCommentDtoResponse} DTO.
+ * <p>
+ * Maps the EventComment entity fields to a response DTO used for sending comment data to clients.
+ * Includes:
+ * <ul>
+ *     <li>Basic comment info (id, text, modified date)</li>
+ *     <li>Author details mapped into {@link EventCommentAuthorDto}</li>
+ *     <li>Count of replies and likes</li>
+ *     <li>List of mentioned users mapped to {@link EventShortInfoUserVO}</li>
+ * </ul>
+ * Handles null safety for collections and nested entities.
+ * </p>
+ */
 public class EventCommentToDtoResponseMapper extends AbstractConverter<EventComment, EventCommentDtoResponse> {
     @Override
     protected EventCommentDtoResponse convert(EventComment source) {

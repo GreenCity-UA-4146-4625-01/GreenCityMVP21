@@ -48,7 +48,6 @@ class EventServiceImplTest {
     private final CreateEventRequestDto createEventRequestDto = ModelUtils.getCreateEventRequestDto();
     private final EventResponseDto eventResponseDto = ModelUtils.getEventResponseDto();
     private final Event event = ModelUtils.createEvent();
-
     private final UserVO userVO = ModelUtils.getUserVO();
 
     @Test
@@ -85,14 +84,14 @@ class EventServiceImplTest {
 
     @Test
     void getEventById() {
-        when(eventRepo.findById(event.getId())).thenReturn(Optional.of(event));
+        when(eventRepo.findEventById(event.getId())).thenReturn(Optional.of(event));
         when(modelMapper.map(event, EventResponseDto.class)).thenReturn(eventResponseDto);
 
         EventResponseDto result = eventService.getEventById(event.getId());
 
         assertNotNull(result);
         assertEquals(event.getId(), result.getEventId());
-        verify(eventRepo).findById(event.getId());
+        verify(eventRepo).findEventById(event.getId());
     }
 
     @Test
@@ -112,5 +111,37 @@ class EventServiceImplTest {
         assertEquals(0, result.getCurrentPage());
         assertEquals(2, result.getTotalElements());
         assertEquals(1, result.getTotalPages());
+    }
+
+    @Test
+    void assignUserToEvent_success() {
+        when(eventRepo.findEventById(event.getId())).thenReturn(Optional.of(event));
+        when(modelMapper.map(userVO, User.class)).thenReturn(ModelUtils.getUser());
+        when(eventRepo.save(event)).thenReturn(event);
+        when(modelMapper.map(event, EventResponseDto.class)).thenReturn(eventResponseDto);
+
+        EventResponseDto result = eventService.assignUserToEvent(event.getId(), userVO);
+
+        assertNotNull(result);
+        verify(eventRepo).save(event);
+    }
+
+
+    @Test
+    void unassignUserFromEvent_success() {
+        User participant = ModelUtils.getUser();
+        participant.setId(userVO.getId());
+
+        event.getParticipants().add(participant);
+
+        when(eventRepo.findEventById(event.getId())).thenReturn(Optional.of(event));
+        when(modelMapper.map(userVO, User.class)).thenReturn(participant);
+        when(eventRepo.save(event)).thenReturn(event);
+        when(modelMapper.map(event, EventResponseDto.class)).thenReturn(eventResponseDto);
+
+        EventResponseDto result = eventService.unassignUserFromEvent(event.getId(), userVO);
+
+        assertNotNull(result);
+        verify(eventRepo).save(event);
     }
 }

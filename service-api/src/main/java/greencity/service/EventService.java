@@ -42,7 +42,7 @@ public interface EventService {
      *
      * @param pageable the pagination and sorting information (e.g. page number, size, sort order)
      * @return a {@link PageableDto} containing a list of {@link EventResponseDto} objects;
-     *         the list may be empty if no events match the criteria
+     * the list may be empty if no events match the criteria
      */
     PageableDto<EventResponseDto> getAllEvents(Pageable pageable);
 
@@ -58,4 +58,22 @@ public interface EventService {
      * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
      */
     EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user);
+
+    /**
+     * Removes a user from the list of participants of the specified event.
+     *
+     * @param eventId the ID of the event to attend
+     * @param user    the user who wants to attend the event
+     * @return the updated event details with the user's participation info
+     */
+    EventResponseDto assignUserToEvent(Long eventId, UserVO user);
+
+    /**
+     * Removes the given user from the participants of the specified event.
+     *
+     * @param eventId the ID of the event from which the user should be removed
+     * @param user    the user who wants to leave the event
+     * @return {@link EventResponseDto} with the updated event details
+     */
+    EventResponseDto unassignUserFromEvent(Long eventId, UserVO user);
 }

@@ -2,6 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUser;
 import greencity.annotations.ValidImage;
+import greencity.constant.ErrorMessage;
 import greencity.constant.HttpStatuses;
 import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
@@ -10,6 +11,7 @@ import greencity.dto.event.EventResponseDto;
 import greencity.dto.user.UserVO;
 import greencity.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -23,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @Validated
@@ -63,7 +67,7 @@ public class EventController {
     public ResponseEntity<EventResponseDto> createEvent(
             @CurrentUser UserVO user,
             @RequestPart("event") @Valid CreateEventRequestDto createEventRequestDto,
-            @RequestPart(value = "images", required = false) @ValidImage @Size(max = 5) List<MultipartFile> images) {
+            @RequestPart(value = "images", required = false) @ValidImage @Size(max = 5, message = ErrorMessage.MAX_EVENT_IMAGES_EXCEEDED) List<MultipartFile> images) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(eventService.createEvent(createEventRequestDto, user, images));
     }
@@ -124,4 +128,57 @@ public class EventController {
     ) {
         return ResponseEntity.ok(eventService.updateEventById(id, editEventRequestDto, images, user));
     }
+
+    /**
+     * Assigns the current user to the specified event.
+     * <p>
+     * Adds the authenticated user to the list of participants for the given event.
+     * Requires the user to be authenticated via {@link CurrentUser}.
+     *
+     * @param eventId ID of the event to join
+     * @param user    authenticated user
+     * @return updated {@link EventResponseDto} with status 200
+     * @apiNote - Response code 200: User successfully joined the event
+     * - Response code 404: Event not found
+     */
+    @Operation(summary = "Join an event (assign current user)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    })
+    @PostMapping("/{eventId}/join")
+    public ResponseEntity<EventResponseDto> joinEvent(
+            @PathVariable Long eventId,
+            @Parameter(hidden = true) @CurrentUser UserVO user
+    ) {
+        return ResponseEntity.ok(eventService.assignUserToEvent(eventId, user));
+    }
+
+    /**
+     * Removes the current user from the specified event.
+     * <p>
+     * Unassigns the authenticated user from the list of event participants.
+     * Requires the user to be authenticated via {@link CurrentUser}.
+     *
+     * @param eventId ID of the event to leave
+     * @param user    authenticated user
+     * @return updated {@link EventResponseDto} with status 200
+     * @apiNote - Response code 200: User successfully left the event
+     * - Response code 404: Event not found
+     */
+    @Operation(summary = "Leave an event (unassign current user)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    })
+    @DeleteMapping("/{eventId}/leave")
+    public ResponseEntity<EventResponseDto> leaveEvent(
+            @PathVariable Long eventId,
+            @Parameter(hidden = true) @CurrentUser UserVO user
+    ) {
+        return ResponseEntity.ok(eventService.unassignUserFromEvent(eventId, user));
+    }
+
 }

@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -73,8 +74,7 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public EventResponseDto getEventById(Long id) {
-        Event event = eventRepo.findById(id).orElseThrow(
-                () -> new NotFoundException("Event not found"));
+        Event event = getEventEntityById(id);
         return modelMapper.map(event, EventResponseDto.class);
     }
 
@@ -136,5 +136,59 @@ public class EventServiceImpl implements EventService {
         Event saved = eventRepo.save(updatedEvent);
 
         return modelMapper.map(saved, EventResponseDto.class);
+    }
+
+    /**
+     * Assigns a user to participate in an event by event ID.
+     * <p>
+     * This method adds the given user to the list of participants of the specified event.
+     * If the user is already assigned, they will not be added again.
+     * </p>
+     *
+     * @param eventId the ID of the event the user wants to join
+     * @param user    the user information to be assigned to the event
+     * @return {@link EventResponseDto} containing the updated event data
+     * @throws NotFoundException if the event with the given ID does not exist
+     */
+    @Override
+    public EventResponseDto assignUserToEvent(Long eventId, UserVO user) {
+        Event event = getEventEntityById(eventId);
+        User userEntity = modelMapper.map(user, User.class);
+
+        event.getParticipants().add(userEntity);
+
+        Event saved = eventRepo.save(event);
+        return modelMapper.map(saved, EventResponseDto.class);
+    }
+
+    /**
+     * Removes a user from the list of participants of the specified event.
+     *
+     * @param eventId the ID of the event to leave
+     * @param user    the user who wants to leave the event
+     * @return {@link EventResponseDto} containing the updated event data
+     * @throws NotFoundException if the event with the given ID does not exist
+     */
+    @Override
+    public EventResponseDto unassignUserFromEvent(Long eventId, UserVO user) {
+        Event event = getEventEntityById(eventId);
+        User userEntity = modelMapper.map(user, User.class);
+
+        event.getParticipants().removeIf(participant -> participant.getId().equals(userEntity.getId()));
+
+        Event saved = eventRepo.save(event);
+        return modelMapper.map(saved, EventResponseDto.class);
+    }
+
+    private Event getEventEntityById(Long id) {
+        return eventRepo.findEventById(id)
+                .orElseThrow(() -> new NotFoundException("Event not found with id: " + id));
+    }
+
+
+    @PostAuthorize("hasRole('ROLE_ADMIN') or #user.id == #returnObject.creator.id")
+    private Event getEventForOwnerAccess(Long eventId, UserVO user) {
+        return eventRepo.findEventById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
     }
 }

@@ -862,7 +862,7 @@ public class ModelUtils {
                         .name("Eco Organizer")
                         .email("organizer@greencity.com")
                         .build())
+                .participants(new HashSet<>())
                 .build();
-
     }
 }

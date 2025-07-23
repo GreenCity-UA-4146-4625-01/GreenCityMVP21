@@ -23,6 +23,12 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserRepo userRepository;
     private final ModelMapper modelMapper;
 
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+    }
+
     /**
      * Creates a notification when a new comment is added.
      *
@@ -31,7 +37,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void createNotification(NotificationDto dto) {
         Notification notification = modelMapper.convert(dto, Notification.class);
-        notification.setReceiver(findUserById(dto.receiver().getId());
+        notification.setReceiver(findUserById(dto.receiver().getId()));
         notificationRepo.save(notification);
     }
 
@@ -96,6 +102,24 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void deleteNotification(Long notificationId) {
         notificationRepo.deleteById(notificationId);
+    }
+
+
+
+    @Override
+    public void createReplyNotification(NewReplyNotificationDto dto) {
+        if (dto.receiver() == null || dto.receiver().getId() == null) {
+            throw new IllegalArgumentException("Receiver must not be null");
+        }
+
+        Notification notification = Notification.builder()
+                .receiver(findUserById(dto.receiver().getId()))
+                .objectId(dto.objectId())
+                .type(NotificationType.NEW_REPLY)
+                .isRead(false)
+                .build();
+
+        notificationRepo.save(notification);
     }
 
 

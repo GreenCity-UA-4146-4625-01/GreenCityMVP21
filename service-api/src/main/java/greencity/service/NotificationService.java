@@ -1,5 +1,6 @@
 package greencity.service;
 
+import greencity.dto.notification.NewReplyNotificationDto;
 import greencity.dto.notification.NotificationInternalDto;
 import greencity.dto.notification.NotificationDto;
 
@@ -51,6 +52,10 @@ import java.util.List;
          * @param notificationId ID of the notification
          */
         void deleteNotification(Long notificationId);
+
+        void createReplyNotification(NewReplyNotificationDto dto);
+
+
 
     }
 

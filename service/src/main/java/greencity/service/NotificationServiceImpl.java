@@ -4,16 +4,20 @@ import greencity.dto.notification.*;
 import greencity.entity.Notification;
 import greencity.entity.User;
 import greencity.enums.NotificationType;
+import greencity.mapping.NotificationMapper;
 import greencity.repository.NotificationRepo;
 import greencity.repository.UserRepo;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import greencity.util.NotificationTextFormatter;
+
+
 
 import java.util.List;
 
-/**
+/**NewReplyNotificationDto
  * Service implementation for managing user notifications.
  */
 @Service
@@ -36,7 +40,18 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void createNotification(NotificationDto dto) {
-        Notification notification = modelMapper.convert(dto, Notification.class);
+        Notification notification = NotificationMapper.mapToEntity(dto);
+        if (dto instanceof NewReplyNotificationDto replyDto) {
+            String notificationText = NotificationTextFormatter.formatNewReplyText(
+                    replyDto.comment().getAuthor().getName(),
+                    "news",
+                    replyDto.comment().getEcoNewsTitle(),
+                    replyDto.comment().getModifiedDate()
+            );
+            notification.setText(notificationText);
+        }
+
+
         notification.setReceiver(findUserById(dto.receiver().getId()));
         notificationRepo.save(notification);
     }
@@ -104,23 +119,12 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepo.deleteById(notificationId);
     }
 
-
-
     @Override
-    public void createReplyNotification(NewReplyNotificationDto dto) {
-        if (dto.receiver() == null || dto.receiver().getId() == null) {
-            throw new IllegalArgumentException("Receiver must not be null");
-        }
-
-        Notification notification = Notification.builder()
-                .receiver(findUserById(dto.receiver().getId()))
-                .objectId(dto.objectId())
-                .type(NotificationType.NEW_REPLY)
-                .isRead(false)
-                .build();
-
-        notificationRepo.save(notification);
+    public int countUnreadNotifications(Long userId) {
+        User receiver = findUserById(userId);
+        return notificationRepo.findUnreadByReceiver(receiver).size();
     }
+
 
 
 }

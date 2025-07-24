@@ -53,8 +53,7 @@ import java.util.List;
          */
         void deleteNotification(Long notificationId);
 
-        void createReplyNotification(NewReplyNotificationDto dto);
-
+        int countUnreadNotifications(Long userId);
 
 
     }

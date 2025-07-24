@@ -5,6 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
 import greencity.dto.econews.EcoNewsVO;
 import greencity.dto.econewscomment.*;
+import greencity.dto.notification.NewReplyNotificationDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.EcoNews;
 import greencity.entity.EcoNewsComment;
@@ -34,6 +35,7 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
     private EcoNewsCommentRepo ecoNewsCommentRepo;
     private EcoNewsService ecoNewsService;
     private ModelMapper modelMapper;
+    private final NotificationService notificationService;
     private final SimpMessagingTemplate messagingTemplate;
     private final greencity.rating.RatingCalculation ratingCalculation;
     private final HttpServletRequest httpServletRequest;
@@ -64,6 +66,15 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
                     () -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
             if (parentComment.getParentComment() == null) {
                 ecoNewsComment.setParentComment(parentComment);
+
+                notificationService.createNotification(
+                        NewReplyNotificationDto.builder()
+                                .isRead(false)
+                                .receiver(modelMapper.map(parentComment.getUser(), UserVO.class))
+                                .comment(modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
+                                .parentComment(modelMapper.map(parentComment, EcoNewsCommentDto.class))
+                                .build()
+                );
             } else {
                 throw new BadRequestException(ErrorMessage.CANNOT_REPLY_THE_REPLY);
             }
@@ -94,7 +105,11 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
                     .anyMatch(u -> u.getId().equals(userVO.getId())));
                 return comment;
             })
-            .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
+                .map(ecoNewsComment -> {
+                    EcoNewsCommentDto dto = modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class);
+                    dto.setEcoNewsTitle(ecoNewsComment.getEcoNews().getTitle());
+                    return dto;
+                })
             .map(comment -> {
                 comment.setReplies(ecoNewsCommentRepo.countByParentCommentId(comment.getId()));
                 return comment;
@@ -127,7 +142,11 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
                     .anyMatch(u -> u.getId().equals(userVO.getId())));
                 return comment;
             })
-            .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
+                .map(ecoNewsComment -> {
+                    EcoNewsCommentDto dto = modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class);
+                    dto.setEcoNewsTitle(ecoNewsComment.getEcoNews().getTitle());
+                    return dto;
+                })
             .collect(Collectors.toList());
 
         return new PageableDto<>(
@@ -312,7 +331,11 @@ public class EcoNewsCommentServiceImpl implements EcoNewsCommentService {
                     .anyMatch(u -> u.getId().equals(user.getId())));
                 return comment;
             })
-            .map(ecoNewsComment -> modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class))
+                .map(ecoNewsComment -> {
+                    EcoNewsCommentDto dto = modelMapper.map(ecoNewsComment, EcoNewsCommentDto.class);
+                    dto.setEcoNewsTitle(ecoNewsComment.getEcoNews().getTitle());
+                    return dto;
+                })
             .collect(Collectors.toList());
 
         return new PageableDto<>(

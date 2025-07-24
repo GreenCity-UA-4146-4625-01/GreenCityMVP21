@@ -22,6 +22,7 @@ public class EcoNewsCommentDto {
     @NotEmpty
     private LocalDateTime modifiedDate;
 
+
     private EcoNewsCommentAuthorDto author;
 
     private String text;
@@ -33,4 +34,7 @@ public class EcoNewsCommentDto {
     private boolean currentUserLiked;
 
     private CommentStatus status;
+
+    private String ecoNewsTitle;
+
 }

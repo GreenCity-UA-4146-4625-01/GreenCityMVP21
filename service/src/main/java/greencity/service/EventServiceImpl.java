@@ -113,15 +113,22 @@ public class EventServiceImpl implements EventService {
             throw new UserHasNoPermissionToAccessException("You are not allowed to edit this event");
         }
 
-        event.setTitle(dto.getTitle());
-        event.setDescription(dto.getDescription());
-        event.setEventVisibility(dto.getVisibility());
+        if (dto.getTitle() != null) {
+            event.setTitle(dto.getTitle());
+        }
+
+        if (dto.getDescription() != null) {
+            event.setDescription(dto.getDescription());
+        }
+
+        if (dto.getVisibility() != null) {
+            event.setEventVisibility(dto.getVisibility());
+        }
 
         if (dto.getEventTypes() != null) {
             event.setEventTypes(dto.getEventTypes());
         }
 
-        // Оновлення locations
         if (dto.getLocations() != null) {
             event.getEventLocations().clear();
             dto.getLocations().forEach(locationDto -> {
@@ -131,7 +138,6 @@ public class EventServiceImpl implements EventService {
             });
         }
 
-        // Оновлення eventDateTimes (з валідацією)
         if (dto.getEventDateTimes() != null) {
             event.getEventDateTimes().clear();
             dto.getEventDateTimes().forEach(dateTimeDto -> {
@@ -142,7 +148,6 @@ public class EventServiceImpl implements EventService {
             });
         }
 
-        // Оновлення onlineLinks
         if (dto.getOnlineLinks() != null) {
             event.getOnlineLinks().clear();
             dto.getOnlineLinks().forEach(link -> event.getOnlineLinks().add(link));
@@ -160,20 +165,22 @@ public class EventServiceImpl implements EventService {
         return modelMapper.map(updatedEvent, EventResponseDto.class);
     }
 
-
     @Override
     @Transactional
     public void deleteEventById(Long eventId, UserVO user) {
-        Event event = eventRepo.findEventById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
-
-        if (!user.getRole().equals(Role.ROLE_ADMIN) && !event.getCreator().getId().equals(user.getId())) {
-            throw new UserHasNoPermissionToAccessException("You are bot allowed to delete this event");
+        if (!eventRepo.existsById(eventId)) {
+            throw new NotFoundException("Event not found");
         }
 
-        event.getEventDateTimes().size();
-        event.getEventImages().size();
+        Long creatorId = eventRepo.getCreatorIdByEventId(eventId);
+        if (creatorId == null) {
+            throw new NotFoundException("Creator Id not found");
+        }
 
-        eventRepo.delete(event);
+        if (!user.getRole().equals(Role.ROLE_ADMIN) && !creatorId.equals(user.getId())) {
+            throw new UserHasNoPermissionToAccessException("You are not allowed to delete this event");
+        }
+
+        eventRepo.deleteById(eventId);
     }
 }

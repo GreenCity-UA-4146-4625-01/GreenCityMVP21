@@ -180,6 +180,32 @@ public class EventServiceImpl implements EventService {
         return modelMapper.map(saved, EventResponseDto.class);
     }
 
+    /**
+     * Retrieves a paginated list of events that the given user has joined (i.e., is assigned to as a participant).
+     * <p>
+     * The method queries the {@code Event} entities where the user is listed as a participant and maps them to
+     * {@link EventResponseDto} objects. The result is wrapped in a {@link PageableDto} with pagination metadata.
+     *
+     * @param user     the currently authenticated user whose assigned events should be fetched; must not be {@code null}
+     * @param pageable the pagination and sorting information
+     * @return a {@link PageableDto} containing a list of {@link EventResponseDto} that the user is assigned to;
+     *         the list may be empty if the user is not participating in any events
+     */
+    @Override
+    public PageableDto<EventResponseDto> getEventsAssignedToUser(UserVO user, Pageable pageable) {
+        Page<Event> byParticipantsId = eventRepo.findByParticipants_Id(user.getId(), pageable);
+
+        List<EventResponseDto> content = byParticipantsId.stream()
+                .map(event -> modelMapper.map(event, EventResponseDto.class))
+                .toList();
+
+        return new PageableDto<>(
+                content,
+                byParticipantsId.getTotalElements(),
+                byParticipantsId.getNumber(),
+                byParticipantsId.getTotalPages());
+    }
+
     private Event getEventEntityById(Long id) {
         return eventRepo.findEventById(id)
                 .orElseThrow(() -> new NotFoundException("Event not found with id: " + id));

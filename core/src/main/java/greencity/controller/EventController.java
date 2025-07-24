@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -181,4 +182,31 @@ public class EventController {
         return ResponseEntity.ok(eventService.unassignUserFromEvent(eventId, user));
     }
 
+    /**
+     * Retrieves a paginated list of events that the currently authenticated user is assigned to.
+     * <p>
+     * This endpoint allows the user to fetch all events they are involved in as an assignee.
+     * The results are sorted by creation date in descending order by default.
+     * Requires authentication.
+     *
+     * @param pageable the pagination and sorting information (e.g., page number, size, sort order)
+     * @param user     the currently authenticated user (injected automatically)
+     * @return a pageable list of {@link EventResponseDto} representing assigned events
+     */
+    @Operation(
+            summary = "Get all events assigned to the current user",
+            description = "Returns a paginated list of events that the currently authenticated user has been assigned to. " +
+                    "Requires user to be authenticated."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+    })
+    @GetMapping("/assigned")
+    public ResponseEntity<PageableDto<EventResponseDto>> getEventsAssignedToUser(
+            @PageableDefault(sort = "creationDate", direction = Sort.Direction.DESC) Pageable pageable,
+            @Parameter(hidden = true) @CurrentUser UserVO user
+    ) {
+        return ResponseEntity.ok(eventService.getEventsAssignedToUser(user, pageable));
+    }
 }

@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -143,5 +144,25 @@ class EventServiceImplTest {
 
         assertNotNull(result);
         verify(eventRepo).save(event);
+    }
+
+    @Test
+    void getEventsAssignedToUser_success() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Event> eventPage = new PageImpl<>(List.of(event), pageable, 1);
+
+        when(eventRepo.findByParticipants_Id(userVO.getId(), pageable)).thenReturn(eventPage);
+        when(modelMapper.map(event, EventResponseDto.class)).thenReturn(eventResponseDto);
+
+        PageableDto<EventResponseDto> result = eventService.getEventsAssignedToUser(userVO, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(0, result.getCurrentPage());
+        assertEquals(1, result.getTotalPages());
+        assertEquals("Test", result.getPage().get(0).getTitle());
+
+        verify(eventRepo).findByParticipants_Id(userVO.getId(), pageable);
+        verify(modelMapper).map(event, EventResponseDto.class);
     }
 }

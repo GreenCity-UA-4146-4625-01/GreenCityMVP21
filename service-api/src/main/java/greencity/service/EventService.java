@@ -76,4 +76,14 @@ public interface EventService {
      * @return {@link EventResponseDto} with the updated event details
      */
     EventResponseDto unassignUserFromEvent(Long eventId, UserVO user);
+
+    /**
+     * Retrieves a paginated list of events to which the given user is assigned (i.e., has joined).
+     *
+     * @param user     the authenticated user for whom to retrieve assigned events; must not be {@code null}
+     * @param pageable the pagination and sorting information (e.g., page number, size, sort order)
+     * @return a {@link PageableDto} containing a list of {@link EventResponseDto} objects the user is assigned to;
+     * the list may be empty if the user has not joined any events
+     */
+    PageableDto<EventResponseDto> getEventsAssignedToUser(UserVO user, Pageable pageable);
 }

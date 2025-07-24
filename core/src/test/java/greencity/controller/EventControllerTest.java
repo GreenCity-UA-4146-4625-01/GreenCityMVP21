@@ -136,4 +136,19 @@ class EventControllerTest {
 
         verify(eventService).unassignUserFromEvent(eq(eventId), any(UserVO.class));
     }
+
+    @Test
+    void getEventsAssignedToUser_ShouldReturn200() throws Exception {
+        PageableDto<EventResponseDto> pageableDto = new PageableDto<>(Collections.emptyList(), 0, 0, 0);
+
+        when(eventService.getEventsAssignedToUser(any(UserVO.class), any(Pageable.class)))
+                .thenReturn(pageableDto);
+
+        mockMvc.perform(get("/events/assigned")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk());
+
+        verify(eventService).getEventsAssignedToUser(any(UserVO.class), any(Pageable.class));
+    }
 }

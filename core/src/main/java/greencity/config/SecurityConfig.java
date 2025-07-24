@@ -199,6 +199,7 @@ public class SecurityConfig {
                     "/habit/search",
                     "/habit/{habitId}/friends/profile-pictures")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
+                    .requestMatchers(HttpMethod.POST, "/events/**/comments").hasAnyRole(USER,ADMIN,MODERATOR,UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     "/category",
                     "/econews",
@@ -206,7 +207,6 @@ public class SecurityConfig {
                     "/econews/dislike",
                     "/econews/comments/{econewsId}",
                     "/econews/comments/like",
-                    "/events/{event-id}/comments",
                     CUSTOM_SHOPPING_LIST_ITEMS,
                     "/files/image",
                     "/files/convert",

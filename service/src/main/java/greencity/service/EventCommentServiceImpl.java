@@ -29,7 +29,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     private final EventRepo eventRepository;
     private final ModelMapper mapper;
     private final HttpServletRequest httpServletRequest;
-    RatingCalculation ratingCalculation;
+    private final RatingCalculation ratingCalculation;
 
 
 

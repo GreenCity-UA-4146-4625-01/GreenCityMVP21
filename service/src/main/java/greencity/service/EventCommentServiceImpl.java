@@ -10,15 +10,11 @@ import greencity.entity.EventComment;
 import greencity.entity.User;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
-import greencity.mapping.AddEventCommentDtoRequestToEventCommentMapper;
-import greencity.mapping.EventCommentToDtoResponseMapper;
 import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
-import greencity.repository.UserRepo;
 import greencity.repository.options.EventCommentRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 

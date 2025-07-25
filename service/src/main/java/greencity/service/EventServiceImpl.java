@@ -152,7 +152,7 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public EventResponseDto assignUserToEvent(Long eventId, UserVO user) {
-        Event event = getEventEntityById(eventId);
+        Event event = getEventForOwnerAccess(eventId, user);
         User userEntity = modelMapper.map(user, User.class);
 
         event.getParticipants().add(userEntity);
@@ -171,7 +171,7 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public EventResponseDto unassignUserFromEvent(Long eventId, UserVO user) {
-        Event event = getEventEntityById(eventId);
+        Event event = getEventForOwnerAccess(eventId, user);
         User userEntity = modelMapper.map(user, User.class);
 
         event.getParticipants().removeIf(participant -> participant.getId().equals(userEntity.getId()));
@@ -189,7 +189,7 @@ public class EventServiceImpl implements EventService {
      * @param user     the currently authenticated user whose assigned events should be fetched; must not be {@code null}
      * @param pageable the pagination and sorting information
      * @return a {@link PageableDto} containing a list of {@link EventResponseDto} that the user is assigned to;
-     *         the list may be empty if the user is not participating in any events
+     * the list may be empty if the user is not participating in any events
      */
     @Override
     public PageableDto<EventResponseDto> getEventsAssignedToUser(UserVO user, Pageable pageable) {

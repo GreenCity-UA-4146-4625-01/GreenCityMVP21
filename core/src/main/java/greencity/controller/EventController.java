@@ -21,18 +21,11 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.List;
 
+import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/events")
@@ -120,8 +113,23 @@ public class EventController {
             @PathVariable Long id,
             @RequestPart("event") @Valid EditEventRequestDto editEventRequestDto,
             @RequestPart(value = "images", required = false) @ValidImage List<MultipartFile> images,
-            @AuthenticationPrincipal UserVO user
+            @CurrentUser UserVO user
     ) {
         return ResponseEntity.ok(eventService.updateEventById(id, editEventRequestDto, images, user));
+    }
+
+    @Operation(summary = "Delete event by ID (accessible for ADMIN and OWNER only)")
+    @ApiResponses(value = {
+            @ApiResponse (responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse (responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse (responseCode = "403", description = HttpStatuses.FORBIDDEN),
+            @ApiResponse (responseCode = "404", description = HttpStatuses.NOT_FOUND),
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEvent(
+            @PathVariable Long id,
+            @CurrentUser UserVO user) {
+        eventService.deleteEventById(id, user);
+        return ResponseEntity.noContent().build();
     }
 }

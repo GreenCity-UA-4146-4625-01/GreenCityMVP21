@@ -1,14 +1,15 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
-import greencity.dto.event.CreateEventRequestDto;
-import greencity.dto.event.EditEventRequestDto;
-import greencity.dto.event.EventResponseDto;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
+import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 import java.util.List;
 
@@ -58,4 +59,16 @@ public interface EventService {
      * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
      */
     EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user);
+
+    /**
+     * Deletes an event with the specified identifier by a given user.
+     *
+     * @param id   the unique identifier of the event to delete; must not be {@code null}
+     * @param user the user performing the delete operation; must not be {@code null}
+     * @throws NotFoundException                    if the event with the specified ID does not exist
+     * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
+     */
+    void deleteEventById(Long id, UserVO user);
+  
+    
 }

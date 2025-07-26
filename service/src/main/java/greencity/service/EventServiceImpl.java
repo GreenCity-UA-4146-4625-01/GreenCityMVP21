@@ -1,25 +1,23 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
-import greencity.dto.event.CreateEventRequestDto;
-import greencity.dto.event.EditEventRequestDto;
-import greencity.dto.event.EventDateTimeDto;
-import greencity.dto.event.EventImageDto;
-import greencity.dto.event.EventResponseDto;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
+import greencity.entity.EventDateTime;
+import greencity.entity.EventLocation;
 import greencity.entity.User;
 import greencity.enums.Role;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventRepo;
 import greencity.validator.EventDateTimeDtoValidator;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -105,22 +103,54 @@ public class EventServiceImpl implements EventService {
         );
     }
 
-    @Override
     @Transactional
+    @Override
     public EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user) {
-
         Event event = eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
         if (!user.getRole().equals(Role.ROLE_ADMIN) && !event.getCreator().getId().equals(user.getId())) {
-            throw new UserHasNoPermissionToAccessException("You are bot allowed to edit this event");
+            throw new UserHasNoPermissionToAccessException("You are not allowed to edit this event");
+        }
+
+        if (dto.getTitle() != null) {
+            event.setTitle(dto.getTitle());
+        }
+
+        if (dto.getDescription() != null) {
+            event.setDescription(dto.getDescription());
+        }
+
+        if (dto.getVisibility() != null) {
+            event.setEventVisibility(dto.getVisibility());
+        }
+
+        if (dto.getEventTypes() != null) {
+            event.setEventTypes(dto.getEventTypes());
+        }
+
+        if (dto.getLocations() != null) {
+            event.getEventLocations().clear();
+            dto.getLocations().forEach(locationDto -> {
+                EventLocation location = modelMapper.map(locationDto, EventLocation.class);
+                location.setEvent(event);
+                event.getEventLocations().add(location);
+            });
         }
 
         if (dto.getEventDateTimes() != null) {
-
-            for (EventDateTimeDto dateTimeDto : dto.getEventDateTimes()) {
+            event.getEventDateTimes().clear();
+            dto.getEventDateTimes().forEach(dateTimeDto -> {
                 eventDateTimeDtoValidator.validateAndFill(dateTimeDto);
-            }
+                EventDateTime eventDateTime = modelMapper.map(dateTimeDto, EventDateTime.class);
+                eventDateTime.setEvent(event);
+                event.getEventDateTimes().add(eventDateTime);
+            });
+        }
+
+        if (dto.getOnlineLinks() != null) {
+            event.getOnlineLinks().clear();
+            dto.getOnlineLinks().forEach(link -> event.getOnlineLinks().add(link));
         }
 
         if (images != null && !images.isEmpty()) {
@@ -131,10 +161,26 @@ public class EventServiceImpl implements EventService {
                     .ifPresent(mainImage -> event.setMainImageId(mainImage.getImageId()));
         }
 
-        Event updatedEvent = modelMapper.map(dto, Event.class);
+        Event updatedEvent = eventRepo.save(event);
+        return modelMapper.map(updatedEvent, EventResponseDto.class);
+    }
 
-        Event saved = eventRepo.save(updatedEvent);
+    @Override
+    @Transactional
+    public void deleteEventById(Long eventId, UserVO user) {
+        if (!eventRepo.existsById(eventId)) {
+            throw new NotFoundException("Event not found");
+        }
 
-        return modelMapper.map(saved, EventResponseDto.class);
+        Long creatorId = eventRepo.getCreatorIdByEventId(eventId);
+        if (creatorId == null) {
+            throw new NotFoundException("Creator Id not found");
+        }
+
+        if (!user.getRole().equals(Role.ROLE_ADMIN) && !creatorId.equals(user.getId())) {
+            throw new UserHasNoPermissionToAccessException("You are not allowed to delete this event");
+        }
+
+        eventRepo.deleteById(eventId);
     }
 }

@@ -145,8 +145,8 @@ public class EventController {
     @Operation(summary = "Join an event (assign current user)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @PostMapping("/{eventId}/join")
     public ResponseEntity<EventResponseDto> joinEvent(
@@ -171,8 +171,8 @@ public class EventController {
     @Operation(summary = "Leave an event (unassign current user)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
-            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED)
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
     @DeleteMapping("/{eventId}/leave")
     public ResponseEntity<EventResponseDto> leaveEvent(

@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
 @Validated
 @RestController
 @RequestMapping("/events")
@@ -207,13 +207,14 @@ public class EventController {
             @Parameter(hidden = true) @CurrentUser UserVO user
     ) {
         return ResponseEntity.ok(eventService.getEventsAssignedToUser(user, pageable));
+    }
 
     @Operation(summary = "Delete event by ID (accessible for ADMIN and OWNER only)")
     @ApiResponses(value = {
-            @ApiResponse (responseCode = "200", description = HttpStatuses.OK),
-            @ApiResponse (responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
-            @ApiResponse (responseCode = "403", description = HttpStatuses.FORBIDDEN),
-            @ApiResponse (responseCode = "404", description = HttpStatuses.NOT_FOUND),
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(
@@ -221,6 +222,6 @@ public class EventController {
             @CurrentUser UserVO user) {
         eventService.deleteEventById(id, user);
         return ResponseEntity.noContent().build();
-
     }
+
 }

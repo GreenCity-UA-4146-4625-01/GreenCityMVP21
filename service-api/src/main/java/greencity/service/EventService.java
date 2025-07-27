@@ -88,8 +88,8 @@ public interface EventService {
      * the list may be empty if the user has not joined any events
      */
     PageableDto<EventResponseDto> getEventsAssignedToUser(UserVO user, Pageable pageable);
-}
 
+    /**
      * Deletes an event with the specified identifier by a given user.
      *
      * @param id   the unique identifier of the event to delete; must not be {@code null}
@@ -98,7 +98,6 @@ public interface EventService {
      * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
      */
     void deleteEventById(Long id, UserVO user);
-  
     
 }
 

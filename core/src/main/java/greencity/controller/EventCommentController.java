@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @AllArgsConstructor
 @RestController
-@RequestMapping("/events/{event-id}/comments")
+@RequestMapping("/events/comments")
 public class EventCommentController {
     private final EventCommentService eventCommentService;
 
@@ -31,14 +31,14 @@ public class EventCommentController {
     @ResponseStatus(value = HttpStatus.CREATED)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = HttpStatuses.CREATED,
-                    content = @Content(schema = @Schema(implementation = AddEcoNewsCommentDtoResponse.class))),
+                    content = @Content(schema = @Schema(implementation = EventCommentDtoResponse.class))),
             @ApiResponse(responseCode = "303", description = HttpStatuses.SEE_OTHER),
             @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })  
-    @PostMapping
-    public ResponseEntity<EventCommentDtoResponse> addComment(@PathVariable("event-id") Long eventId,
+    @PostMapping("{eventId}")
+    public ResponseEntity<EventCommentDtoResponse> addComment(@PathVariable Long eventId,
         @Valid @RequestBody AddEventCommentDtoRequest request,
         @Parameter(hidden = true) @CurrentUser UserVO userVO) {
         return ResponseEntity

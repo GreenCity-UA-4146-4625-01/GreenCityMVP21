@@ -199,13 +199,13 @@ public class SecurityConfig {
                     "/habit/search",
                     "/habit/{habitId}/friends/profile-pictures")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
-                    .requestMatchers(HttpMethod.POST, "/events/**/comments").hasAnyRole(USER,ADMIN,MODERATOR,UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.POST,
                     "/category",
                     "/econews",
                     "/econews/like",
                     "/econews/dislike",
                     "/econews/comments/{econewsId}",
+                    "/events/comments/{eventId}",
                     "/econews/comments/like",
                     CUSTOM_SHOPPING_LIST_ITEMS,
                     "/files/image",

@@ -283,7 +283,9 @@ public class SecurityConfig {
                     "/user/role",
                     "/user/update/role")
                 .hasAnyRole(ADMIN)
-                .requestMatchers(HttpMethod.PATCH, "events/**")
+                .requestMatchers(HttpMethod.PATCH, "/events/**")
+                .hasAnyRole(ADMIN, USER)
+                .requestMatchers(HttpMethod.DELETE, "/events/**")
                 .hasAnyRole(ADMIN, USER)
                 .requestMatchers(HttpMethod.DELETE,
                     "/facts/{factId}",

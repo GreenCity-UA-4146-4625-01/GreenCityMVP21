@@ -27,21 +27,17 @@ import java.util.Set;
 @Builder
 @EqualsAndHashCode
 public class EditEventRequestDto {
-    @NotNull
+
     private Long eventId;
 
-    @NotBlank
     @Size(max = 70)
     private String title;
 
-    @NotBlank
     @Size(min = 20, max = 63206)
     private String description;
 
-    @NotNull
     private EventVisibility visibility;
 
-    @NotEmpty
     private Set<EventType> eventTypes;
 
     private List<EventLocationDto> locations;

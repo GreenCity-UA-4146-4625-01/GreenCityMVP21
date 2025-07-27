@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -23,7 +24,6 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,12 +32,16 @@ import static org.mockito.Mockito.when;
 class EventImageServiceImplTest {
 
     private static final Long EVENT_ID = 1L;
+
     @Mock
     private EventRepo eventRepo;
+
     @Mock
     private EventImageRepo eventImageRepo;
+
     @Mock
     private FileService fileService;
+
     @Mock
     private ModelMapper modelMapper;
 
@@ -53,21 +57,27 @@ class EventImageServiceImplTest {
     @Test
     void uploadEventImages_success() {
         Event event = mockEvent();
+
         MultipartFile image1 = mock(MultipartFile.class);
         MultipartFile image2 = mock(MultipartFile.class);
 
         EventImage imageEntity1 = EventImage.builder().id(1L).url("url1").isMain(true).event(event).build();
         EventImage imageEntity2 = EventImage.builder().id(2L).url("url2").isMain(false).event(event).build();
 
-        when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
+        when(eventRepo.findEventById(EVENT_ID)).thenReturn(Optional.of(event));
         when(eventImageRepo.findAllByEventId(EVENT_ID)).thenReturn(List.of());
-        when(fileService.upload(any())).thenReturn("url1", "url2");
-        when(eventImageRepo.saveAll(any())).thenReturn(List.of(imageEntity1, imageEntity2));
-        when(modelMapper.map(any(EventImage.class), eq(EventImageDto.class)))
-                .thenAnswer(invocation -> {
-                    EventImage img = invocation.getArgument(0);
-                    return new EventImageDto(img.getId(), img.getUrl(), img.getIsMain());
-                });
+
+        when(fileService.upload(image1)).thenReturn("url1");
+        when(fileService.upload(image2)).thenReturn("url2");
+
+        when(eventImageRepo.saveAll(any()))
+                .thenReturn(List.of(imageEntity1, imageEntity2));
+
+        when(modelMapper.map(imageEntity1, EventImageDto.class))
+                .thenReturn(new EventImageDto(imageEntity1.getId(), imageEntity1.getUrl(), imageEntity1.getIsMain()));
+
+        when(modelMapper.map(imageEntity2, EventImageDto.class))
+                .thenReturn(new EventImageDto(imageEntity2.getId(), imageEntity2.getUrl(), imageEntity2.getIsMain()));
 
         List<MultipartFile> files = List.of(image1, image2);
         List<EventImageDto> result = eventImageService.uploadEventImages(files, EVENT_ID, user);
@@ -81,7 +91,7 @@ class EventImageServiceImplTest {
 
     @Test
     void uploadEventImages_eventNotFound_throwsException() {
-        when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.empty());
+        when(eventRepo.findEventById(EVENT_ID)).thenReturn(Optional.empty());
 
         MultipartFile file = mock(MultipartFile.class);
         List<MultipartFile> files = List.of(file);
@@ -97,7 +107,7 @@ class EventImageServiceImplTest {
                 .mapToObj(i -> EventImage.builder().id((long) i).build())
                 .toList();
 
-        when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
+        when(eventRepo.findEventById(EVENT_ID)).thenReturn(Optional.of(event));
         when(eventImageRepo.findAllByEventId(EVENT_ID)).thenReturn(existing);
 
         List<MultipartFile> newImages = List.of(
@@ -113,7 +123,7 @@ class EventImageServiceImplTest {
     void uploadEventImages_emptyImageList_returnsEmptyList() {
         Event event = mockEvent();
 
-        when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
+        when(eventRepo.findEventById(EVENT_ID)).thenReturn(Optional.of(event));
         when(eventImageRepo.findAllByEventId(EVENT_ID)).thenReturn(List.of());
 
         List<MultipartFile> images = List.of();

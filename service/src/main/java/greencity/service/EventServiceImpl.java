@@ -263,4 +263,34 @@ public class EventServiceImpl implements EventService {
         return eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
     }
+
+    /**
+     * Updates the location of the event identified by the given event ID.
+     * <p>
+     * Only the event OWNER or an ADMIN user is authorized to perform this operation.
+     * The existing event locations are cleared and replaced with the new location provided.
+     * The bidirectional relationship between {@link Event} and {@link EventLocation} is maintained by setting the event reference in the new location.
+     *
+     * @param eventId           the ID of the event to update; must not be {@code null}
+     * @param eventLocationDto  the new location data transfer object; must not be {@code null} and valid
+     * @param user              the user performing the update operation; must not be {@code null}
+     * @return the updated {@link EventResponseDto} reflecting the new location
+     * @throws NotFoundException                    if no event exists with the given ID
+     * @throws UserHasNoPermissionToAccessException if the user is not the OWNER or ADMIN
+     */
+    @Override
+    public EventResponseDto updateLocationByEventId(Long eventId, EventLocationDto eventLocationDto, UserVO user) {
+        Event event = getEventForOwnerAccess(eventId, user);
+
+        EventLocation eventLocation = modelMapper.map(eventLocationDto, EventLocation.class);
+        eventLocation.setEvent(event);
+
+        event.getEventLocations().clear();
+
+        event.getEventLocations().add(eventLocation);
+
+        Event saved = eventRepo.save(event);
+
+        return modelMapper.map(saved, EventResponseDto.class);
+    }
 }

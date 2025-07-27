@@ -3,9 +3,11 @@ package greencity.service;
 import greencity.ModelUtils;
 import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
+import greencity.dto.event.EventLocationDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
+import greencity.entity.EventLocation;
 import greencity.entity.User;
 import greencity.repository.EventRepo;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -164,5 +167,44 @@ class EventServiceImplTest {
 
         verify(eventRepo).findByParticipants_Id(userVO.getId(), pageable);
         verify(modelMapper).map(event, EventResponseDto.class);
+    }
+
+    @Test
+    void updateLocationByEventId_ShouldReturnUpdatedEventResponseDto() {
+        Long eventId = 1L;
+        UserVO user = ModelUtils.getUserVO();
+        EventLocationDto locationDto = ModelUtils.getEventLocationDto();
+
+        Event event = new Event();
+        event.setId(eventId);
+        event.setEventLocations(new ArrayList<>());
+        event.setCreator(ModelUtils.getUser());
+
+        EventLocation eventLocation = new EventLocation();
+        eventLocation.setAddress(locationDto.getAddress());
+        eventLocation.setLatitude(locationDto.getLatitude());
+        eventLocation.setLongitude(locationDto.getLongitude());
+        eventLocation.setEvent(event);
+
+        Event savedEvent = new Event();
+        savedEvent.setId(eventId);
+        savedEvent.setEventLocations(List.of(eventLocation));
+
+        EventResponseDto responseDto = ModelUtils.getEventResponseDto();
+
+        when(eventRepo.findEventById(eventId)).thenReturn(Optional.of(event));
+        when(modelMapper.map(locationDto, EventLocation.class)).thenReturn(eventLocation);
+        when(eventRepo.save(any(Event.class))).thenReturn(savedEvent);
+        when(modelMapper.map(savedEvent, EventResponseDto.class)).thenReturn(responseDto);
+
+        EventResponseDto result = eventService.updateLocationByEventId(eventId, locationDto, user);
+
+        assertNotNull(result);
+        assertEquals(responseDto, result);
+
+        verify(eventRepo).findEventById(eventId);
+        verify(modelMapper).map(locationDto, EventLocation.class);
+        verify(eventRepo).save(event);
+        verify(modelMapper).map(savedEvent, EventResponseDto.class);
     }
 }

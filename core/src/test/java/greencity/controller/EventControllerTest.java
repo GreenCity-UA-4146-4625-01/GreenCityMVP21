@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
+import greencity.dto.event.EventLocationDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.dto.user.UserVO;
 import greencity.service.EventService;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -151,4 +153,21 @@ class EventControllerTest {
 
         verify(eventService).getEventsAssignedToUser(any(UserVO.class), any(Pageable.class));
     }
+
+    @Test
+    void updateEventLocation_ShouldReturnEventResponse() {
+        Long eventId = 1L;
+        EventLocationDto locationDto = ModelUtils.getEventLocationDto();
+        EventResponseDto expectedResponse = ModelUtils.getEventResponseDto();
+        UserVO mockUser = ModelUtils.getUserVO();
+
+        when(eventService.updateLocationByEventId(eventId, locationDto, mockUser))
+                .thenReturn(expectedResponse);
+
+        EventResponseDto actual = eventController.updateLocation(eventId, locationDto, mockUser).getBody();
+
+        assertEquals(expectedResponse, actual);
+        verify(eventService).updateLocationByEventId(eventId, locationDto, mockUser);
+    }
+
 }

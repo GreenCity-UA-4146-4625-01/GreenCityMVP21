@@ -865,4 +865,12 @@ public class ModelUtils {
                 .participants(new HashSet<>())
                 .build();
     }
+
+    public static EventLocationDto getEventLocationDto() {
+        return EventLocationDto.builder()
+                .address("123 Eco Street, Green City Park")
+                .latitude(50.4501)
+                .longitude(30.5234)
+                .build();
+    }
 }

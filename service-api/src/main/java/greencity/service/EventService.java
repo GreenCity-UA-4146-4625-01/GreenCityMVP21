@@ -1,15 +1,15 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
-import greencity.dto.event.*;
+import greencity.dto.event.CreateEventRequestDto;
+import greencity.dto.event.EditEventRequestDto;
+import greencity.dto.event.EventLocationDto;
+import greencity.dto.event.EventResponseDto;
 import greencity.dto.user.UserVO;
-import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 import java.util.List;
 
@@ -98,6 +98,21 @@ public interface EventService {
      * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
      */
     void deleteEventById(Long id, UserVO user);
-    
+
+    /**
+     * Updates the location information of an event identified by its ID.
+     * <p>
+     * This operation is allowed only for users with ADMIN role or the OWNER of the event.
+     * The method updates the event's location details based on the provided {@link EventLocationDto}.
+     *
+     * @param id               the unique identifier of the event to update; must not be {@code null}
+     * @param eventLocationDto the data transfer object containing the new location details; must not be {@code null} and valid
+     * @param user             the user performing the update operation; must not be {@code null}
+     * @return the updated {@link EventResponseDto} representing the event with new location data
+     * @throws NotFoundException                   if no event exists with the given ID
+     * @throws UserHasNoPermissionToAccessException if the user is neither ADMIN nor OWNER of the event
+     */
+    EventResponseDto updateLocationByEventId(Long id, EventLocationDto eventLocationDto, UserVO user);
+
 }
 

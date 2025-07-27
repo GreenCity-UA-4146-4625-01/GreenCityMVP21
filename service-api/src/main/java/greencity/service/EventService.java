@@ -43,7 +43,7 @@ public interface EventService {
      *
      * @param pageable the pagination and sorting information (e.g. page number, size, sort order)
      * @return a {@link PageableDto} containing a list of {@link EventResponseDto} objects;
-     *         the list may be empty if no events match the criteria
+     * the list may be empty if no events match the criteria
      */
     PageableDto<EventResponseDto> getAllEvents(Pageable pageable);
 
@@ -61,6 +61,35 @@ public interface EventService {
     EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user);
 
     /**
+
+     * Removes a user from the list of participants of the specified event.
+     *
+     * @param eventId the ID of the event to attend
+     * @param user    the user who wants to attend the event
+     * @return the updated event details with the user's participation info
+     */
+    EventResponseDto assignUserToEvent(Long eventId, UserVO user);
+
+    /**
+     * Removes the given user from the participants of the specified event.
+     *
+     * @param eventId the ID of the event from which the user should be removed
+     * @param user    the user who wants to leave the event
+     * @return {@link EventResponseDto} with the updated event details
+     */
+    EventResponseDto unassignUserFromEvent(Long eventId, UserVO user);
+
+    /**
+     * Retrieves a paginated list of events to which the given user is assigned (i.e., has joined).
+     *
+     * @param user     the authenticated user for whom to retrieve assigned events; must not be {@code null}
+     * @param pageable the pagination and sorting information (e.g., page number, size, sort order)
+     * @return a {@link PageableDto} containing a list of {@link EventResponseDto} objects the user is assigned to;
+     * the list may be empty if the user has not joined any events
+     */
+    PageableDto<EventResponseDto> getEventsAssignedToUser(UserVO user, Pageable pageable);
+}
+
      * Deletes an event with the specified identifier by a given user.
      *
      * @param id   the unique identifier of the event to delete; must not be {@code null}
@@ -72,3 +101,4 @@ public interface EventService {
   
     
 }
+

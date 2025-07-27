@@ -180,6 +180,7 @@
     <include file="db/changelog/logs/ch-add-column-event-date-time-Sirobaba.xml"/>
     <include file="db/changelog/logs/ch-add-column-event-location-Sirobaba.xml"/>
     <include file="db/changelog/logs/ch-add-column-event-images-Sirobaba.xml"/>
-    <include file="db/changelog/logs/ch-add-table-event-comment-Sirobaba.xml"/>
+    <include file="db/changelog/logs/ch-add-table-event-comment-Sirobaba.xml"/>	
+    <include file="db/changelog/logs/ch-add-column-event_participants-Pavlyk.xml"/>
 </databaseChangeLog>
 

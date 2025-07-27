@@ -5,18 +5,17 @@ import greencity.dto.event.EventImageDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventImage;
-import greencity.enums.Role;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.repository.EventImageRepo;
 import greencity.repository.EventRepo;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -50,14 +49,12 @@ public class EventImageServiceImpl implements EventImageService {
      * @throws UserHasNoPermissionToAccessException if the user is neither the event creator nor an admin
      */
     @Override
-    public List<EventImageDto> uploadEventImages(@Valid
-                                                 @Size(max = 5, message = "Maximum 5 images allowed")
+    public List<EventImageDto> uploadEventImages(@Validated
+                                                 @Size(max = 5, message = ErrorMessage.MAX_EVENT_IMAGES_EXCEEDED)
                                                  List<MultipartFile> images,
                                                  Long eventId,
                                                  UserVO user) {
-        Event event = getEventOrThrow(eventId);
-
-        checkUserPermission(event, user);
+        Event event = getEventForOwnerAccess(eventId, user);
 
         List<EventImage> existingImages = eventImageRepo.findAllByEventId(eventId);
 
@@ -97,14 +94,9 @@ public class EventImageServiceImpl implements EventImageService {
         return allImages;
     }
 
-    private Event getEventOrThrow(Long eventId) {
-        return eventRepo.findById(eventId)
+    @PostAuthorize("hasRole('ROLE_ADMIN') or #user.id == #returnObject.creator.id")
+    private Event getEventForOwnerAccess (Long eventId, UserVO user) {
+        return eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
-    }
-
-    private void checkUserPermission(Event event, UserVO user) {
-        if (!user.getRole().equals(Role.ROLE_ADMIN) && !event.getCreator().getId().equals(user.getId())) {
-            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
-        }
     }
 }

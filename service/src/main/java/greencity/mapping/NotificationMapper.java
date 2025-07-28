@@ -17,7 +17,7 @@ public class NotificationMapper {
         if (dto instanceof NewReplyNotificationDto replyDto) {
             Notification notification = new NewReplyNotificationDtoMapper().convert(replyDto);
 
-            // додаємо згенерований текст
+            // Generate notification text for a reply comment
             String text = NotificationTextFormatter.formatNewReplyText(
                     replyDto.comment().getAuthor().getName(),
                     "news",

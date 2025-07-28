@@ -13,4 +13,7 @@ public interface NotificationRepo extends JpaRepository<Notification, Long> {
 
     @Query("SELECT n FROM Notification n WHERE n.receiver = :receiver AND NOT n.isRead")
     List<Notification> findUnreadByReceiver(User receiver);
+
+    int countByReceiverAndIsReadFalse(User receiver);
+
 }

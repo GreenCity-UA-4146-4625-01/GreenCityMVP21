@@ -17,4 +17,5 @@ public interface NotificationDto {
     boolean isRead();
     UserVO receiver();
     long objectId();
+    String text();
 }

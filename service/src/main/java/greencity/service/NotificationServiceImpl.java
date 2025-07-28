@@ -41,20 +41,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void createNotification(NotificationDto dto) {
         Notification notification = NotificationMapper.mapToEntity(dto);
-        if (dto instanceof NewReplyNotificationDto replyDto) {
-            String notificationText = NotificationTextFormatter.formatNewReplyText(
-                    replyDto.comment().getAuthor().getName(),
-                    "news",
-                    replyDto.comment().getEcoNewsTitle(),
-                    replyDto.comment().getModifiedDate()
-            );
-            notification.setText(notificationText);
-        }
-
-
         notification.setReceiver(findUserById(dto.receiver().getId()));
         notificationRepo.save(notification);
     }
+
+
 
     /**
      * Retrieves all notifications for a specific user.
@@ -122,8 +113,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public int countUnreadNotifications(Long userId) {
         User receiver = findUserById(userId);
-        return notificationRepo.findUnreadByReceiver(receiver).size();
+        return notificationRepo.countByReceiverAndIsReadFalse(receiver);
     }
+
+
 
 
 

@@ -2,7 +2,6 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
-import greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.EventCommentDtoResponse;
 import greencity.dto.eventcomment.EventShortInfoUserVO;

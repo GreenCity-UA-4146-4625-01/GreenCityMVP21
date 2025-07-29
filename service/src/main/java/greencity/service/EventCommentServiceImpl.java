@@ -42,8 +42,6 @@ public class EventCommentServiceImpl implements EventCommentService {
     private final RatingCalculation ratingCalculation;
     private final UserRepo userRepo;
     private final AddEventCommentDtoRequestToEventCommentMapper addCommentMapper;
-    private final PageableHandlerMethodArgumentResolverCustomizer pageableCustomizer;
-
 
     @Override
     public EventCommentDtoResponse createComment(AddEventCommentDtoRequest addEventCommentDtoRequest, Long eventId, UserVO userVO) {

@@ -21,7 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service implementation for managing {@link Event} entities.
@@ -257,10 +259,41 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Event not found with id: " + id));
     }
 
-
     @PostAuthorize("hasRole('ROLE_ADMIN') or #user.id == #returnObject.creator.id")
     private Event getEventForOwnerAccess(Long eventId, UserVO user) {
         return eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
+    }
+
+    /**
+     * Searches for events based on a provided keyword fragment in the event title.
+     * <p>
+     * The method performs a case-insensitive search across event titles, returning a list of events whose titles
+     * contain the specified query string. The results are sorted by textual relevance to the search query
+     * (i.e., the better the match in the title, the higher the event is placed in the list).
+     * Each matching {@code Event} entity is mapped to an {@link EventPreviewDto} for client display.
+     *
+     * @param query the search keyword to look for in event titles; must be between 3 and 64 characters long
+     * @return a list of {@link EventPreviewDto} that match the search query, sorted by relevance; may be empty if no matches are found
+     */
+    @Override
+    public List<EventPreviewDto> searchEventsByTitle(String query) {
+        return eventRepo.findByTitleContainsIgnoreCase(query).stream()
+                .sorted(Comparator.comparingInt((Event event) ->
+                                calculateRelevance(event.getTitle(), query))
+                        .reversed()
+                )
+                .map(event -> modelMapper.map(event, EventPreviewDto.class))
+                .collect(Collectors.toList());
+    }
+
+    private int calculateRelevance(String title, String query) {
+        title = title.toLowerCase();
+        query = query.toLowerCase();
+
+        if (title.equals(query)) return 3;
+        if (title.startsWith(query)) return 2;
+        if (title.contains(query)) return 1;
+        return 0;
     }
 }

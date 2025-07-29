@@ -1,10 +1,12 @@
 package greencity.repository;
 
+import greencity.dto.event.EventPreviewDto;
 import greencity.entity.Event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.Optional;
 
 @Repository
 public interface EventRepo extends JpaRepository<Event, Long> {
+    List<Event> findByTitleContainsIgnoreCase(String fragment);
 
     Optional<Event> findEventById(Long id);
 
@@ -26,6 +29,9 @@ public interface EventRepo extends JpaRepository<Event, Long> {
     @Override
     void deleteById(Long aLong);
 
-
+//    @Query("SELECT new greencity.dto.event.EventPreviewDto(e.id, e.title) " +
+//            "FROM Event e " +
+//            "WHERE LOWER(e.title) LIKE LOWER(CONCAT('%', :query, '%'))")
+//    List<EventPreviewDto> findByTitleContainingIgnoreCase(@Param("query") String query);
 
 }

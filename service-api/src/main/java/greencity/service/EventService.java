@@ -98,6 +98,19 @@ public interface EventService {
      * @throws UserHasNoPermissionToAccessException if the user is not Admin or Owner
      */
     void deleteEventById(Long id, UserVO user);
-    
+
+    /**
+     * Retrieves a list of events that match a given search query in their titles.
+     *
+     * <p>
+     * The search is case-insensitive and matches partial titles. Only events with titles containing the
+     * provided query string will be returned. Results are sorted by textual relevance to the query.
+     * Each matching {@code Event} entity is mapped to an {@link EventPreviewDto}.
+     *
+     * @param query the search keyword used to match against event titles; must be between 3 and 64 characters
+     * @return a list of {@link EventPreviewDto} objects whose titles contain the query string;
+     *         the list may be empty if no matching events are found
+     */
+    List<EventPreviewDto> searchEventsByTitle(String query);
 }
 

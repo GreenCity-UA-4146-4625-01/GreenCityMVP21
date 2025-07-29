@@ -1,6 +1,10 @@
 package greencity.service;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.EventCommentDtoResponse;
+import greencity.dto.eventcomment.EventShortInfoUserVO;
+import greencity.dto.user.UserVO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import greencity.dto.eventcomment.EventCommentViewDto;
 import greencity.dto.user.UserVO;
 import org.springframework.data.domain.Page;
@@ -16,5 +20,6 @@ public interface EventCommentService {
 
     EventCommentDtoResponse createComment(AddEventCommentDtoRequest addEventCommentDtoRequest, Long eventId, UserVO userVO);
 
+    Page<EventShortInfoUserVO> getMentionableUsers(String query, Pageable pageable);
     Page<EventCommentViewDto> getCommentsByEventId(Long eventId, int page, int size);
 }

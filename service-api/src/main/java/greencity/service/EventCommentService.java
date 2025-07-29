@@ -6,8 +6,6 @@ import greencity.dto.user.UserVO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import greencity.dto.eventcomment.EventCommentViewDto;
-import greencity.dto.user.UserVO;
-import org.springframework.data.domain.Page;
 
 public interface EventCommentService {
     /**

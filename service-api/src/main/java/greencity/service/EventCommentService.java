@@ -21,5 +21,8 @@ public interface EventCommentService {
     EventCommentDtoResponse createComment(AddEventCommentDtoRequest addEventCommentDtoRequest, Long eventId, UserVO userVO);
 
     Page<EventShortInfoUserVO> getMentionableUsers(String query, Pageable pageable);
+
     Page<EventCommentViewDto> getCommentsByEventId(Long eventId, int page, int size);
+
+    EventCommentViewDto getCommentById(Long commentId);
 }

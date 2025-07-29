@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @AllArgsConstructor
 @RestController
-@RequestMapping("/events/comments")
+@RequestMapping("/events")
 public class EventCommentController {
     private final EventCommentService eventCommentService;
 
@@ -40,7 +42,7 @@ public class EventCommentController {
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })  
-    @PostMapping("{eventId}")
+    @PostMapping("/{eventId}/comments")
     public ResponseEntity<EventCommentDtoResponse> addComment(@PathVariable Long eventId,
         @Valid @RequestBody AddEventCommentDtoRequest request,
         @Parameter(hidden = true) @CurrentUser UserVO userVO) {
@@ -49,12 +51,13 @@ public class EventCommentController {
                 .body(eventCommentService.createComment(request, eventId, userVO));
     }
 
-    @GetMapping("/mentioned-users")
-    public Page<EventShortInfoUserVO> autocompleteMentionedUsers(
+    @GetMapping("/comments/mentioned-users")
+    public ResponseEntity<Page<EventShortInfoUserVO>> autocompleteMentionedUsers(
             @RequestParam String query,
             Pageable pageable) {
-        return eventCommentService.getMentionableUsers(query, pageable);
-      
+        return ResponseEntity.status(HttpStatus.OK).body(eventCommentService.getMentionableUsers(query, pageable));
+    }
+
     @Operation(summary = "get comments")
     @ResponseStatus(value = HttpStatus.OK)
     @ApiResponses(value = {
@@ -63,11 +66,25 @@ public class EventCommentController {
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("{eventId}")
-    public Page<EventCommentViewDto> getComments(
+    @GetMapping("/{eventId}/comments")
+    public ResponseEntity<Page<EventCommentViewDto>> getComments(
             @PathVariable Long eventId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return eventCommentService.getCommentsByEventId(eventId, page, size);
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventCommentService.getCommentsByEventId(eventId, page, size));
+    }
+
+    @Operation(summary = "get comment by id")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+
+    @GetMapping("/comments/{commentId}")
+    public ResponseEntity<EventCommentViewDto> getComment(@PathVariable Long commentId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventCommentService.getCommentById(commentId));
     }
 }

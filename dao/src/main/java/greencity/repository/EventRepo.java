@@ -15,10 +15,10 @@ import java.util.Optional;
 
 @Repository
 public interface EventRepo extends JpaRepository<Event, Long> {
-    List<Event> findByTitleContainsIgnoreCase(String fragment);
+
+    Page<Event> findByTitleContainsIgnoreCase(String fragment, Pageable pageable);
 
     Optional<Event> findEventById(Long id);
-
 
     Page<Event> findByParticipants_Id(Long id,
                                       Pageable pageable);
@@ -28,10 +28,4 @@ public interface EventRepo extends JpaRepository<Event, Long> {
 
     @Override
     void deleteById(Long aLong);
-
-//    @Query("SELECT new greencity.dto.event.EventPreviewDto(e.id, e.title) " +
-//            "FROM Event e " +
-//            "WHERE LOWER(e.title) LIKE LOWER(CONCAT('%', :query, '%'))")
-//    List<EventPreviewDto> findByTitleContainingIgnoreCase(@Param("query") String query);
-
 }

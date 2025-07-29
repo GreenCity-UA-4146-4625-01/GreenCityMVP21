@@ -277,23 +277,38 @@ public class EventServiceImpl implements EventService {
      * @return a list of {@link EventPreviewDto} that match the search query, sorted by relevance; may be empty if no matches are found
      */
     @Override
-    public List<EventPreviewDto> searchEventsByTitle(String query) {
-        return eventRepo.findByTitleContainsIgnoreCase(query).stream()
-                .sorted(Comparator.comparingInt((Event event) ->
-                                calculateRelevance(event.getTitle(), query))
+    public PageableDto<EventPreviewDto> searchEventsByTitle(String query, Pageable pageable) {
+        String normolizedQuery = query.toLowerCase();
+
+        List<EventPreviewDto> sorted = eventRepo.findByTitleContainsIgnoreCase(query, pageable).stream()
+                .sorted(Comparator.comparingInt((Event event) -> {
+                            String normalizedTitle = event.getTitle().toLowerCase();
+                            return calculateRelevance(normalizedTitle, normolizedQuery);
+                        })
                         .reversed()
                 )
                 .map(event -> modelMapper.map(event, EventPreviewDto.class))
                 .collect(Collectors.toList());
+
+        int total = sorted.size();
+        int pageSize = pageable.getPageSize();
+        int pageNumber = pageable.getPageNumber();
+        int fromIndex = pageNumber * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, total);
+
+        List<EventPreviewDto> pageContent = fromIndex >= total ? List.of() : sorted.subList(fromIndex, toIndex);
+        return new PageableDto<>(
+                pageContent,
+                total,
+                pageNumber,
+                (int) Math.ceil((double) total / pageSize)
+        );
     }
 
-    private int calculateRelevance(String title, String query) {
-        title = title.toLowerCase();
-        query = query.toLowerCase();
-
-        if (title.equals(query)) return 3;
-        if (title.startsWith(query)) return 2;
-        if (title.contains(query)) return 1;
+    private int calculateRelevance(String normalizedTitle, String normolizedQuery) {
+        if (normalizedTitle.equals(normolizedQuery)) return 3;
+        if (normalizedTitle.startsWith(normolizedQuery)) return 2;
+        if (normalizedTitle.contains(normolizedQuery)) return 1;
         return 0;
     }
 }

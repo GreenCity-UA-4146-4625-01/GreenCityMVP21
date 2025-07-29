@@ -111,6 +111,6 @@ public interface EventService {
      * @return a list of {@link EventPreviewDto} objects whose titles contain the query string;
      *         the list may be empty if no matching events are found
      */
-    List<EventPreviewDto> searchEventsByTitle(String query);
+    PageableDto<EventPreviewDto> searchEventsByTitle(String query, Pageable pageable);
 }
 

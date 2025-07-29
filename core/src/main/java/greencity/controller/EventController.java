@@ -243,10 +243,12 @@ public class EventController {
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
     })
     @GetMapping("/search")
-    public ResponseEntity<List<EventPreviewDto>> searchEvents(
+    public ResponseEntity<PageableDto<EventPreviewDto>> searchEvents(
             @RequestParam
             @Size(min = 3, max = 64, message = ValidationConstants.SEARCH_TEXT_VALIDATION_MESSAGE)
-            String query) {
-        return ResponseEntity.ok(eventService.searchEventsByTitle(query));
+            String query,
+            @PageableDefault(size = 10, sort = "title") Pageable pageable
+    ) {
+        return ResponseEntity.ok(eventService.searchEventsByTitle(query, pageable));
     }
 }

@@ -1,15 +1,15 @@
 package greencity.service;
 
 import greencity.dto.PageableDto;
-import greencity.dto.event.*;
+import greencity.dto.event.CreateEventRequestDto;
+import greencity.dto.event.EditEventRequestDto;
+import greencity.dto.event.EventPreviewDto;
+import greencity.dto.event.EventResponseDto;
 import greencity.dto.user.UserVO;
-import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 import java.util.List;
 

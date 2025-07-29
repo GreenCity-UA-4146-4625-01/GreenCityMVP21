@@ -4,20 +4,25 @@ import greencity.annotations.RatingCalculationEnum;
 import greencity.constant.ErrorMessage;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.EventCommentDtoResponse;
+import greencity.dto.eventcomment.EventShortInfoUserVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventComment;
 import greencity.entity.User;
+import greencity.enums.UserStatus;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.mapping.AddEventCommentDtoRequestToEventCommentMapper;
 import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
 import greencity.repository.UserRepo;
-import greencity.repository.options.EventCommentRepository;
+import greencity.repository.EventCommentRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.config.PageableHandlerMethodArgumentResolverCustomizer;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -37,6 +42,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     private final RatingCalculation ratingCalculation;
     private final UserRepo userRepo;
     private final AddEventCommentDtoRequestToEventCommentMapper addCommentMapper;
+    private final PageableHandlerMethodArgumentResolverCustomizer pageableCustomizer;
 
 
     @Override
@@ -70,5 +76,13 @@ public class EventCommentServiceImpl implements EventCommentService {
         EventComment saved = eventCommentRepository.save(eventComment);
 
         return mapper.map(saved, EventCommentDtoResponse.class);
+    }
+
+    @Override
+    public Page<EventShortInfoUserVO> getMentionableUsers(String query, Pageable pageable) {
+        return userRepo.findAuthorizedUsersForMention(
+                query,
+                UserStatus.ACTIVATED,
+                pageable);
     }
 }

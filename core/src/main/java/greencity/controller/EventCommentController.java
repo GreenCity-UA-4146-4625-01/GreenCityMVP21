@@ -5,6 +5,7 @@ import greencity.constant.HttpStatuses;
 import greencity.dto.econewscomment.AddEcoNewsCommentDtoResponse;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.EventCommentDtoResponse;
+import greencity.dto.eventcomment.EventShortInfoUserVO;
 import greencity.dto.user.UserVO;
 import greencity.service.EventCommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -44,5 +47,12 @@ public class EventCommentController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(eventCommentService.createComment(request, eventId, userVO));
+    }
+
+    @GetMapping("/mentioned-users")
+    public Page<EventShortInfoUserVO> autocompleteMentionedUsers(
+            @RequestParam String query,
+            Pageable pageable) {
+        return eventCommentService.getMentionableUsers(query, pageable);
     }
 }

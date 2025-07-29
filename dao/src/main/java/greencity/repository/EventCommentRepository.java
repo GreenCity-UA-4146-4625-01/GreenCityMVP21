@@ -1,4 +1,4 @@
-package greencity.repository.options;
+package greencity.repository;
 
 import greencity.entity.EventComment;
 import org.springframework.data.jpa.repository.JpaRepository;

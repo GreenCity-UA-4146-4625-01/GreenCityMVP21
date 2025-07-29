@@ -41,7 +41,7 @@ public class EventCommentServiceImpl implements EventCommentService {
         eventComment.setEvent(event);
         eventComment.setUser(mapper.map(userVO, User.class));
 
-        if(addEventCommentDtoRequest.getParentCommentId() != 0) {
+        if(addEventCommentDtoRequest.getParentCommentId() != null && addEventCommentDtoRequest.getParentCommentId() != 0) {
             EventComment parentComment = eventCommentRepository.findById(addEventCommentDtoRequest.getParentCommentId()).orElseThrow(
                     ()->new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
 

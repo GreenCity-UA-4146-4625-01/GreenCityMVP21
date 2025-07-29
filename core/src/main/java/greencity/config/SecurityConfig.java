@@ -152,6 +152,7 @@ public class SecurityConfig {
                     "/user/{userId}/habit/assign",
                     "/token",
                     "/events",
+                    "/events/comments/{eventId}",
                     "/events/{id}")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST,

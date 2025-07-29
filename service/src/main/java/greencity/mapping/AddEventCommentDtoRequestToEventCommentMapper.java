@@ -3,13 +3,11 @@ package greencity.mapping;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.entity.EventComment;
 import greencity.entity.User;
-import greencity.repository.UserRepo;
 import org.modelmapper.AbstractConverter;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Mapper class converting {@link AddEventCommentDtoRequest} to {@link EventComment} entity.
@@ -25,8 +23,6 @@ import java.util.stream.Collectors;
  */
 @Component
 public class AddEventCommentDtoRequestToEventCommentMapper extends AbstractConverter<AddEventCommentDtoRequest, EventComment> {
-
-    private Set<User> mentionedUsers = Collections.emptySet();
 
     public EventComment convert(AddEventCommentDtoRequest source, Set<User> mentionedUsers) {
         return EventComment.builder()

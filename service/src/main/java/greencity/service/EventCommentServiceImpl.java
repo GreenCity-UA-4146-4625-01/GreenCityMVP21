@@ -10,14 +10,19 @@ import greencity.entity.EventComment;
 import greencity.entity.User;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
+import greencity.mapping.AddEventCommentDtoRequestToEventCommentMapper;
 import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
+import greencity.repository.UserRepo;
 import greencity.repository.options.EventCommentRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static greencity.constant.AppConstant.AUTHORIZATION;
@@ -30,31 +35,40 @@ public class EventCommentServiceImpl implements EventCommentService {
     private final ModelMapper mapper;
     private final HttpServletRequest httpServletRequest;
     private final RatingCalculation ratingCalculation;
-
+    private final UserRepo userRepo;
+    private final AddEventCommentDtoRequestToEventCommentMapper addCommentMapper;
 
 
     @Override
     public EventCommentDtoResponse createComment(AddEventCommentDtoRequest addEventCommentDtoRequest, Long eventId, UserVO userVO) {
-        Event event = eventRepository.findEventById(eventId).orElseThrow(()->new NotFoundException("Event not found"));
+        Event event = eventRepository.findEventById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
 
-        EventComment eventComment = mapper.map(addEventCommentDtoRequest, EventComment.class);
+        Set<User> mentionedUsers = Collections.emptySet();
+        if (addEventCommentDtoRequest.getMentionedUserIds() != null && !addEventCommentDtoRequest.getMentionedUserIds().isEmpty()) {
+            mentionedUsers = new HashSet<>(userRepo.findAllById(addEventCommentDtoRequest.getMentionedUserIds()));
+        }
+
+        EventComment eventComment = addCommentMapper.convert(addEventCommentDtoRequest, mentionedUsers);
+
         eventComment.setEvent(event);
         eventComment.setUser(mapper.map(userVO, User.class));
 
-        if(addEventCommentDtoRequest.getParentCommentId() != null && addEventCommentDtoRequest.getParentCommentId() != 0) {
-            EventComment parentComment = eventCommentRepository.findById(addEventCommentDtoRequest.getParentCommentId()).orElseThrow(
-                    ()->new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+        if (addEventCommentDtoRequest.getParentCommentId() != null && addEventCommentDtoRequest.getParentCommentId() != 0) {
+            EventComment parentComment = eventCommentRepository.findById(addEventCommentDtoRequest.getParentCommentId())
+                    .orElseThrow(() -> new BadRequestException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
 
-            if(parentComment == null){
-                eventComment.setParentComment(parentComment);
-            }else {
+            if (parentComment.getParentComment() != null) {
                 throw new BadRequestException(ErrorMessage.CANNOT_REPLY_THE_REPLY);
             }
+            eventComment.setParentComment(parentComment);
         }
 
-        String accesToken = httpServletRequest.getHeader(AUTHORIZATION);
-        CompletableFuture.runAsync(
-                ()-> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accesToken));
-        return mapper.map(eventCommentRepository.save(eventComment), EventCommentDtoResponse.class);
+        String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
+        CompletableFuture.runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
+
+        EventComment saved = eventCommentRepository.save(eventComment);
+
+        return mapper.map(saved, EventCommentDtoResponse.class);
     }
 }

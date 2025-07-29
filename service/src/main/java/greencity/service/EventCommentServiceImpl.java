@@ -5,6 +5,7 @@ import greencity.constant.ErrorMessage;
 import greencity.dto.eventcomment.AddEventCommentDtoRequest;
 import greencity.dto.eventcomment.EventCommentDtoResponse;
 import greencity.dto.eventcomment.EventShortInfoUserVO;
+import greencity.dto.eventcomment.EventCommentViewDto;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventComment;
@@ -22,6 +23,8 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -81,5 +84,26 @@ public class EventCommentServiceImpl implements EventCommentService {
                 query,
                 UserStatus.ACTIVATED,
                 pageable);
+    }
+
+    @Override
+    public Page<EventCommentViewDto> getCommentsByEventId(Long eventId, int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("modifiedDate").descending());
+        Page<EventComment> commentsPage = eventCommentRepository.findTopLevelCommentsByEventId(eventId, pageable);
+
+        return commentsPage.map(comment -> {
+            String authorName = comment.getUser() != null ? comment.getUser().getName() : "Unknown";
+            String authorAvatar = comment.getUser() != null ? comment.getUser().getProfilePicturePath() : null;
+            int likesCount = comment.getUsersLiked() != null ? comment.getUsersLiked().size() : 0;
+
+            return new EventCommentViewDto(
+                    comment.getId(),
+                    authorName,
+                    authorAvatar,
+                    comment.getModifiedDate(),
+                    likesCount,
+                    comment.getText()
+            );
+        });
     }
 }

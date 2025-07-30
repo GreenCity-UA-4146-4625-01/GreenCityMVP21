@@ -106,4 +106,22 @@ public class EventCommentServiceImpl implements EventCommentService {
             );
         });
     }
+
+    @Override
+    public EventCommentViewDto getCommentById(Long commentId) {
+        EventComment eventComment = eventCommentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Comment not found"));
+
+        String authorName = eventComment.getUser() != null ? eventComment.getUser().getName() : "Unknown";
+        String authorAvatar = eventComment.getUser() != null ? eventComment.getUser().getProfilePicturePath() : null;
+        int likes = eventComment.getUsersLiked() != null ? eventComment.getUsersLiked().size() : 0;
+
+        return new EventCommentViewDto(
+                eventComment.getId(),
+                authorName,
+                authorAvatar,
+                eventComment.getModifiedDate(),
+                likes,
+                eventComment.getText()
+        );
+    }
 }

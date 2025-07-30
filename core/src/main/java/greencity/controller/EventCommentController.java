@@ -54,6 +54,7 @@ public class EventCommentController {
             @RequestParam String query,
             Pageable pageable) {
         return eventCommentService.getMentionableUsers(query, pageable);
+    }
       
     @Operation(summary = "get comments")
     @ResponseStatus(value = HttpStatus.OK)

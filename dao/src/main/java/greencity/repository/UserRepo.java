@@ -36,7 +36,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @return list of all {@link UserManagementVO}
      */
     @Query(" SELECT new greencity.dto.user.UserManagementVO(u.id, u.name, u.email, u.userCredo, u.role, u.userStatus) "
-        + " FROM User u ")
+           + " FROM User u ")
     Page<UserManagementVO> findAllManagementVo(UserFilter filter, Pageable pageable);
 
     /**
@@ -80,12 +80,12 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     @Modifying
     @Transactional
     @Query("UPDATE User SET userStatus = CASE "
-        + "WHEN (:userStatus = 'DEACTIVATED') THEN 1 "
-        + "WHEN (:userStatus = 'ACTIVATED') THEN 2 "
-        + "WHEN (:userStatus = 'CREATED') THEN 3 "
-        + "WHEN (:userStatus = 'BLOCKED') THEN 4 "
-        + "ELSE 0 END "
-        + "WHERE id = :userId")
+           + "WHEN (:userStatus = 'DEACTIVATED') THEN 1 "
+           + "WHEN (:userStatus = 'ACTIVATED') THEN 2 "
+           + "WHEN (:userStatus = 'CREATED') THEN 3 "
+           + "WHEN (:userStatus = 'BLOCKED') THEN 4 "
+           + "ELSE 0 END "
+           + "WHERE id = :userId")
     void updateUserStatus(Long userId, String userStatus);
 
     /**
@@ -95,7 +95,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @return {@link Date}
      */
     @Query(nativeQuery = true,
-        value = "SELECT last_activity_time FROM users WHERE id=:userId")
+            value = "SELECT last_activity_time FROM users WHERE id=:userId")
     Optional<Timestamp> findLastActivityTimeById(Long userId);
 
     /**
@@ -119,25 +119,80 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @return List of friends.
      */
     @Query(nativeQuery = true, value = "SELECT * FROM ((SELECT user_id FROM users_friends AS uf "
-        + "WHERE uf.friend_id = :userId AND uf.status = 'FRIEND' AND "
-        + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.user_id "
-        + "AND ha.status = 'INPROGRESS') = 1) "
-        + "UNION "
-        + "(SELECT friend_id FROM users_friends AS uf "
-        + "WHERE uf.user_id = :userId AND uf.status = 'FRIEND' AND "
-        + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.friend_id "
-        + "AND ha.status = 'INPROGRESS') = 1)) as ui JOIN users as u ON user_id = u.id")
+                                       + "WHERE uf.friend_id = :userId AND uf.status = 'FRIEND' AND "
+                                       + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.user_id "
+                                       + "AND ha.status = 'INPROGRESS') = 1) "
+                                       + "UNION "
+                                       + "(SELECT friend_id FROM users_friends AS uf "
+                                       + "WHERE uf.user_id = :userId AND uf.status = 'FRIEND' AND "
+                                       + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.friend_id "
+                                       + "AND ha.status = 'INPROGRESS') = 1)) as ui JOIN users as u ON user_id = u.id")
     List<User> getFriendsAssignedToHabit(Long userId, Long habitId);
 
     /**
      * Get all user friends.
      *
      * @param userId The ID of the user.
-     *
      * @return list of {@link User}.
      */
     @Query(nativeQuery = true, value = "SELECT * FROM users WHERE id IN ( "
-        + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
-        + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
+                                       + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
+                                       + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
+
+    /**
+     * Checks whether two users are already friends, regardless of direction.
+     * Friendship is considered mutual if a record with status = 'FRIEND' exists in either direction.
+     *
+     * @param userId   ID of the first user
+     * @param friendId ID of the second user
+     * @return true if users are friends, false otherwise
+     */
+    @Query(nativeQuery = true,
+            value = "SELECT EXISTS(SELECT * FROM users_friends WHERE status = 'FRIEND' AND ("
+                    + "user_id = :userId AND friend_id = :friendId OR "
+                    + "user_id = :friendId AND friend_id = :userId))")
+    boolean isFriend(Long userId, Long friendId);
+
+    /**
+     * Checks if a friend request exists between two users in either direction.
+     * The request must have status = 'REQUEST'.
+     *
+     * @param userId   ID of one user
+     * @param friendId ID of the other user
+     * @return true if a friend request exists in any direction, false otherwise
+     */
+    @Query(nativeQuery = true,
+            value = "SELECT EXISTS(SELECT * FROM users_friends "
+                    + "WHERE status = 'REQUEST' AND ("
+                    + "(user_id = :userId AND friend_id = :friendId) OR "
+                    + "(user_id = :friendId AND friend_id = :userId)))")
+    boolean isFriendRequested(Long userId, Long friendId);
+
+    /**
+     * Checks whether a friend request was specifically sent from the friend to the current user.
+     * This is useful for confirming that the current user is the receiver of the request.
+     *
+     * @param userId   ID of the current user (request receiver)
+     * @param friendId ID of the user who potentially sent the request
+     * @return true if a request from friendId to userId exists, false otherwise
+     */
+    @Query(nativeQuery = true,
+            value = "SELECT EXISTS(SELECT * FROM users_friends WHERE status = 'REQUEST' AND "
+                    + "user_id = :friendId AND friend_id = :userId) ")
+    boolean isFriendRequestedByCurrentUser(Long userId, Long friendId);
+
+    /**
+     * Accepts a friend request by updating its status to 'FRIEND'.
+     * This method assumes the request exists in direction from friend to current user.
+     *
+     * @param userId   ID of the current user (receiver of request)
+     * @param friendId ID of the user who sent the friend request
+     */
+    @Modifying
+    @Query(nativeQuery = true,
+            value = "UPDATE users_friends SET status = 'FRIEND' "
+                    + "WHERE user_id = :friendId AND friend_id = :userId")
+    void acceptFriendRequest(Long userId, Long friendId);
+
 }

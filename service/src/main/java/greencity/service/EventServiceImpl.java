@@ -5,11 +5,13 @@ import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventDateTime;
+import greencity.entity.EventImage;
 import greencity.entity.EventLocation;
 import greencity.entity.User;
 import greencity.enums.Role;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.repository.EventImageRepo;
 import greencity.repository.EventRepo;
 import greencity.validator.EventDateTimeDtoValidator;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,8 @@ public class EventServiceImpl implements EventService {
     private final EventRepo eventRepo;
     private final EventDateTimeDtoValidator eventDateTimeDtoValidator;
     private final EventImageService eventImageService;
+    private final EventImageRepo eventImageRepo;
+    private final FileService fileService;
 
     /**
      * Creates a new event based on the provided {@link CreateEventRequestDto}.
@@ -106,6 +110,8 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user) {
+        dto.setEventId(eventId);
+
         Event event = eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
@@ -154,6 +160,11 @@ public class EventServiceImpl implements EventService {
         }
 
         if (images != null && !images.isEmpty()) {
+            List<EventImage> existingImages = eventImageRepo.findAllByEventId(eventId);
+
+            existingImages.forEach(image -> fileService.delete(image.getUrl()));
+            eventImageRepo.deleteAll(existingImages);
+
             List<EventImageDto> uploadedImages = eventImageService.uploadEventImages(images, dto.getEventId(), user);
             uploadedImages.stream()
                     .filter(EventImageDto::getIsMain)

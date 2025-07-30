@@ -12,4 +12,8 @@ import org.springframework.data.domain.Pageable;
 public interface EventCommentRepository extends JpaRepository<EventComment, Long> {
     @Query("SELECT c FROM EventComment c WHERE c.event.id = :eventId AND c.parentComment IS NULL AND c.deleted = false ORDER BY c.modifiedDate DESC")
     Page<EventComment> findTopLevelCommentsByEventId(Long eventId, Pageable pageable);
+
+    @Query("SELECT count(ec) FROM EventComment ec "
+            + "WHERE ec.parentComment IS NULL AND ec.event.id = ?1 AND ec.deleted = FALSE")
+    int countOfComments(Long eventId);
 }

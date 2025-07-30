@@ -124,4 +124,12 @@ public class EventCommentServiceImpl implements EventCommentService {
                 eventComment.getText()
         );
     }
+
+    @Override
+    public int countOfCommentsByEventId(Long eventId) {
+        Event event = eventRepository.findEventById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+
+        return eventCommentRepository.countOfComments(event.getId());
+    }
 }

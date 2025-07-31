@@ -19,7 +19,6 @@ public class EditEventRequestDtoMapper extends AbstractConverter<EditEventReques
         if (dto == null) return null;
 
         Event event = Event.builder()
-                .id(dto.getEventId())
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .eventVisibility(dto.getVisibility())

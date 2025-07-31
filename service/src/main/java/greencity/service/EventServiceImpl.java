@@ -156,7 +156,7 @@ public class EventServiceImpl implements EventService {
         }
 
         if (images != null && !images.isEmpty()) {
-            List<EventImageDto> uploadedImages = eventImageService.uploadEventImages(images, dto.getEventId(), user);
+            List<EventImageDto> uploadedImages = eventImageService.uploadEventImages(images, eventId, user);
             uploadedImages.stream()
                     .filter(EventImageDto::getIsMain)
                     .findFirst()

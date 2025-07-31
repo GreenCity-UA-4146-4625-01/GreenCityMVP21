@@ -28,8 +28,6 @@ import java.util.Set;
 @EqualsAndHashCode
 public class EditEventRequestDto {
 
-    private Long eventId;
-
     @Size(max = 70)
     private String title;
 
@@ -47,5 +45,4 @@ public class EditEventRequestDto {
     @Size(min = 1, max = 7)
     @Valid
     private List<EventDateTimeDto> eventDateTimes;
-
 }

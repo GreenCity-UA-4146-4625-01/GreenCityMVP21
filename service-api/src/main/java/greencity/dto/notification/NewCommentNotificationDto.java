@@ -11,10 +11,17 @@ public record NewCommentNotificationDto(
     boolean isRead,
     UserVO receiver,
     EcoNewsCommentDto comment
+
 ) implements NotificationDto {
 
     @Override
     public long objectId() {
         return comment.getId();
     }
+    @Override
+    public String text() {
+        return "";
+    }
+
 }
+

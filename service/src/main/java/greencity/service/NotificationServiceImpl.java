@@ -4,16 +4,20 @@ import greencity.dto.notification.*;
 import greencity.entity.Notification;
 import greencity.entity.User;
 import greencity.enums.NotificationType;
+import greencity.mapping.NotificationMapper;
 import greencity.repository.NotificationRepo;
 import greencity.repository.UserRepo;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import greencity.util.NotificationTextFormatter;
+
+
 
 import java.util.List;
 
-/**
+/**NewReplyNotificationDto
  * Service implementation for managing user notifications.
  */
 @Service
@@ -23,6 +27,12 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserRepo userRepository;
     private final ModelMapper modelMapper;
 
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+    }
+
     /**
      * Creates a notification when a new comment is added.
      *
@@ -30,10 +40,12 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void createNotification(NotificationDto dto) {
-        Notification notification = modelMapper.convert(dto, Notification.class);
-        notification.setReceiver(findUserById(dto.receiver().getId());
+        Notification notification = NotificationMapper.mapToEntity(dto);
+        notification.setReceiver(findUserById(dto.receiver().getId()));
         notificationRepo.save(notification);
     }
+
+
 
     /**
      * Retrieves all notifications for a specific user.
@@ -97,6 +109,15 @@ public class NotificationServiceImpl implements NotificationService {
     public void deleteNotification(Long notificationId) {
         notificationRepo.deleteById(notificationId);
     }
+
+    @Override
+    public int countUnreadNotifications(Long userId) {
+        User receiver = findUserById(userId);
+        return notificationRepo.countByReceiverAndIsReadFalse(receiver);
+    }
+
+
+
 
 
 }

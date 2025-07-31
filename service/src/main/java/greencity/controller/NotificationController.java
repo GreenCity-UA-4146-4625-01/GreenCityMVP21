@@ -66,4 +66,11 @@ public class NotificationController {
             throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED_NOTIFICATION);
         }
     }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Integer> getUnreadCount(Principal principal) {
+        Long userId = currentUserId(principal);
+        return ResponseEntity.ok(notificationService.countUnreadNotifications(userId));
+    }
+
 }

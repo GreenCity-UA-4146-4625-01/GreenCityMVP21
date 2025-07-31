@@ -1,6 +1,7 @@
 package greencity.service;
 
-import greencity.dto.notification.NotificationInternalDto;
+import greencity.dto.notification.NewReplyNotificationDto;
+//import greencity.dto.notification.NotificationInternalDto;
 import greencity.dto.notification.NotificationDto;
 
 import java.util.List;
@@ -51,6 +52,8 @@ import java.util.List;
          * @param notificationId ID of the notification
          */
         void deleteNotification(Long notificationId);
+
+        int countUnreadNotifications(Long userId);
 
     }
 

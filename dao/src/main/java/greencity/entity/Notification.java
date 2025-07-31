@@ -27,4 +27,8 @@ public class Notification {
 
     @ManyToOne
     private User receiver;
+
+    @Column(name = "text")
+    private String text;
+
 }

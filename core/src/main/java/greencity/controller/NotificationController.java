@@ -1,17 +1,22 @@
 package greencity.controller;
 
+import greencity.annotations.CurrentUserId;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.service.NotificationService;
 import greencity.service.UserService;
+import greencity.sse.SseSubscriptionHandler;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 @RestController
 @RequestMapping("/notifications")
@@ -19,6 +24,9 @@ import java.util.List;
 public class NotificationController {
     private final NotificationService notificationService;
     private final UserService userService;
+
+    @Qualifier("streamingNotificationsExecutor")
+    private final ExecutorService streamingNotificationsExecutor;
 
     /** Get all notifications for the current user. */
     @GetMapping
@@ -71,4 +79,14 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.countUnreadNotifications(userId));
     }
 
+    @GetMapping("/stream")
+    public SseEmitter streamNotifications(@CurrentUserId Long userId) {
+        SseEmitter emitter = new SseEmitter();
+
+        streamingNotificationsExecutor.execute(new SseSubscriptionHandler<>(
+                emitter, notificationService.subscribeForUser(userId)
+        ));
+
+        return emitter;
+    }
 }

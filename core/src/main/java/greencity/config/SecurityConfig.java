@@ -152,6 +152,8 @@ public class SecurityConfig {
                     "/user/{userId}/habit/assign",
                     "/token",
                     "/events",
+                    "/events/{eventId}/comments",
+                    "/events/comments/{commentId}",
                     "/events/{id}")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST,
@@ -205,6 +207,7 @@ public class SecurityConfig {
                     "/econews/like",
                     "/econews/dislike",
                     "/econews/comments/{econewsId}",
+                    "/events/{eventId}/comments",
                     "/econews/comments/like",
                     CUSTOM_SHOPPING_LIST_ITEMS,
                     "/files/image",
@@ -258,6 +261,7 @@ public class SecurityConfig {
                     USER_SHOPPING_LIST + "/user-shopping-list-items")
                 .hasAnyRole(USER, ADMIN, MODERATOR, UBS_EMPLOYEE)
                 .requestMatchers(HttpMethod.GET,
+                    "events/comments/mentioned-users",
                     "/newsSubscriber",
                     "/comments",
                     "/comments/{id}",
@@ -284,6 +288,8 @@ public class SecurityConfig {
                     "/user/update/role")
                 .hasAnyRole(ADMIN)
                 .requestMatchers(HttpMethod.PATCH, "/events/**")
+                .hasAnyRole(ADMIN, USER)
+                .requestMatchers(HttpMethod.PUT, "/events/**")
                 .hasAnyRole(ADMIN, USER)
                 .requestMatchers(HttpMethod.DELETE, "/events/**")
                 .hasAnyRole(ADMIN, USER)

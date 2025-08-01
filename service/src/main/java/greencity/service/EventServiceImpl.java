@@ -5,11 +5,13 @@ import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventDateTime;
+import greencity.entity.EventImage;
 import greencity.entity.EventLocation;
 import greencity.entity.User;
 import greencity.enums.Role;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.repository.EventImageRepo;
 import greencity.repository.EventRepo;
 import greencity.validator.EventDateTimeDtoValidator;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,8 @@ public class EventServiceImpl implements EventService {
     private final EventRepo eventRepo;
     private final EventDateTimeDtoValidator eventDateTimeDtoValidator;
     private final EventImageService eventImageService;
+    private final EventImageRepo eventImageRepo;
+    private final FileService fileService;
 
     /**
      * Creates a new event based on the provided {@link CreateEventRequestDto}.
@@ -108,6 +112,8 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user) {
+        dto.setEventId(eventId);
+
         Event event = eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
@@ -310,5 +316,34 @@ public class EventServiceImpl implements EventService {
         if (normalizedTitle.startsWith(normolizedQuery)) return 2;
         if (normalizedTitle.contains(normolizedQuery)) return 1;
         return 0;
+    }
+  
+     * Updates the location of the event identified by the given event ID.
+     * <p>
+     * Only the event OWNER or an ADMIN user is authorized to perform this operation.
+     * The existing event locations are cleared and replaced with the new location provided.
+     * The bidirectional relationship between {@link Event} and {@link EventLocation} is maintained by setting the event reference in the new location.
+     *
+     * @param eventId           the ID of the event to update; must not be {@code null}
+     * @param eventLocationDto  the new location data transfer object; must not be {@code null} and valid
+     * @param user              the user performing the update operation; must not be {@code null}
+     * @return the updated {@link EventResponseDto} reflecting the new location
+     * @throws NotFoundException                    if no event exists with the given ID
+     * @throws UserHasNoPermissionToAccessException if the user is not the OWNER or ADMIN
+     */
+    @Override
+    public EventResponseDto updateLocationByEventId(Long eventId, EventLocationDto eventLocationDto, UserVO user) {
+        Event event = getEventForOwnerAccess(eventId, user);
+
+        EventLocation eventLocation = modelMapper.map(eventLocationDto, EventLocation.class);
+        eventLocation.setEvent(event);
+
+        event.getEventLocations().clear();
+
+        event.getEventLocations().add(eventLocation);
+
+        Event saved = eventRepo.save(event);
+
+        return modelMapper.map(saved, EventResponseDto.class);
     }
 }

@@ -1,9 +1,11 @@
 package greencity.repository;
 
+import greencity.dto.eventcomment.EventShortInfoUserVO;
 import greencity.dto.habit.HabitVO;
 import greencity.dto.user.UserManagementVO;
 import greencity.dto.user.UserVO;
 import greencity.entity.User;
+import greencity.enums.UserStatus;
 import greencity.repository.options.UserFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
@@ -140,4 +143,19 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
         + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
         + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
+
+    @Query("""
+    SELECT new greencity.dto.eventcomment.EventShortInfoUserVO(
+        u.id,
+        u.name,
+        u.profilePicturePath
+    )
+    FROM User u
+    WHERE u.userStatus = :status
+      AND (
+        LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%'))
+      )
+    ORDER BY u.name
+    """)
+    Page<EventShortInfoUserVO> findAuthorizedUsersForMention(@Param("query") String query, @Param("status") UserStatus status, Pageable pageable);
 }

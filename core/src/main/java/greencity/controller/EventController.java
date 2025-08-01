@@ -9,6 +9,7 @@ import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EditEventRequestDto;
 import greencity.dto.event.EventPreviewDto;
+import greencity.dto.event.EventLocationDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.dto.user.UserVO;
 import greencity.service.EventService;
@@ -28,6 +29,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -249,5 +260,33 @@ public class EventController {
             @PageableDefault(size = 10, sort = "title") Pageable pageable
     ) {
         return ResponseEntity.ok(eventService.searchEventsByTitle(query, pageable));
+    }
+  
+     * Update the location of an event by its ID.
+     * <p>
+     * Accessible only to the event OWNER or ADMIN users.
+     * Accepts location data in JSON format and updates the corresponding event's location.
+     * </p>
+     *
+     * @param id                the ID of the event to update
+     * @param eventLocationDto  the new location data for the event (validated)
+     * @param user              the current authenticated user (injected via {@code @CurrentUser})
+     * @return ResponseEntity containing the updated {@link EventResponseDto}
+     */
+    @Operation(summary = "Edit event location by ID (accessible for ADMIN and OWNER only)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.CREATED),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "403", description = HttpStatuses.FORBIDDEN),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND),
+    })
+    @PutMapping("/{id}/location")
+    public ResponseEntity<EventResponseDto> updateLocation(
+            @PathVariable Long id,
+            @Valid @RequestBody EventLocationDto eventLocationDto,
+            @Parameter(hidden = true) @CurrentUser UserVO user
+    ) {
+        return ResponseEntity.ok(eventService.updateLocationByEventId(id, eventLocationDto, user));
+
     }
 }

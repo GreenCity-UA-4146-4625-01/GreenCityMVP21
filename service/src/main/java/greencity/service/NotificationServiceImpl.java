@@ -116,8 +116,11 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationRepo.countByReceiverAndIsReadFalse(receiver);
     }
 
-
-
-
-
+    @Override
+    public boolean isNotificationForUser(Long notificationId, Long userId) {
+        return notificationRepo.findById(notificationId)
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found with id: " + notificationId))
+                .getReceiver().getId()
+                .equals(userId);
+    }
 }

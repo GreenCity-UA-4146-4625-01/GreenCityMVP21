@@ -2,7 +2,6 @@ package greencity.controller;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
-import greencity.entity.Notification;
 import greencity.service.NotificationService;
 import greencity.service.UserService;
 import jakarta.validation.constraints.NotEmpty;
@@ -61,8 +60,7 @@ public class NotificationController {
 
     /** Throws 403 if the notification does not belong to the current user. */
     private void ensureOwner(Long notificationId, Long userId) {
-        Notification n = notificationService.findById(notificationId);
-        if (!n.getReceiver().getId().equals(userId)) {
+        if (!notificationService.isNotificationForUser(notificationId, userId)) {
             throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED_NOTIFICATION);
         }
     }

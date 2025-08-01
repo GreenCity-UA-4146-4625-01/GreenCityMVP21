@@ -1,7 +1,6 @@
 package greencity.service;
 
 import greencity.dto.notification.NotificationDto;
-import greencity.dto.notification.streaming.StreamingNotificationDto;
 import greencity.sse.StreamingSubscription;
 
 import java.util.List;
@@ -63,5 +62,5 @@ public interface NotificationService {
      */
     boolean isNotificationForUser(Long notificationId, Long userId);
 
-    StreamingSubscription<StreamingNotificationDto> subscribeForUser(Long userId);
+    StreamingSubscription<NotificationDto> subscribeForUser(Long userId);
 }

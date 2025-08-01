@@ -1,7 +1,6 @@
 package greencity.service;
 
 import greencity.dto.notification.*;
-import greencity.dto.notification.streaming.StreamingNotificationDto;
 import greencity.entity.Notification;
 import greencity.entity.User;
 import greencity.mapping.NotificationMapper;
@@ -27,7 +26,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserRepo userRepository;
     private final ModelMapper modelMapper;
 
-    private final SubscriptionHolder<StreamingNotificationDto> subscriptions;
+    private final SubscriptionHolder<NotificationDto> subscriptions;
 
     private User findUserById(Long id) {
         return userRepository.findById(id)
@@ -45,7 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setReceiver(findUserById(dto.receiver().getId()));
         notificationRepo.save(notification);
 
-        subscriptions.notifyByUser(dto.receiver().getId(), null);
+        subscriptions.notifyByUser(dto.receiver().getId(), dto);
     }
 
 
@@ -128,7 +127,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public StreamingSubscription<StreamingNotificationDto> subscribeForUser(Long userId) {
+    public StreamingSubscription<NotificationDto> subscribeForUser(Long userId) {
         return subscriptions.createForUser(userId);
     }
 }

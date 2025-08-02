@@ -89,7 +89,7 @@ public interface UserFriendRepository extends JpaRepository<UserFriend, UserFrie
                     AND uf3.status = 'FRIEND'
               )
         ),
-        false 
+        false\s
     )
     FROM User u
     WHERE (LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))
@@ -164,7 +164,7 @@ public interface UserFriendRepository extends JpaRepository<UserFriend, UserFrie
      * Retrieves a list of the current user's friends as UserCardDto objects.
      * Each DTO contains basic information about the friend along with the count of mutual friends
      * between the current user and that friend.
-     *
+     * <p>
      * The query selects users who are friends of the user with the given currentUserId and have a 'FRIEND' status.
      * For each friend, it calculates the number of mutual friends shared with the current user.
      *

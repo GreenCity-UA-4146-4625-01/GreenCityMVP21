@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service implementation for managing {@link Event} entities.
@@ -160,12 +162,7 @@ public class EventServiceImpl implements EventService {
         }
 
         if (images != null && !images.isEmpty()) {
-            List<EventImage> existingImages = eventImageRepo.findAllByEventId(eventId);
-
-            existingImages.forEach(image -> fileService.delete(image.getUrl()));
-            eventImageRepo.deleteAll(existingImages);
-
-            List<EventImageDto> uploadedImages = eventImageService.uploadEventImages(images, dto.getEventId(), user);
+            List<EventImageDto> uploadedImages = eventImageService.uploadEventImages(images, eventId, user);
             uploadedImages.stream()
                     .filter(EventImageDto::getIsMain)
                     .findFirst()
@@ -268,7 +265,6 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Event not found with id: " + id));
     }
 
-
     @PostAuthorize("hasRole('ROLE_ADMIN') or #user.id == #returnObject.creator.id")
     private Event getEventForOwnerAccess(Long eventId, UserVO user) {
         return eventRepo.findEventById(eventId)
@@ -276,6 +272,52 @@ public class EventServiceImpl implements EventService {
     }
 
     /**
+     * Searches for events based on a provided keyword fragment in the event title.
+     * <p>
+     * The method performs a case-insensitive search across event titles, returning a list of events whose titles
+     * contain the specified query string. The results are sorted by textual relevance to the search query
+     * (i.e., the better the match in the title, the higher the event is placed in the list).
+     * Each matching {@code Event} entity is mapped to an {@link EventPreviewDto} for client display.
+     *
+     * @param query the search keyword to look for in event titles; must be between 3 and 64 characters long
+     * @return a list of {@link EventPreviewDto} that match the search query, sorted by relevance; may be empty if no matches are found
+     */
+    @Override
+    public PageableDto<EventPreviewDto> searchEventsByTitle(String query, Pageable pageable) {
+        String normolizedQuery = query.toLowerCase();
+
+        List<EventPreviewDto> sorted = eventRepo.findByTitleContainsIgnoreCase(query, pageable).stream()
+                .sorted(Comparator.comparingInt((Event event) -> {
+                            String normalizedTitle = event.getTitle().toLowerCase();
+                            return calculateRelevance(normalizedTitle, normolizedQuery);
+                        })
+                        .reversed()
+                )
+                .map(event -> modelMapper.map(event, EventPreviewDto.class))
+                .collect(Collectors.toList());
+
+        int total = sorted.size();
+        int pageSize = pageable.getPageSize();
+        int pageNumber = pageable.getPageNumber();
+        int fromIndex = pageNumber * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, total);
+
+        List<EventPreviewDto> pageContent = fromIndex >= total ? List.of() : sorted.subList(fromIndex, toIndex);
+        return new PageableDto<>(
+                pageContent,
+                total,
+                pageNumber,
+                (int) Math.ceil((double) total / pageSize)
+        );
+    }
+
+    private int calculateRelevance(String normalizedTitle, String normolizedQuery) {
+        if (normalizedTitle.equals(normolizedQuery)) return 3;
+        if (normalizedTitle.startsWith(normolizedQuery)) return 2;
+        if (normalizedTitle.contains(normolizedQuery)) return 1;
+        return 0;
+    }
+  
      * Updates the location of the event identified by the given event ID.
      * <p>
      * Only the event OWNER or an ADMIN user is authorized to perform this operation.

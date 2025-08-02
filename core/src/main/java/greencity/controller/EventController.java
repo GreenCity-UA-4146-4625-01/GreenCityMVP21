@@ -4,15 +4,18 @@ import greencity.annotations.CurrentUser;
 import greencity.annotations.ValidImage;
 import greencity.constant.ErrorMessage;
 import greencity.constant.HttpStatuses;
+import greencity.constant.ValidationConstants;
 import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EditEventRequestDto;
+import greencity.dto.event.EventPreviewDto;
 import greencity.dto.event.EventLocationDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.dto.user.UserVO;
 import greencity.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -25,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -228,6 +232,36 @@ public class EventController {
     }
 
     /**
+     * Searches for events by a given keyword present in the event title.
+     * <p>
+     * This endpoint allows users to search for events using partial or full keywords. The search is case-insensitive
+     * and is performed only across event titles. The input must be between 3 and 64 characters in length.
+     * <p>
+     * Returns a list of {@link EventPreviewDto} sorted by textual relevance to the search query.
+     *
+     * @param query the keyword to search within event titles; must be 3–64 characters long
+     * @return a list of matching {@link EventPreviewDto} sorted by relevance; an empty list if no matches found
+     */
+    @Operation(
+            summary = "Search events by title",
+            description = "Allows users to search for events using a keyword that matches (partially or fully) the event title. " +
+                    "The search is case-insensitive and returns a list of matching events sorted by relevance."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST, content = @Content),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND, content = @Content)
+    })
+    @GetMapping("/search")
+    public ResponseEntity<PageableDto<EventPreviewDto>> searchEvents(
+            @RequestParam
+            @Size(min = 3, max = 64, message = ValidationConstants.SEARCH_TEXT_VALIDATION_MESSAGE)
+            String query,
+            @PageableDefault(size = 10, sort = "title") Pageable pageable
+    ) {
+        return ResponseEntity.ok(eventService.searchEventsByTitle(query, pageable));
+    }
+  
      * Update the location of an event by its ID.
      * <p>
      * Accessible only to the event OWNER or ADMIN users.
@@ -253,5 +287,6 @@ public class EventController {
             @Parameter(hidden = true) @CurrentUser UserVO user
     ) {
         return ResponseEntity.ok(eventService.updateLocationByEventId(id, eventLocationDto, user));
+
     }
 }

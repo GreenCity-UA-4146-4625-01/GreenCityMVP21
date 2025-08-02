@@ -7,15 +7,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 
 @Repository
 public interface EventRepo extends JpaRepository<Event, Long> {
 
-    Optional<Event> findEventById(Long id);
+    Page<Event> findByTitleContainsIgnoreCase(String fragment, Pageable pageable);
 
+    Optional<Event> findEventById(Long id);
 
     Page<Event> findByParticipants_Id(Long id,
                                       Pageable pageable);
@@ -25,7 +25,4 @@ public interface EventRepo extends JpaRepository<Event, Long> {
 
     @Override
     void deleteById(Long aLong);
-
-
-
 }

@@ -3,6 +3,7 @@ package greencity.service;
 import greencity.dto.PageableDto;
 import greencity.dto.event.CreateEventRequestDto;
 import greencity.dto.event.EditEventRequestDto;
+import greencity.dto.event.EventPreviewDto;
 import greencity.dto.event.EventLocationDto;
 import greencity.dto.event.EventResponseDto;
 import greencity.dto.user.UserVO;
@@ -100,6 +101,19 @@ public interface EventService {
     void deleteEventById(Long id, UserVO user);
 
     /**
+     * Retrieves a list of events that match a given search query in their titles.
+     *
+     * <p>
+     * The search is case-insensitive and matches partial titles. Only events with titles containing the
+     * provided query string will be returned. Results are sorted by textual relevance to the query.
+     * Each matching {@code Event} entity is mapped to an {@link EventPreviewDto}.
+     *
+     * @param query the search keyword used to match against event titles; must be between 3 and 64 characters
+     * @return a list of {@link EventPreviewDto} objects whose titles contain the query string;
+     *         the list may be empty if no matching events are found
+     */
+    PageableDto<EventPreviewDto> searchEventsByTitle(String query, Pageable pageable);
+  
      * Updates the location information of an event identified by its ID.
      * <p>
      * This operation is allowed only for users with ADMIN role or the OWNER of the event.
@@ -113,6 +127,5 @@ public interface EventService {
      * @throws UserHasNoPermissionToAccessException if the user is neither ADMIN nor OWNER of the event
      */
     EventResponseDto updateLocationByEventId(Long id, EventLocationDto eventLocationDto, UserVO user);
-
 }
 

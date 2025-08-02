@@ -262,7 +262,7 @@ public class EventController {
         return ResponseEntity.ok(eventService.searchEventsByTitle(query, pageable));
     }
   
-     * Update the location of an event by its ID.
+     /** Update the location of an event by its ID.
      * <p>
      * Accessible only to the event OWNER or ADMIN users.
      * Accepts location data in JSON format and updates the corresponding event's location.

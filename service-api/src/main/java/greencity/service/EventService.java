@@ -114,7 +114,7 @@ public interface EventService {
      */
     PageableDto<EventPreviewDto> searchEventsByTitle(String query, Pageable pageable);
   
-     * Updates the location information of an event identified by its ID.
+     /** Updates the location information of an event identified by its ID.
      * <p>
      * This operation is allowed only for users with ADMIN role or the OWNER of the event.
      * The method updates the event's location details based on the provided {@link EventLocationDto}.

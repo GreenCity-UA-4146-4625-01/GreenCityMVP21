@@ -112,7 +112,6 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public EventResponseDto updateEventById(Long eventId, EditEventRequestDto dto, List<MultipartFile> images, UserVO user) {
-        dto.setEventId(eventId);
 
         Event event = eventRepo.findEventById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
@@ -318,7 +317,7 @@ public class EventServiceImpl implements EventService {
         return 0;
     }
   
-     * Updates the location of the event identified by the given event ID.
+     /** Updates the location of the event identified by the given event ID.
      * <p>
      * Only the event OWNER or an ADMIN user is authorized to perform this operation.
      * The existing event locations are cleared and replaced with the new location provided.

@@ -15,25 +15,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @DisplayName("FriendServiceImpl unit tests")
 class FriendServiceImplTest {
-
-    @Mock
-    private ModelMapper modelMapper;
 
     @Mock
     private UserRepo userRepo;
@@ -44,12 +41,11 @@ class FriendServiceImplTest {
     @InjectMocks
     private FriendServiceImpl friendService;
 
-    private User user;
     private UserCardDto userCardDto;
 
     @BeforeEach
     void setUp() {
-        user = new User();
+        User user = new User();
         user.setId(1L);
         user.setName("John");
         user.setCity("Kyiv");
@@ -68,23 +64,24 @@ class FriendServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should return filtered users with mutual friends count")
+    @DisplayName("Should return filtered UserCardDto list with mutual friends count")
     void searchUsers_withMutualAndCityFilter() {
-        List<User> users = List.of(user);
         Pageable pageable = PageRequest.of(0, 10);
 
-        when(userFriendRepository.searchUsers(eq(1L), anyString(), eq(true), eq(true))).thenReturn(users);
-        when(modelMapper.map(user, UserCardDto.class)).thenReturn(userCardDto);
-        when(userFriendRepository.countMutualFriends(1L, 1L, FriendStatus.FRIEND)).thenReturn(3L);
+        List<UserCardDto> userDtos = List.of(userCardDto);
+        Page<UserCardDto> usersPage = new PageImpl<>(userDtos, pageable, 1);
+
+        when(userFriendRepository.searchUsers(1L, "Jo", true, true, pageable))
+                .thenReturn(usersPage);
 
         PageableDto<UserCardDto> result = friendService.searchUsers("Jo", true, true, pageable, 1L);
 
         assertThat(result).isNotNull();
         assertThat(result.getPage()).hasSize(1);
         assertThat(result.getPage().getFirst().getName()).isEqualTo("John");
+        assertThat(result.getPage().getFirst().getMutualFriendsCount()).isEqualTo(3L);
 
-        verify(userFriendRepository).searchUsers(1L, "Jo", true, true);
-        verify(userFriendRepository).countMutualFriends(1L, 1L, FriendStatus.FRIEND);
+        verify(userFriendRepository).searchUsers(1L, "Jo", true, true, pageable);
     }
 
     @Test
@@ -115,34 +112,51 @@ class FriendServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should accept friend request")
+    @DisplayName("Should accept friend request and create bidirectional friendship")
     void acceptFriendRequest_success() {
-        when(userRepo.existsById(1L)).thenReturn(true);
-        when(userRepo.existsById(2L)).thenReturn(true);
-        when(userRepo.isFriend(1L, 2L)).thenReturn(false);
-        when(userRepo.isFriendRequestedByCurrentUser(1L, 2L)).thenReturn(true);
+        Long currentUserId = 123L;
+        Long friendId = 124L;
 
-        friendService.acceptFriendRequest(1L, 2L);
+        when(userRepo.existsById(currentUserId)).thenReturn(true);
+        when(userRepo.existsById(friendId)).thenReturn(true);
+        when(userFriendRepository.existsFriendshipWithStatus(currentUserId, friendId, FriendStatus.FRIEND.toString()))
+                .thenReturn(false);
+        when(userFriendRepository.isFriendRequestedByCurrentUser(currentUserId, friendId))
+                .thenReturn(true);
 
-        verify(userRepo).acceptFriendRequest(1L, 2L);
+        doNothing().when(userFriendRepository).acceptFriendRequest(currentUserId, friendId);
+
+        friendService.acceptFriendRequest(currentUserId, friendId);
+
+        verify(userRepo).existsById(currentUserId);
+        verify(userRepo).existsById(friendId);
+        verify(userFriendRepository).existsFriendshipWithStatus(currentUserId, friendId, FriendStatus.FRIEND.toString());
+        verify(userFriendRepository).isFriendRequestedByCurrentUser(currentUserId, friendId);
+        verify(userFriendRepository).addOrUpdateFriendRequest(currentUserId, friendId, FriendStatus.FRIEND.toString());
+        verify(userFriendRepository).addOrUpdateFriendRequest(friendId, currentUserId, FriendStatus.FRIEND.toString());
     }
 
     @Test
-    @DisplayName("Should return all friends with pagination")
+    @DisplayName("Should return all friends with mutual friends count (pagination simulated)")
     void getAllFriends_success() {
         Pageable pageable = PageRequest.of(0, 5);
-        Page<User> page = new PageImpl<>(List.of(user), pageable, 1);
+
+        List<UserCardDto> mockFriends = List.of(userCardDto.setFriend(true));
+
         when(userRepo.existsById(1L)).thenReturn(true);
-        when(userFriendRepository.findFriendsByUserIdAndStatus(1L, FriendStatus.FRIEND, pageable)).thenReturn(page);
-        when(userFriendRepository.findMutualCounts(eq(1L), anyList(), eq(FriendStatus.FRIEND)))
-                .thenReturn(List.of(new greencity.dto.userfriend.MutualCountDto(1L, 3L)));
-        when(modelMapper.map(user, UserCardDto.class)).thenReturn(userCardDto);
+        when(userFriendRepository.getAllFriends(1L)).thenReturn(mockFriends);
 
         PageableDto<UserCardDto> result = friendService.getAllFriends(1L, pageable);
 
         assertThat(result).isNotNull();
+        assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getPage()).hasSize(1);
+        assertThat(result.getPage().getFirst().getName()).isEqualTo("John");
         assertThat(result.getPage().getFirst().getMutualFriendsCount()).isEqualTo(3L);
+        assertThat(result.getPage().getFirst().isFriend()).isTrue();
+
+        verify(userRepo).existsById(1L);
+        verify(userFriendRepository).getAllFriends(1L);
     }
 
     @Test

@@ -2,9 +2,7 @@ package greencity.service;
 
 import greencity.constant.ErrorMessage;
 import greencity.dto.PageableDto;
-import greencity.dto.userfriend.MutualCountDto;
 import greencity.dto.userfriend.UserCardDto;
-import greencity.entity.User;
 import greencity.enums.FriendStatus;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
@@ -17,8 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,19 +42,15 @@ public class FriendServiceImpl implements FriendService {
                                                 Boolean filterByMutual, Pageable pageable,
                                                 Long currentUserId) {
 
-        List<User> users = userFriendRepository.searchUsers(currentUserId, query, filterByCity, filterByMutual);
+        Page<UserCardDto> usersPage = userFriendRepository.searchUsers(currentUserId, query, filterByCity, filterByMutual, pageable);
+        List<UserCardDto> users = usersPage.getContent();
 
-        List<UserCardDto> dtoList = users.stream()
-                .map(user -> {
-                    UserCardDto dto = modelMapper.map(user, UserCardDto.class);
-                    Long mutualCount = userFriendRepository.countMutualFriends(currentUserId, user.getId(), FriendStatus.FRIEND);
-                    dto.setMutualFriendsCount(mutualCount);
-                    dto.setFriend(false);
-                    return dto;
-                })
-                .toList();
-
-        return new PageableDto<>(dtoList, dtoList.size(), pageable.getPageNumber(), pageable.getPageSize());
+        return new PageableDto<>(
+                users,
+                usersPage.getTotalElements(),
+                usersPage.getNumber(),
+                usersPage.getSize()
+        );
     }
 
     /**
@@ -90,7 +86,7 @@ public class FriendServiceImpl implements FriendService {
         validateUserAndFriendExistence(currentUserId, friendId);
         validateFriendNotExists(currentUserId, friendId);
         validateFriendRequestSentByFriend(currentUserId, friendId);
-        userRepository.acceptFriendRequest(currentUserId, friendId);
+        ensureBidirectionalFriendship(currentUserId, friendId);
     }
 
     /**
@@ -108,7 +104,7 @@ public class FriendServiceImpl implements FriendService {
         validateUserAndFriendExistence(currentUserId, friendId);
         validateFriendNotExists(currentUserId, friendId);
         validateFriendRequestSentByFriend(currentUserId, friendId);
-        userFriendRepository.deleteFriendRequest(currentUserId, friendId, FriendStatus.REQUEST);
+        userFriendRepository.deleteFriendRequest(currentUserId, friendId);
     }
 
     /**
@@ -124,31 +120,13 @@ public class FriendServiceImpl implements FriendService {
         Objects.requireNonNull(pageable);
         validateUserExistence(currentUserId);
 
-        Page<User> friendPage = userFriendRepository.findFriendsByUserIdAndStatus(currentUserId, FriendStatus.FRIEND, pageable);
-        List<User> friends = friendPage.getContent();
-        if (friends.isEmpty()) {
-            return new PageableDto<>(Collections.emptyList(), 0, pageable.getPageNumber(), pageable.getPageSize());
+        List<UserCardDto> allFriends = userFriendRepository.getAllFriends(currentUserId);
+
+        if (allFriends.isEmpty()) {
+            return new PageableDto<>(Collections.emptyList(), 0,  pageable.getPageNumber(), pageable.getPageSize());
         }
 
-        List<Long> friendIds = friends.stream().map(User::getId).toList();
-
-        List<MutualCountDto> mutualCounts = userFriendRepository.findMutualCounts(currentUserId, friendIds, FriendStatus.FRIEND);
-        Map<Long, Long> mutualMap = mutualCounts.stream()
-                .collect(Collectors.toMap(MutualCountDto::getTargetUserId, MutualCountDto::getCount));
-
-        Map<Long, Boolean> friendMap = friendIds.stream()
-                .collect(Collectors.toMap(id -> id, id -> true));
-
-        List<UserCardDto> dtos = friends.stream()
-                .map(user -> {
-                    UserCardDto dto = modelMapper.map(user, UserCardDto.class);
-                    dto.setMutualFriendsCount(mutualMap.getOrDefault(user.getId(), 0L));
-                    dto.setFriend(friendMap.getOrDefault(user.getId(), false));
-                    return dto;
-                })
-                .toList();
-
-        return new PageableDto<>(dtos, (int) friendPage.getTotalElements(), pageable.getPageNumber(), pageable.getPageSize());
+        return new PageableDto<>(allFriends, allFriends.size(), pageable.getPageNumber(), pageable.getPageSize());
     }
 
     /**
@@ -210,7 +188,7 @@ public class FriendServiceImpl implements FriendService {
      * @throws BadRequestException if request already sent
      */
     private void validateFriendRequestNotSent(long userId, long friendId) {
-        if (userRepository.isFriendRequested(userId, friendId)) {
+        if (userFriendRepository.existsFriendshipWithStatus(userId, friendId, FriendStatus.REQUEST.toString())) {
             throw new BadRequestException(ErrorMessage.FRIEND_REQUEST_ALREADY_SENT);
         }
     }
@@ -223,7 +201,7 @@ public class FriendServiceImpl implements FriendService {
      * @throws BadRequestException if they are already friends
      */
     private void validateFriendNotExists(long userId, long friendId) {
-        if (userRepository.isFriend(userId, friendId)) {
+        if (userFriendRepository.existsFriendshipWithStatus(userId, friendId, FriendStatus.FRIEND.toString())) {
             throw new BadRequestException(ErrorMessage.FRIEND_EXISTS + friendId);
         }
     }
@@ -236,10 +214,14 @@ public class FriendServiceImpl implements FriendService {
      * @throws NotFoundException if request not found
      */
     private void validateFriendRequestSentByFriend(long userId, long friendId) {
-        if (!userRepository.isFriendRequestedByCurrentUser(userId, friendId)) {
+        if (!userFriendRepository.isFriendRequestedByCurrentUser(userId, friendId)) {
             throw new NotFoundException(ErrorMessage.FRIEND_REQUEST_NOT_SENT);
         }
     }
 
+    private void ensureBidirectionalFriendship(Long userId1, Long userId2) {
+        userFriendRepository.addOrUpdateFriendRequest(userId1, userId2, "FRIEND");
+        userFriendRepository.addOrUpdateFriendRequest(userId2, userId1, "FRIEND");
+    }
 }
 

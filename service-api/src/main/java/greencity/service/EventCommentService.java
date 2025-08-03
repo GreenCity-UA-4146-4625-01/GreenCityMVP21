@@ -1,5 +1,4 @@
 package greencity.service;
-import greencity.dto.econewscomment.EcoNewsCommentVO;
 import greencity.dto.eventcomment.*;
 import greencity.dto.user.UserVO;
 import org.springframework.data.domain.Page;

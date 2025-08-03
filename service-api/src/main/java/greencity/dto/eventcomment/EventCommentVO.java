@@ -5,7 +5,6 @@ import lombok.*;
 
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 @Data

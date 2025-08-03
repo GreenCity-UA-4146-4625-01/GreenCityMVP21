@@ -4,6 +4,8 @@ import greencity.dto.user.UserVO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface EventCommentService {
     /**
      * Creates a comment on an event.
@@ -24,4 +26,6 @@ public interface EventCommentService {
     int countOfCommentsByEventId(Long eventId);
 
     void like(UserVO userVO, Long id);
+
+    List<EventShortInfoUserVO> getUsersWhoLikedComment(Long commentId);
 }

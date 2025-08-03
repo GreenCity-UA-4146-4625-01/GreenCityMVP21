@@ -145,7 +145,30 @@ public interface UserFriendRepository extends JpaRepository<UserFriend, UserFrie
     @Query(nativeQuery = true,
             value = "SELECT EXISTS(SELECT * FROM users_friends WHERE status = 'REQUEST' AND "
                     + "user_id = :friendId AND friend_id = :userId) ")
-    boolean isFriendRequestedByCurrentUser(Long userId, Long friendId);
+    boolean isFriendRequestedByFriend(Long userId, Long friendId);
+
+    /**
+     * Deletes a friend request with status 'REQUEST' from the current user to the specified friend.
+     * <p>
+     * This method removes the pending friend request record in the database.
+     *
+     * @param currentUserId the ID of the user who sent the friend request
+     * @param friendId      the ID of the user who received the friend request
+     */
+    @Modifying
+    @Query("DELETE FROM UserFriend uf WHERE uf.user.id = :currentUserId AND uf.friend.id = :friendId AND uf.status = 'REQUEST'")
+    void revokeFriendRequest(@Param("currentUserId") Long currentUserId, @Param("friendId") Long friendId);
+
+    /**
+     * Checks if a friend request with status 'REQUEST' exists from userId to friendId.
+     *
+     * @param userId   the ID of the user who may have sent the friend request
+     * @param friendId the ID of the user who may have received the friend request
+     * @return true if such a friend request exists, false otherwise
+     */
+    @Query(nativeQuery = true,
+            value = "SELECT EXISTS(SELECT 1 FROM users_friends WHERE status = 'REQUEST' AND user_id = :userId AND friend_id = :friendId)")
+    boolean isFriendRequestedByCurrentUser(@Param("userId") Long userId, @Param("friendId") Long friendId);
 
     /**
      * Accepts a friend request by updating its status to 'FRIEND'.

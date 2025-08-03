@@ -121,7 +121,7 @@ class FriendServiceImplTest {
         when(userRepo.existsById(friendId)).thenReturn(true);
         when(userFriendRepository.existsFriendshipWithStatus(currentUserId, friendId, FriendStatus.FRIEND.toString()))
                 .thenReturn(false);
-        when(userFriendRepository.isFriendRequestedByCurrentUser(currentUserId, friendId))
+        when(userFriendRepository.isFriendRequestedByFriend(currentUserId, friendId))
                 .thenReturn(true);
 
         doNothing().when(userFriendRepository).acceptFriendRequest(currentUserId, friendId);
@@ -131,7 +131,7 @@ class FriendServiceImplTest {
         verify(userRepo).existsById(currentUserId);
         verify(userRepo).existsById(friendId);
         verify(userFriendRepository).existsFriendshipWithStatus(currentUserId, friendId, FriendStatus.FRIEND.toString());
-        verify(userFriendRepository).isFriendRequestedByCurrentUser(currentUserId, friendId);
+        verify(userFriendRepository).isFriendRequestedByFriend(currentUserId, friendId);
         verify(userFriendRepository).addOrUpdateFriendRequest(currentUserId, friendId, FriendStatus.FRIEND.toString());
         verify(userFriendRepository).addOrUpdateFriendRequest(friendId, currentUserId, FriendStatus.FRIEND.toString());
     }
@@ -169,5 +169,27 @@ class FriendServiceImplTest {
         Optional<FriendStatus> result = friendService.getFriendStatus(1L, 2L);
 
         assertThat(result).contains(FriendStatus.FRIEND);
+    }
+
+    @Test
+    @DisplayName("Should successfully revoke sent friend request when all validations pass")
+    void revokeFriendRequest_success() {
+        Long currentUserId = 1L;
+        Long friendId = 2L;
+
+        when(userRepo.existsById(currentUserId)).thenReturn(true);
+        when(userRepo.existsById(friendId)).thenReturn(true);
+        when(userFriendRepository.existsFriendshipWithStatus(currentUserId, friendId, "REQUEST")).thenReturn(true);
+        when(userFriendRepository.existsFriendshipWithStatus(currentUserId, friendId, "FRIEND")).thenReturn(false);
+        when(userFriendRepository.isFriendRequestedByCurrentUser(currentUserId, friendId)).thenReturn(true);
+
+        friendService.revokeFriendRequest(currentUserId, friendId);
+
+        verify(userRepo).existsById(currentUserId);
+        verify(userRepo).existsById(friendId);
+        verify(userFriendRepository).existsFriendshipWithStatus(currentUserId, friendId, "REQUEST");
+        verify(userFriendRepository).existsFriendshipWithStatus(currentUserId, friendId, "FRIEND");
+        verify(userFriendRepository).isFriendRequestedByCurrentUser(currentUserId, friendId);
+        verify(userFriendRepository).revokeFriendRequest(currentUserId, friendId);
     }
 }

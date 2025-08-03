@@ -108,6 +108,32 @@ public class FriendServiceImpl implements FriendService {
     }
 
     /**
+     * Revokes a previously sent friend request from the current user to the specified friend.
+     * The method performs the following validations before revoking the request:
+     *     Checks that the current user and friend are not the same person.
+     *     Verifies that both users exist.
+     *     Confirms that a friend request was actually sent.
+     *     Ensures the users are not already friends.
+     *     Validates that the friend request was sent by the current user.
+     * If all validations pass, the friend request is revoked in the repository.
+     *
+     * @param currentUserId the ID of the user who sent the friend request
+     * @param friendId      the ID of the user to whom the friend request was sent
+     * @throws IllegalArgumentException if any validation fails
+     */
+    @Override
+    @Transactional
+    public void revokeFriendRequest(Long currentUserId, Long friendId) {
+        validateUserAndFriendNotSamePerson(currentUserId, friendId);
+        validateUserAndFriendExistence(currentUserId, friendId);
+        validateFriendRequestWasSent(currentUserId, friendId);
+        validateFriendNotExists(currentUserId, friendId);
+        validateFriendRequestSentByCurrentUser(currentUserId, friendId);
+        userFriendRepository.revokeFriendRequest(currentUserId, friendId);
+    }
+
+
+    /**
      * Retrieves a paginated list of all friends for the current user.
      *
      * @param currentUserId ID of the user whose friends to retrieve
@@ -214,14 +240,55 @@ public class FriendServiceImpl implements FriendService {
      * @throws NotFoundException if request not found
      */
     private void validateFriendRequestSentByFriend(long userId, long friendId) {
-        if (!userFriendRepository.isFriendRequestedByCurrentUser(userId, friendId)) {
+        if (!userFriendRepository.isFriendRequestedByFriend(userId, friendId)) {
             throw new NotFoundException(ErrorMessage.FRIEND_REQUEST_NOT_SENT);
         }
     }
 
+    /**
+     * Ensures that a friendship relationship exists bidirectionally between two users.
+     * <p>
+     * This method sets the friendship status to "FRIEND" in both directions:
+     * from userId1 to userId2 and from userId2 to userId1.
+     *
+     * @param userId1 the ID of the first user
+     * @param userId2 the ID of the second user
+     */
     private void ensureBidirectionalFriendship(Long userId1, Long userId2) {
         userFriendRepository.addOrUpdateFriendRequest(userId1, userId2, "FRIEND");
         userFriendRepository.addOrUpdateFriendRequest(userId2, userId1, "FRIEND");
     }
+
+    /**
+     * Validates that a friend request with status "REQUEST" exists from userId to friendId.
+     * <p>
+     * Throws a BadRequestException if no such friend request is found.
+     *
+     * @param userId   the ID of the user who supposedly sent the friend request
+     * @param friendId the ID of the user who supposedly received the friend request
+     * @throws BadRequestException if no friend request with status "REQUEST" exists between the users
+     */
+    private void validateFriendRequestWasSent(long userId, long friendId) {
+        if (!userFriendRepository.existsFriendshipWithStatus(userId, friendId, FriendStatus.REQUEST.toString())) {
+            throw new BadRequestException(ErrorMessage.NOT_FOUND_REQUEST + friendId);
+        }
+    }
+
+    /**
+     * Validates that the friend request from userId to friendId was actually sent by the current user.
+     * <p>
+     * Throws a BadRequestException if the friend request was not sent by the user.
+     *
+     * @param userId   the ID of the user who is expected to have sent the friend request
+     * @param friendId the ID of the recipient user of the friend request
+     * @throws BadRequestException if the friend request was not sent by the specified user
+     */
+    private void validateFriendRequestSentByCurrentUser(long userId, long friendId) {
+        boolean sentByUser = userFriendRepository.isFriendRequestedByCurrentUser(userId, friendId);
+        if (!sentByUser) {
+            throw new BadRequestException(ErrorMessage.FRIEND_REQUEST_NOT_SENT_BY_USER + userId);
+        }
+    }
+
 }
 

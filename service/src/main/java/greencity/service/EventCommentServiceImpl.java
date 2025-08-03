@@ -2,10 +2,7 @@ package greencity.service;
 
 import greencity.annotations.RatingCalculationEnum;
 import greencity.constant.ErrorMessage;
-import greencity.dto.eventcomment.AddEventCommentDtoRequest;
-import greencity.dto.eventcomment.EventCommentDtoResponse;
-import greencity.dto.eventcomment.EventShortInfoUserVO;
-import greencity.dto.eventcomment.EventCommentViewDto;
+import greencity.dto.eventcomment.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventComment;
@@ -131,5 +128,25 @@ public class EventCommentServiceImpl implements EventCommentService {
                 .orElseThrow(() -> new NotFoundException("Event not found"));
 
         return eventCommentRepository.countOfComments(event.getId());
+    }
+
+    @Override
+    public void like(UserVO userVO, Long id) {
+        EventComment comment = eventCommentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+
+        User user = userRepo.findById(userVO.getId())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        Set<User> likedUsers = comment.getUsersLiked();
+
+        if (likedUsers.contains(user)) {
+            likedUsers.remove(user);
+        } else {
+            likedUsers.add(user);
+        }
+
+        comment.setUsersLiked(likedUsers);
+        eventCommentRepository.save(comment);
     }
 }

@@ -1,11 +1,8 @@
 package greencity.service;
-import greencity.dto.eventcomment.AddEventCommentDtoRequest;
-import greencity.dto.eventcomment.EventCommentDtoResponse;
-import greencity.dto.eventcomment.EventShortInfoUserVO;
+import greencity.dto.eventcomment.*;
 import greencity.dto.user.UserVO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import greencity.dto.eventcomment.EventCommentViewDto;
 
 public interface EventCommentService {
     /**
@@ -25,4 +22,6 @@ public interface EventCommentService {
     EventCommentViewDto getCommentById(Long commentId);
 
     int countOfCommentsByEventId(Long eventId);
+
+    void like(UserVO userVO, Long id);
 }

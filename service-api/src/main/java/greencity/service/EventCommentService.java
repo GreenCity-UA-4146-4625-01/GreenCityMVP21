@@ -23,4 +23,6 @@ public interface EventCommentService {
     Page<EventCommentViewDto> getCommentsByEventId(Long eventId, int page, int size);
 
     EventCommentViewDto getCommentById(Long commentId);
+
+    int countOfCommentsByEventId(Long eventId);
 }

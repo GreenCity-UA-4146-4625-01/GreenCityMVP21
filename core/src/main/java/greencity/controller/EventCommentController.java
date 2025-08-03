@@ -51,6 +51,14 @@ public class EventCommentController {
                 .body(eventCommentService.createComment(request, eventId, userVO));
     }
 
+    @Operation(summary = "get mentioned-users")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
     @GetMapping("/comments/mentioned-users")
     public ResponseEntity<Page<EventShortInfoUserVO>> autocompleteMentionedUsers(
             @RequestParam String query,
@@ -82,9 +90,21 @@ public class EventCommentController {
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-
     @GetMapping("/comments/{commentId}")
     public ResponseEntity<EventCommentViewDto> getComment(@PathVariable Long commentId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventCommentService.getCommentById(commentId));
+    }
+
+    @Operation(summary = "get count of comments")
+    @ResponseStatus(value = HttpStatus.OK)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.BAD_REQUEST)
+    })
+    @GetMapping("/{eventId}/comments/count")
+    public int getCommentsCountByEventId(@PathVariable Long eventId) {
+        return eventCommentService.countOfCommentsByEventId(eventId);
     }
 }

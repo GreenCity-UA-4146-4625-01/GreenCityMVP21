@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import greencity.ModelUtils;
 import greencity.config.MockCurrentUserArgumentResolver;
 import greencity.dto.PageableDto;
-import greencity.dto.event.CreateEventRequestDto;
-import greencity.dto.event.EditEventRequestDto;
-import greencity.dto.event.EventLocationDto;
-import greencity.dto.event.EventResponseDto;
+import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.enums.Role;
 import greencity.service.EventService;
@@ -17,7 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -25,12 +24,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -183,6 +184,17 @@ class EventControllerTest {
                 .title("Updated Event title")
                 .build();
 
+        UserVO mockUser = UserVO.builder()
+                .id(100L)
+                .email("admin@example.com")
+                .role(Role.ROLE_ADMIN)
+                .build();
+
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(eventController)
+                .setCustomArgumentResolvers(new MockCurrentUserArgumentResolver(mockUser))
+                .build();
+
         MockMultipartFile eventPart = new MockMultipartFile(
                 "event",
                 "",
@@ -200,12 +212,17 @@ class EventControllerTest {
         mockMvc.perform(multipart("/events/{id}", eventId)
                         .file(eventPart)
                         .file(imageFile)
-                        .with(request -> { request.setMethod("PATCH"); return request; })
+                        .with(request -> {
+                            request.setMethod("PATCH");
+                            return request;
+                        })
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.eventId").value(eventId))
                 .andExpect(jsonPath("$.title").value("Updated Event title"));
+
+        verify(eventService, times(1)).updateEventById(eq(eventId), any(), any(), any());
     }
 
     @Test
@@ -227,5 +244,46 @@ class EventControllerTest {
 
         mockMvc.perform(delete("/events/{id}", eventId))
                 .andExpect(status().isNoContent());
+
+        verify(eventService, times(1)).deleteEventById(eq(eventId), eq(mockUser));
+    }
+
+    @Test
+    void searchEvent_ShouldReturn200() throws Exception {
+        String query = "Tree";
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title"));
+
+        EventPreviewDto event1 = EventPreviewDto.builder()
+                .id(1L)
+                .title("Tree")
+                .build();
+
+        EventPreviewDto event2 = EventPreviewDto.builder()
+                .id(2L)
+                .title("Save the Trees")
+                .build();
+
+        List<EventPreviewDto> content = List.of(event1, event2);
+        PageableDto<EventPreviewDto> response = new PageableDto<>(
+                content, content.size(), 0, 1
+        );
+
+        when(eventService.searchEventsByTitle(eq(query), any(Pageable.class))).thenReturn(response);
+
+        mockMvc.perform(get("/events/search")
+                .param("query", query)
+                .param("page", "0")
+                .param("size", "10")
+                .param("sort", "title")
+                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentPage").value(0))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.page[0].title").value("Tree"))
+                .andExpect(jsonPath("$.page[1].title").value("Save the Trees"));
+
+        verify(eventService, times(1)).searchEventsByTitle(eq(query), any(Pageable.class));
     }
 }

@@ -107,4 +107,17 @@ public class EventCommentController {
     public int getCommentsCountByEventId(@PathVariable Long eventId) {
         return eventCommentService.countOfCommentsByEventId(eventId);
     }
+
+    @Operation(summary = "Like comment.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @PostMapping("/comments/like")
+    public void like(@RequestParam("id") Long id, @Parameter(hidden = true) @CurrentUser UserVO user) {
+        eventCommentService.like(user, id);
+    }
+
 }

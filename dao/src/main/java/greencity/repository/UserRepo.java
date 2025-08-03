@@ -36,7 +36,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @return list of all {@link UserManagementVO}
      */
     @Query(" SELECT new greencity.dto.user.UserManagementVO(u.id, u.name, u.email, u.userCredo, u.role, u.userStatus) "
-        + " FROM User u ")
+           + " FROM User u ")
     Page<UserManagementVO> findAllManagementVo(UserFilter filter, Pageable pageable);
 
     /**
@@ -80,12 +80,12 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
     @Modifying
     @Transactional
     @Query("UPDATE User SET userStatus = CASE "
-        + "WHEN (:userStatus = 'DEACTIVATED') THEN 1 "
-        + "WHEN (:userStatus = 'ACTIVATED') THEN 2 "
-        + "WHEN (:userStatus = 'CREATED') THEN 3 "
-        + "WHEN (:userStatus = 'BLOCKED') THEN 4 "
-        + "ELSE 0 END "
-        + "WHERE id = :userId")
+           + "WHEN (:userStatus = 'DEACTIVATED') THEN 1 "
+           + "WHEN (:userStatus = 'ACTIVATED') THEN 2 "
+           + "WHEN (:userStatus = 'CREATED') THEN 3 "
+           + "WHEN (:userStatus = 'BLOCKED') THEN 4 "
+           + "ELSE 0 END "
+           + "WHERE id = :userId")
     void updateUserStatus(Long userId, String userStatus);
 
     /**
@@ -95,7 +95,7 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @return {@link Date}
      */
     @Query(nativeQuery = true,
-        value = "SELECT last_activity_time FROM users WHERE id=:userId")
+            value = "SELECT last_activity_time FROM users WHERE id=:userId")
     Optional<Timestamp> findLastActivityTimeById(Long userId);
 
     /**
@@ -119,25 +119,24 @@ public interface UserRepo extends JpaRepository<User, Long>, JpaSpecificationExe
      * @return List of friends.
      */
     @Query(nativeQuery = true, value = "SELECT * FROM ((SELECT user_id FROM users_friends AS uf "
-        + "WHERE uf.friend_id = :userId AND uf.status = 'FRIEND' AND "
-        + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.user_id "
-        + "AND ha.status = 'INPROGRESS') = 1) "
-        + "UNION "
-        + "(SELECT friend_id FROM users_friends AS uf "
-        + "WHERE uf.user_id = :userId AND uf.status = 'FRIEND' AND "
-        + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.friend_id "
-        + "AND ha.status = 'INPROGRESS') = 1)) as ui JOIN users as u ON user_id = u.id")
+                                       + "WHERE uf.friend_id = :userId AND uf.status = 'FRIEND' AND "
+                                       + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.user_id "
+                                       + "AND ha.status = 'INPROGRESS') = 1) "
+                                       + "UNION "
+                                       + "(SELECT friend_id FROM users_friends AS uf "
+                                       + "WHERE uf.user_id = :userId AND uf.status = 'FRIEND' AND "
+                                       + "(SELECT count(*) FROM habit_assign ha WHERE ha.habit_id = :habitId AND ha.user_id = uf.friend_id "
+                                       + "AND ha.status = 'INPROGRESS') = 1)) as ui JOIN users as u ON user_id = u.id")
     List<User> getFriendsAssignedToHabit(Long userId, Long habitId);
 
     /**
      * Get all user friends.
      *
      * @param userId The ID of the user.
-     *
      * @return list of {@link User}.
      */
     @Query(nativeQuery = true, value = "SELECT * FROM users WHERE id IN ( "
-        + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
-        + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
+                                       + "(SELECT user_id FROM users_friends WHERE friend_id = :userId and status = 'FRIEND')"
+                                       + "UNION (SELECT friend_id FROM users_friends WHERE user_id = :userId and status = 'FRIEND'));")
     List<User> getAllUserFriends(Long userId);
 }

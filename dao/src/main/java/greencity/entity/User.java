@@ -129,6 +129,12 @@ public class User {
     @ManyToMany(mappedBy = "usersLikedNews")
     private Set<EcoNews> ecoNewsLiked;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserFriend> friends = new ArrayList<>();
+
+    @OneToMany(mappedBy = "friend", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserFriend> friendOf = new ArrayList<>();
+
     @ManyToMany(mappedBy = "usersLiked")
     private Set<EcoNewsComment> ecoNewsCommentsLiked;
 

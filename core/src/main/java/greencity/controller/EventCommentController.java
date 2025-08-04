@@ -127,7 +127,7 @@ public class EventCommentController {
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @DeleteMapping("/comments/{commentId}")
+    @DeleteMapping("/comments/{eventCommentId}")
     public ResponseEntity<Object> deleteComment(@PathVariable Long eventCommentId,
                               @Parameter(hidden = true) @CurrentUser UserVO userVO){
         eventCommentService.deleteById(eventCommentId, userVO);

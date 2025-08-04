@@ -24,4 +24,6 @@ public interface EventCommentService {
     int countOfCommentsByEventId(Long eventId);
 
     void like(UserVO userVO, Long id);
+
+    void deleteById(Long id, UserVO user);
 }

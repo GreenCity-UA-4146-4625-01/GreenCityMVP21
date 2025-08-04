@@ -7,9 +7,11 @@ import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventComment;
 import greencity.entity.User;
+import greencity.enums.Role;
 import greencity.enums.UserStatus;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.mapping.AddEventCommentDtoRequestToEventCommentMapper;
 import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
@@ -148,5 +150,23 @@ public class EventCommentServiceImpl implements EventCommentService {
 
         comment.setUsersLiked(likedUsers);
         eventCommentRepository.save(comment);
+    }
+
+    @Override
+    public void deleteById(Long id, UserVO user) {
+        EventComment eventComment = eventCommentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+
+        if(user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(eventComment.getUser().getId())) {
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+        if (eventComment.getReplies() != null && !eventComment.getReplies().isEmpty()) {
+            eventComment.getReplies().forEach(c->c.setDeleted(true));
+        }
+        eventComment.setDeleted(true);
+        String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
+        CompletableFuture.runAsync(
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_COMMENT, user, accessToken));
+        eventCommentRepository.save(eventComment);
     }
 }

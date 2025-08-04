@@ -120,4 +120,17 @@ public class EventCommentController {
         eventCommentService.like(user, id);
     }
 
+    @Operation(summary = "delete comment")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Object> deleteComment(@PathVariable Long eventCommentId,
+                              @Parameter(hidden = true) @CurrentUser UserVO userVO){
+        eventCommentService.deleteById(eventCommentId, userVO);
+        return ResponseEntity.ok().build();
+    }
 }

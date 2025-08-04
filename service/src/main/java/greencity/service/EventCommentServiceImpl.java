@@ -39,7 +39,6 @@ import static greencity.constant.AppConstant.AUTHORIZATION;
 public class EventCommentServiceImpl implements EventCommentService {
     private final EventCommentRepository eventCommentRepository;
     private final EventRepo eventRepository;
-    private final ModelMapper mapper;
     private final HttpServletRequest httpServletRequest;
     private final RatingCalculation ratingCalculation;
     private final UserRepo userRepo;

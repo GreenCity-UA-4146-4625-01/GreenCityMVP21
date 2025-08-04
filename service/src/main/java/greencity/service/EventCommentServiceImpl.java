@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static greencity.constant.AppConstant.AUTHORIZATION;
 
@@ -57,7 +58,11 @@ public class EventCommentServiceImpl implements EventCommentService {
         EventComment eventComment = addCommentMapper.convert(addEventCommentDtoRequest, mentionedUsers);
 
         eventComment.setEvent(event);
-        eventComment.setUser(mapper.map(userVO, User.class));
+        User author = User.builder()
+                .id(userVO.getId())
+                .name(userVO.getName())
+                .email(userVO.getEmail())
+                .build();
 
         if (addEventCommentDtoRequest.getParentCommentId() != null && addEventCommentDtoRequest.getParentCommentId() != 0) {
             EventComment parentComment = eventCommentRepository.findById(addEventCommentDtoRequest.getParentCommentId())
@@ -74,7 +79,25 @@ public class EventCommentServiceImpl implements EventCommentService {
 
         EventComment saved = eventCommentRepository.save(eventComment);
 
-        return mapper.map(saved, EventCommentDtoResponse.class);
+        return EventCommentDtoResponse.builder()
+                .id(saved.getId())
+                .text(saved.getText())
+                .modifiedDate(saved.getModifiedDate())
+                .replies(saved.getReplies() != null ? saved.getReplies().size() : 0)
+                .likes(saved.getUsersLiked() != null ? saved.getUsersLiked().size() : 0)
+                .author(EventCommentAuthorDto.builder()
+                        .id(author.getId())
+                        .name(author.getName())
+                        .userProfilePicturePath(author.getProfilePicturePath())
+                        .build())
+                .mentionedUser(saved.getMentionedUsers().stream()
+                        .map(user -> EventShortInfoUserVO.builder()
+                                .id(user.getId())
+                                .name(user.getName())
+                                .userProfilePicturePath(user.getProfilePicturePath())
+                                .build())
+                        .collect(Collectors.toSet()))
+                .build();
     }
 
     @Override

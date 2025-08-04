@@ -3,8 +3,10 @@ package greencity.controller;
 import greencity.constant.ErrorMessage;
 import greencity.dto.notification.NotificationDto;
 import greencity.entity.Notification;
+import greencity.repository.NotificationRepo;
 import greencity.service.NotificationService;
 import greencity.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import java.util.List;
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
+    private final NotificationRepo notificationRepo;
     private final NotificationService notificationService;
     private final UserService userService;
 
@@ -60,12 +63,22 @@ public class NotificationController {
     }
 
     /** Throws 403 if the notification does not belong to the current user. */
+    /**private void ensureOwner(Long notificationId, Long userId) {
+        Optional<Notification> n = notificationRepo.findById(notificationId);
+        if (!n.get().getReceiver().getId().equals(userId)) {
+            throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED_NOTIFICATION);
+        }
+    }**/
+
     private void ensureOwner(Long notificationId, Long userId) {
-        Notification n = notificationService.findById(notificationId);
-        if (!n.getReceiver().getId().equals(userId)) {
+        Notification notification = notificationRepo.findById(notificationId)
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found with id: " + notificationId));
+
+        if (!notification.getReceiver().getId().equals(userId)) {
             throw new AccessDeniedException(ErrorMessage.ACCESS_DENIED_NOTIFICATION);
         }
     }
+
 
     @GetMapping("/unread-count")
     public ResponseEntity<Integer> getUnreadCount(Principal principal) {

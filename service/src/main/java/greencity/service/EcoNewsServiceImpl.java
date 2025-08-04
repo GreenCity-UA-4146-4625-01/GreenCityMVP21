@@ -42,6 +42,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import static greencity.constant.AppConstant.AUTHORIZATION;
+import greencity.service.NotificationService;
+import greencity.dto.notification.NewsLikedNotificationDto;
 
 @Service
 @EnableCaching
@@ -56,6 +58,7 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     private final HttpServletRequest httpServletRequest;
     private final EcoNewsSearchRepo ecoNewsSearchRepo;
     private final List<String> languageCode = List.of("en", "ua");
+    private final NotificationService notificationService;
 
     /**
      * {@inheritDoc}
@@ -511,16 +514,34 @@ public class EcoNewsServiceImpl implements EcoNewsService {
     @Override
     public void like(UserVO userVO, Long id) {
         EcoNewsVO ecoNewsVO = findById(id);
+        UserVO author = ecoNewsVO.getAuthor();
+
+        boolean wasAlreadyLiked = ecoNewsVO.getUsersLikedNews().stream().anyMatch(u -> u.getId().equals(userVO.getId()));
+
         if (ecoNewsVO.getUsersDislikedNews().stream().anyMatch(u -> u.getId().equals(userVO.getId()))) {
             ecoNewsVO.getUsersDislikedNews().removeIf(u -> u.getId().equals(userVO.getId()));
         }
-        if (ecoNewsVO.getUsersLikedNews().stream().anyMatch(u -> u.getId().equals(userVO.getId()))) {
+
+        if (wasAlreadyLiked) {
             ecoNewsVO.getUsersLikedNews().removeIf(u -> u.getId().equals(userVO.getId()));
         } else {
             ecoNewsVO.getUsersLikedNews().add(userVO);
+
+            if (!userVO.getId().equals(author.getId())) {
+                NewsLikedNotificationDto notificationDto = NewsLikedNotificationDto.builder()
+                        .receiver(author)
+                        .likerName(userVO.getName())
+                        .newsTitle(ecoNewsVO.getTitle())
+                        .objectId(id)
+                        .isRead(false)
+                        .build();
+                notificationService.createNotification(notificationDto);
+            }
         }
         ecoNewsRepo.save(modelMapper.map(ecoNewsVO, EcoNews.class));
     }
+
+
 
     /**
      * Method to like or dislike {@link EcoNews} by id.

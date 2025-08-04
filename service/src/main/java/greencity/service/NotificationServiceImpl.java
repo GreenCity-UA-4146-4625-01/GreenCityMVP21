@@ -40,6 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     public void createNotification(NotificationDto dto) {
+        System.out.println("DEBUG: Метод createNotification в NotificationServiceImpl викликано з DTO: " + dto);
         Notification notification = NotificationMapper.mapToEntity(dto);
         notification.setReceiver(findUserById(dto.receiver().getId()));
         notificationRepo.save(notification);

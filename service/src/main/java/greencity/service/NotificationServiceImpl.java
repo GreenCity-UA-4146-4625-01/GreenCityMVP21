@@ -3,16 +3,15 @@ package greencity.service;
 import greencity.dto.notification.*;
 import greencity.entity.Notification;
 import greencity.entity.User;
-import greencity.enums.NotificationType;
 import greencity.mapping.NotificationMapper;
 import greencity.repository.NotificationRepo;
 import greencity.repository.UserRepo;
+import greencity.sse.StreamingSubscription;
+import greencity.sse.SubscriptionHolder;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import greencity.util.NotificationTextFormatter;
-
 
 
 import java.util.List;
@@ -27,6 +26,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserRepo userRepository;
     private final ModelMapper modelMapper;
 
+    private final SubscriptionHolder<NotificationDto> subscriptions;
 
     private User findUserById(Long id) {
         return userRepository.findById(id)
@@ -43,6 +43,8 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = NotificationMapper.mapToEntity(dto);
         notification.setReceiver(findUserById(dto.receiver().getId()));
         notificationRepo.save(notification);
+
+        subscriptions.notifyByUser(dto.receiver().getId(), dto);
     }
 
 
@@ -116,8 +118,16 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationRepo.countByReceiverAndIsReadFalse(receiver);
     }
 
+    @Override
+    public boolean isNotificationForUser(Long notificationId, Long userId) {
+        return notificationRepo.findById(notificationId)
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found with id: " + notificationId))
+                .getReceiver().getId()
+                .equals(userId);
+    }
 
-
-
-
+    @Override
+    public StreamingSubscription<NotificationDto> subscribeForUser(Long userId) {
+        return subscriptions.createForUser(userId);
+    }
 }

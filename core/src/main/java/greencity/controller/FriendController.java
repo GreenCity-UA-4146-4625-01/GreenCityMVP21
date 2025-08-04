@@ -134,6 +134,34 @@ public class FriendController {
     }
 
     /**
+     * Handles HTTP DELETE request to revoke a previously sent friend request.
+     * <p>
+     * This method cancels the friend request sent by the current authenticated user
+     * to the user identified by the given friendId.
+     * Upon successful execution, it returns HTTP status 200 OK with no response body.
+     *
+     * @param friendId the ID of the user whose friend request will be revoked
+     * @param userVO   the currently authenticated user (injected automatically)
+     * @return ResponseEntity with HTTP status 200 OK if the request was successfully revoked
+     */
+    @Operation(summary = "Revoke a sent friend request",
+            description = "Cancels the friend request sent by the current user to the specified friend.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Friend request successfully revoked"),
+            @ApiResponse(responseCode = "400", description = "Invalid request or friend request not found"),
+            @ApiResponse(responseCode = "404", description = "Friend user not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @DeleteMapping("/{friendId}/revoke")
+    public ResponseEntity<Void> revokeFriendRequest(
+            @Parameter(description = "ID of the user whose friend request will be cancelled", required = true)
+            @PathVariable long friendId,
+            @Parameter(hidden = true) @CurrentUser UserVO userVO) {
+        friendService.revokeFriendRequest(userVO.getId(), friendId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
      * Retrieves all friends of the current user.
      *
      * @param userVO The current authenticated user.

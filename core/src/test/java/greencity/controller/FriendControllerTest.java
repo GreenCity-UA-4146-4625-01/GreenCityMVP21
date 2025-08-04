@@ -11,6 +11,7 @@ import greencity.enums.FriendStatus;
 import greencity.service.FriendService;
 import greencity.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,11 +27,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class FriendControllerTest {
@@ -62,6 +61,7 @@ class FriendControllerTest {
     }
 
     @Test
+    @DisplayName("Search friends with filters should return OK")
     void searchFriends_ShouldReturnOk() throws Exception {
         PageableDto<UserCardDto> responseDto = new PageableDto<>(List.of(), 0, 0, 0);
         when(userService.findByEmail(mockUserVO.getEmail())).thenReturn(mockUserVO);
@@ -82,6 +82,7 @@ class FriendControllerTest {
     }
 
     @Test
+    @DisplayName("Send a friend request should return OK")
     void addNewFriend_ShouldReturnOk() throws Exception {
         when(userService.findByEmail(TestConst.EMAIL)).thenReturn(mockUserVO);
 
@@ -93,8 +94,8 @@ class FriendControllerTest {
         verify(friendService).sendFriendRequest(1L, 2L);
     }
 
-
     @Test
+    @DisplayName("Accept a friend request should return OK")
     void acceptFriendRequest_ShouldReturnOk() throws Exception {
         when(userService.findByEmail(TestConst.EMAIL)).thenReturn(mockUserVO);
 
@@ -107,6 +108,7 @@ class FriendControllerTest {
     }
 
     @Test
+    @DisplayName("Cancel a friend request should return OK")
     void cancelFriendRequest_ShouldReturnOk() throws Exception {
         when(userService.findByEmail(TestConst.EMAIL)).thenReturn(mockUserVO);
 
@@ -118,8 +120,8 @@ class FriendControllerTest {
         verify(friendService).cancelFriendRequest(1L, 2L);
     }
 
-
     @Test
+    @DisplayName("Get all friends should return OK")
     void getAllFriends_ShouldReturnOk() throws Exception {
         PageableDto<UserCardDto> responseDto = new PageableDto<>(List.of(), 0, 0, 0);
 
@@ -129,7 +131,7 @@ class FriendControllerTest {
         mockMvc.perform(get("/friends")
                         .param("page", "0")
                         .param("size", "10")
-                        .principal(() -> TestConst.EMAIL)  // Передаємо Principal
+                        .principal(() -> TestConst.EMAIL)
                 )
                 .andExpect(status().isOk());
 
@@ -137,6 +139,7 @@ class FriendControllerTest {
     }
 
     @Test
+    @DisplayName("Get friend status should return OK if friendship exists")
     void getFriendStatus_ShouldReturnOk() throws Exception {
         when(userService.findByEmail(TestConst.EMAIL)).thenReturn(mockUserVO);
         when(friendService.getFriendStatus(1L, 2L)).thenReturn(Optional.of(FriendStatus.FRIEND));
@@ -151,6 +154,7 @@ class FriendControllerTest {
     }
 
     @Test
+    @DisplayName("Get friend status should return NOT_FOUND if friendship does not exist")
     void getFriendStatus_ShouldReturnNotFound() throws Exception {
         when(userService.findByEmail(TestConst.EMAIL)).thenReturn(mockUserVO);
         when(friendService.getFriendStatus(1L, 2L)).thenReturn(Optional.empty());
@@ -163,4 +167,17 @@ class FriendControllerTest {
         verify(friendService).getFriendStatus(1L, 2L);
     }
 
+    @Test
+    @DisplayName("Revoke a sent friend request should return OK")
+    void revokeFriendRequest_ShouldReturnOk() throws Exception {
+        when(userService.findByEmail(TestConst.EMAIL)).thenReturn(mockUserVO);
+        doNothing().when(friendService).revokeFriendRequest(1L, 2L);
+
+        mockMvc.perform(delete("/friends/{friendId}/revoke", 2L)
+                        .principal(() -> TestConst.EMAIL)
+                )
+                .andExpect(status().isOk());
+
+        verify(friendService).revokeFriendRequest(1L, 2L);
+    }
 }

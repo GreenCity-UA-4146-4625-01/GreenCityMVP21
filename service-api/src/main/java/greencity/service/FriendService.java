@@ -20,5 +20,7 @@ public interface FriendService {
     Optional<FriendStatus> getFriendStatus(Long currentUserId, Long userId);
 
     void acceptFriendRequest(Long currentUserId, Long friendId);
+
+    void revokeFriendRequest(Long currentUserId, Long friendId);
 }
 

@@ -24,4 +24,6 @@ public interface EventCommentService {
     int countOfCommentsByEventId(Long eventId);
 
     void like(UserVO userVO, Long id);
+
+    EventCommentEditViewDto editComment(Long commentId, UserVO currentUser, EditEventCommentDtoRequest editEventCommentDtoRequest);
 }

@@ -25,6 +25,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Validated
 @AllArgsConstructor
 @RestController
@@ -120,6 +122,12 @@ public class EventCommentController {
         eventCommentService.like(user, id);
     }
 
+
+    @Operation(summary = "get list of users who liked")
+    @GetMapping("/comments/{commentId}/likes")
+    public ResponseEntity<List<EventShortInfoUserVO>> getUsersWhoLikedComment(@PathVariable Long commentId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventCommentService.getUsersWhoLikedComment(commentId));
+      
     @Operation(summary = "delete comment")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = HttpStatuses.OK),

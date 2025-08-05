@@ -26,9 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -175,6 +173,21 @@ public class EventCommentServiceImpl implements EventCommentService {
     }
 
     @Override
+    public List<EventShortInfoUserVO> getUsersWhoLikedComment(Long commentId) {
+        EventComment comment = eventCommentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment not found"));
+
+        return comment.getUsersLiked().stream()
+                .map(user -> EventShortInfoUserVO.builder()
+                        .id(user.getId())
+                        .name(user.getName())
+                        .userProfilePicturePath(user.getProfilePicturePath())
+                        .build())
+                .sorted(Comparator.comparing(EventShortInfoUserVO::getName)) // or by like time if tracked
+                .toList();
+    }
+  
+    @Override  
     public void deleteById(Long id, UserVO user) {
         EventComment eventComment = eventCommentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));

@@ -147,7 +147,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     @Override
     public int countOfCommentsByEventId(Long eventId) {
         Event event = eventRepository.findEventById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
 
         return eventCommentRepository.countOfComments(event.getId());
     }
@@ -158,7 +158,7 @@ public class EventCommentServiceImpl implements EventCommentService {
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
 
         User user = userRepo.findById(userVO.getId())
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID));
 
         Set<User> likedUsers = comment.getUsersLiked();
 
@@ -175,7 +175,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     @Override
     public List<EventShortInfoUserVO> getUsersWhoLikedComment(Long commentId) {
         EventComment comment = eventCommentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("Comment not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
 
         return comment.getUsersLiked().stream()
                 .map(user -> EventShortInfoUserVO.builder()

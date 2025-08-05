@@ -124,10 +124,17 @@ public class EventCommentController {
 
 
     @Operation(summary = "get list of users who liked")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })
     @GetMapping("/comments/{commentId}/likes")
     public ResponseEntity<List<EventShortInfoUserVO>> getUsersWhoLikedComment(@PathVariable Long commentId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventCommentService.getUsersWhoLikedComment(commentId));
-      
+    }
+
     @Operation(summary = "delete comment")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = HttpStatuses.OK),

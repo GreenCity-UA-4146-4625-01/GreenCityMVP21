@@ -7,9 +7,11 @@ import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventComment;
 import greencity.entity.User;
+import greencity.enums.Role;
 import greencity.enums.UserStatus;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
+import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.mapping.AddEventCommentDtoRequestToEventCommentMapper;
 import greencity.rating.RatingCalculation;
 import greencity.repository.EventRepo;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static greencity.constant.AppConstant.AUTHORIZATION;
 
@@ -34,7 +37,6 @@ import static greencity.constant.AppConstant.AUTHORIZATION;
 public class EventCommentServiceImpl implements EventCommentService {
     private final EventCommentRepository eventCommentRepository;
     private final EventRepo eventRepository;
-    private final ModelMapper mapper;
     private final HttpServletRequest httpServletRequest;
     private final RatingCalculation ratingCalculation;
     private final UserRepo userRepo;
@@ -53,7 +55,11 @@ public class EventCommentServiceImpl implements EventCommentService {
         EventComment eventComment = addCommentMapper.convert(addEventCommentDtoRequest, mentionedUsers);
 
         eventComment.setEvent(event);
-        eventComment.setUser(mapper.map(userVO, User.class));
+        User author = User.builder()
+                .id(userVO.getId())
+                .name(userVO.getName())
+                .email(userVO.getEmail())
+                .build();
 
         if (addEventCommentDtoRequest.getParentCommentId() != null && addEventCommentDtoRequest.getParentCommentId() != 0) {
             EventComment parentComment = eventCommentRepository.findById(addEventCommentDtoRequest.getParentCommentId())
@@ -70,7 +76,25 @@ public class EventCommentServiceImpl implements EventCommentService {
 
         EventComment saved = eventCommentRepository.save(eventComment);
 
-        return mapper.map(saved, EventCommentDtoResponse.class);
+        return EventCommentDtoResponse.builder()
+                .id(saved.getId())
+                .text(saved.getText())
+                .modifiedDate(saved.getModifiedDate())
+                .replies(saved.getReplies() != null ? saved.getReplies().size() : 0)
+                .likes(saved.getUsersLiked() != null ? saved.getUsersLiked().size() : 0)
+                .author(EventCommentAuthorDto.builder()
+                        .id(author.getId())
+                        .name(author.getName())
+                        .userProfilePicturePath(author.getProfilePicturePath())
+                        .build())
+                .mentionedUser(saved.getMentionedUsers().stream()
+                        .map(user -> EventShortInfoUserVO.builder()
+                                .id(user.getId())
+                                .name(user.getName())
+                                .userProfilePicturePath(user.getProfilePicturePath())
+                                .build())
+                        .collect(Collectors.toSet()))
+                .build();
     }
 
     @Override
@@ -161,5 +185,23 @@ public class EventCommentServiceImpl implements EventCommentService {
                         .build())
                 .sorted(Comparator.comparing(EventShortInfoUserVO::getName)) // or by like time if tracked
                 .toList();
+    }
+  
+    @Override  
+    public void deleteById(Long id, UserVO user) {
+        EventComment eventComment = eventCommentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+
+        if(user.getRole() != Role.ROLE_ADMIN && !user.getId().equals(eventComment.getUser().getId())) {
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_HAS_NO_PERMISSION);
+        }
+        if (eventComment.getReplies() != null && !eventComment.getReplies().isEmpty()) {
+            eventComment.getReplies().forEach(c->c.setDeleted(true));
+        }
+        eventComment.setDeleted(true);
+        String accessToken = httpServletRequest.getHeader(AUTHORIZATION);
+        CompletableFuture.runAsync(
+                () -> ratingCalculation.ratingCalculation(RatingCalculationEnum.DELETE_COMMENT, user, accessToken));
+        eventCommentRepository.save(eventComment);
     }
 }

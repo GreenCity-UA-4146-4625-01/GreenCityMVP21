@@ -28,4 +28,6 @@ public interface EventCommentService {
     void like(UserVO userVO, Long id);
 
     List<EventShortInfoUserVO> getUsersWhoLikedComment(Long commentId);
+  
+    void deleteById(Long id, UserVO user);
 }

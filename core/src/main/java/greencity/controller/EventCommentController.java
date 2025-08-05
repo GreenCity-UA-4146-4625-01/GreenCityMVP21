@@ -122,15 +122,23 @@ public class EventCommentController {
         eventCommentService.like(user, id);
     }
 
+
     @Operation(summary = "get list of users who liked")
+    @GetMapping("/comments/{commentId}/likes")
+    public ResponseEntity<List<EventShortInfoUserVO>> getUsersWhoLikedComment(@PathVariable Long commentId) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventCommentService.getUsersWhoLikedComment(commentId));
+      
+    @Operation(summary = "delete comment")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
             @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/comments/{commentId}/likes")
-    public ResponseEntity<List<EventShortInfoUserVO>> getUsersWhoLikedComment(@PathVariable Long commentId) {
-        return ResponseEntity.status(HttpStatus.OK).body(eventCommentService.getUsersWhoLikedComment(commentId));
+    @DeleteMapping("/comments/{eventCommentId}")
+    public ResponseEntity<Object> deleteComment(@PathVariable Long eventCommentId,
+                              @Parameter(hidden = true) @CurrentUser UserVO userVO){
+        eventCommentService.deleteById(eventCommentId, userVO);
+        return ResponseEntity.ok().build();
     }
 }

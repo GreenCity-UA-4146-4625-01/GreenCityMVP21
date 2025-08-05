@@ -45,7 +45,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     @Override
     public EventCommentDtoResponse createComment(AddEventCommentDtoRequest addEventCommentDtoRequest, Long eventId, UserVO userVO) {
         Event event = eventRepository.findEventById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.EVENT_NOT_FOUND));
 
         Set<User> mentionedUsers = Collections.emptySet();
         if (addEventCommentDtoRequest.getMentionedUserIds() != null && !addEventCommentDtoRequest.getMentionedUserIds().isEmpty()) {

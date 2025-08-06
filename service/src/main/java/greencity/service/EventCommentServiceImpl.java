@@ -18,12 +18,10 @@ import greencity.rating.RatingCalculation;
 import greencity.repository.EventCommentRepository;
 import greencity.repository.EventRepo;
 import greencity.repository.UserRepo;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -111,25 +109,34 @@ public class EventCommentServiceImpl implements EventCommentService {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("modifiedDate").descending());
         Page<EventComment> commentsPage = eventCommentRepository.findTopLevelCommentsByEventId(eventId, pageable);
 
-        return commentsPage.map(comment -> {
-            String authorName = comment.getUser() != null ? comment.getUser().getName() : "Unknown";
-            String authorAvatar = comment.getUser() != null ? comment.getUser().getProfilePicturePath() : null;
-            int likesCount = comment.getUsersLiked() != null ? comment.getUsersLiked().size() : 0;
+        List<EventCommentViewDto> filteredDtos = commentsPage
+                .stream()
+                .filter(comment -> !comment.isDeleted()) // фильтрация удалённых
+                .map(comment -> {
+                    String authorName = comment.getUser() != null ? comment.getUser().getName() : "Unknown";
+                    String authorAvatar = comment.getUser() != null ? comment.getUser().getProfilePicturePath() : null;
+                    int likesCount = comment.getUsersLiked() != null ? comment.getUsersLiked().size() : 0;
 
-            return new EventCommentViewDto(
-                    comment.getId(),
-                    authorName,
-                    authorAvatar,
-                    comment.getModifiedDate(),
-                    likesCount,
-                    comment.getText()
-            );
-        });
+                    return new EventCommentViewDto(
+                            comment.getId(),
+                            authorName,
+                            authorAvatar,
+                            comment.getModifiedDate(),
+                            likesCount,
+                            comment.getText()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(filteredDtos, pageable, commentsPage.getTotalElements());
     }
 
     @Override
     public EventCommentViewDto getCommentById(Long commentId) {
         EventComment eventComment = eventCommentRepository.findById(commentId).orElseThrow(() -> new NotFoundException("Comment not found"));
+        if (eventComment.isDeleted()) {
+            throw new EntityNotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION);
+        }
 
         String authorName = eventComment.getUser() != null ? eventComment.getUser().getName() : "Unknown";
         String authorAvatar = eventComment.getUser() != null ? eventComment.getUser().getProfilePicturePath() : null;
@@ -157,6 +164,9 @@ public class EventCommentServiceImpl implements EventCommentService {
     public void like(UserVO userVO, Long id) {
         EventComment comment = eventCommentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+        if (comment.isDeleted()) {
+            throw new EntityNotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION);
+        }
 
         User user = userRepo.findById(userVO.getId())
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND_BY_ID));
@@ -192,6 +202,9 @@ public class EventCommentServiceImpl implements EventCommentService {
     @Override
     public EventCommentEditViewDto editComment(Long commentId, UserVO currentUser, EditEventCommentDtoRequest editEventCommentDtoRequest) {
         EventComment comment = eventCommentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+        if (comment.isDeleted()) {
+            throw new EntityNotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION);
+        }
 
         if (!currentUser.getId().equals(comment.getUser().getId())) {
             throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_IS_NOT_THE_AUTHOR_OF_THE_COMMENT + commentId);
@@ -206,11 +219,15 @@ public class EventCommentServiceImpl implements EventCommentService {
         eventCommentRepository.save(comment);
 
         return eventCommentRepository.getEventCommentByID(commentId);
+    }
 
     @Override
     public List<EventShortInfoUserVO> getUsersWhoLikedComment(Long commentId) {
         EventComment comment = eventCommentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+        if (comment.isDeleted()) {
+            throw new EntityNotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION);
+        }
 
         return comment.getUsersLiked().stream()
                 .map(user -> EventShortInfoUserVO.builder()

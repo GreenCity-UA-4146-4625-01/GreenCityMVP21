@@ -2,6 +2,7 @@ package greencity.dto.eventcomment;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.Set;
 
@@ -11,8 +12,9 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class EditEventCommentDtoRequest {
-    @NotBlank
-    String text;
+    @NotBlank(message = "The text of comment can not be empty")
+    @Length(min = 1, max = 8000)
+    private String text;
 
     private Set<Long> mentionedUserIds;
 }

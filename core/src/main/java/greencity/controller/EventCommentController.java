@@ -2,10 +2,7 @@ package greencity.controller;
 
 import greencity.annotations.CurrentUser;
 import greencity.constant.HttpStatuses;
-import greencity.dto.eventcomment.AddEventCommentDtoRequest;
-import greencity.dto.eventcomment.EventCommentDtoResponse;
-import greencity.dto.eventcomment.EventShortInfoUserVO;
-import greencity.dto.eventcomment.EventCommentViewDto;
+import greencity.dto.eventcomment.*;
 import greencity.dto.user.UserVO;
 import greencity.service.EventCommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -123,14 +120,35 @@ public class EventCommentController {
     }
 
 
-    @Operation(summary = "get list of users who liked")
+    /**
+     * Edits an existing comment identified by {@code commentId}.
+     *
+     * @param commentId the ID of the comment to be edited
+     * @param currentUser the currently authenticated user (injected by security context)
+     * @param request the request body containing updated comment data (text and mentioned users)
+     * @return a {@link ResponseEntity} containing the updated comment DTO {@link EventCommentEditViewDto}
+     *         with HTTP status 200 (OK) if successful
+     */
+    @Operation(summary = "Edit comment.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
             @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
     })
-    @GetMapping("/comments/{commentId}/likes")
+    @PutMapping("/comment/{commentId}")
+    public ResponseEntity<EventCommentEditViewDto> editComment(@PathVariable("commentId") Long commentId, @Parameter(hidden = true)@CurrentUser UserVO currentUser,
+                                                           @Valid @RequestBody EditEventCommentDtoRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(eventCommentService.editComment(commentId, currentUser, request));
+    }
+
+    @Operation(summary = "get list of users who liked")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND)
+    })    @GetMapping("/comments/{commentId}/likes")
     public ResponseEntity<List<EventShortInfoUserVO>> getUsersWhoLikedComment(@PathVariable Long commentId) {
         return ResponseEntity.status(HttpStatus.OK).body(eventCommentService.getUsersWhoLikedComment(commentId));
     }

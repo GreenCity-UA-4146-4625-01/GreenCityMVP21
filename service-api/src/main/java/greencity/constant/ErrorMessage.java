@@ -99,6 +99,7 @@ public final class ErrorMessage {
     public static final String MALFORMED_URL = "Malformed URL. The string could not be parsed.";
     public static final String USER_CANNOT_ADD_SAME_SOCIAL_NETWORK_LINKS =
         "User cannot add the same social network links";
+    public static final String USER_IS_NOT_THE_AUTHOR_OF_THE_COMMENT = "The user is not the author of the comment id:";
     public static final String COMMENT_NOT_FOUND_EXCEPTION = "The comment with entered id doesn't exist";
     public static final String CANNOT_REPLY_THE_REPLY = "Can not make a reply to a reply";
     public static final String NOT_A_CURRENT_USER = "You can't perform actions with the data of other user";

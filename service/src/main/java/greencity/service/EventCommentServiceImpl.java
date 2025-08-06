@@ -13,15 +13,16 @@ import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
 import greencity.mapping.AddEventCommentDtoRequestToEventCommentMapper;
+import greencity.mapping.EditEventCommentDtoRequestToEventCommentMapper;
 import greencity.rating.RatingCalculation;
+import greencity.repository.EventCommentRepository;
 import greencity.repository.EventRepo;
 import greencity.repository.UserRepo;
-import greencity.repository.EventCommentRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     private final RatingCalculation ratingCalculation;
     private final UserRepo userRepo;
     private final AddEventCommentDtoRequestToEventCommentMapper addCommentMapper;
+    private final EditEventCommentDtoRequestToEventCommentMapper editCommentMapper;
 
     @Override
     public EventCommentDtoResponse createComment(AddEventCommentDtoRequest addEventCommentDtoRequest, Long eventId, UserVO userVO) {
@@ -170,6 +172,40 @@ public class EventCommentServiceImpl implements EventCommentService {
         comment.setUsersLiked(likedUsers);
         eventCommentRepository.save(comment);
     }
+
+    /**
+     * Edits an existing comment identified by {@code commentId}.
+     * <p>
+     * The method checks if the comment with the given ID exists; if not, it throws {@link NotFoundException}.
+     * It also verifies that the current user is the author of the comment; otherwise, it throws {@link UserHasNoPermissionToAccessException}.
+     * Then it updates the comment's text, the set of mentioned users, and the modification timestamp.
+     * The updated comment is saved in the repository.
+     * Finally, it returns the updated comment data as {@link EventCommentEditViewDto}.
+     *
+     * @param commentId the ID of the comment to be edited
+     * @param currentUser the user performing the edit operation
+     * @param editEventCommentDtoRequest the DTO containing updated comment data (text and mentioned users)
+     * @return the updated comment DTO {@link EventCommentEditViewDto} with current comment information
+     * @throws NotFoundException if no comment with the specified ID is found
+     * @throws UserHasNoPermissionToAccessException if the current user is not the author of the comment and has no permission to edit
+     */
+    @Override
+    public EventCommentEditViewDto editComment(Long commentId, UserVO currentUser, EditEventCommentDtoRequest editEventCommentDtoRequest) {
+        EventComment comment = eventCommentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(ErrorMessage.COMMENT_NOT_FOUND_EXCEPTION));
+
+        if (!currentUser.getId().equals(comment.getUser().getId())) {
+            throw new UserHasNoPermissionToAccessException(ErrorMessage.USER_IS_NOT_THE_AUTHOR_OF_THE_COMMENT + commentId);
+        }
+
+        Set<User> mentionedUsers = Collections.emptySet();
+        if (editEventCommentDtoRequest.getMentionedUserIds() != null && !editEventCommentDtoRequest.getMentionedUserIds().isEmpty()) {
+            mentionedUsers = new HashSet<>(userRepo.findAllById(editEventCommentDtoRequest.getMentionedUserIds()));
+        }
+
+        editCommentMapper.update(comment, editEventCommentDtoRequest, mentionedUsers);
+        eventCommentRepository.save(comment);
+
+        return eventCommentRepository.getEventCommentByID(commentId);
 
     @Override
     public List<EventShortInfoUserVO> getUsersWhoLikedComment(Long commentId) {

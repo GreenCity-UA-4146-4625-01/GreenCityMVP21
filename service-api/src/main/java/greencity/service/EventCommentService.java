@@ -27,6 +27,8 @@ public interface EventCommentService {
 
     void like(UserVO userVO, Long id);
 
+    EventCommentEditViewDto editComment(Long commentId, UserVO currentUser, EditEventCommentDtoRequest editEventCommentDtoRequest);
+  
     List<EventShortInfoUserVO> getUsersWhoLikedComment(Long commentId);
   
     void deleteById(Long id, UserVO user);

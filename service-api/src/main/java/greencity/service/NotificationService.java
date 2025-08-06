@@ -63,4 +63,6 @@ public interface NotificationService {
     boolean isNotificationForUser(Long notificationId, Long userId);
 
     StreamingSubscription<NotificationDto> subscribeForUser(Long userId);
+
+    void incrementNotificationCounter(Long userID);
 }

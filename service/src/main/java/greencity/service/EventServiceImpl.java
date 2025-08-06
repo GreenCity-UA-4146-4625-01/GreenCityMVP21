@@ -5,17 +5,18 @@ import greencity.dto.event.*;
 import greencity.dto.user.UserVO;
 import greencity.entity.Event;
 import greencity.entity.EventDateTime;
-import greencity.entity.EventImage;
 import greencity.entity.EventLocation;
 import greencity.entity.User;
 import greencity.enums.Role;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.listeners.EventCancellationEvent;
 import greencity.repository.EventImageRepo;
 import greencity.repository.EventRepo;
 import greencity.validator.EventDateTimeDtoValidator;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -39,6 +40,7 @@ public class EventServiceImpl implements EventService {
     private final EventImageService eventImageService;
     private final EventImageRepo eventImageRepo;
     private final FileService fileService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Creates a new event based on the provided {@link CreateEventRequestDto}.
@@ -187,6 +189,11 @@ public class EventServiceImpl implements EventService {
         if (!user.getRole().equals(Role.ROLE_ADMIN) && !creatorId.equals(user.getId())) {
             throw new UserHasNoPermissionToAccessException("You are not allowed to delete this event");
         }
+
+        eventPublisher.publishEvent(new EventCancellationEvent(this,
+                eventId,
+                eventRepo.getReferenceById(eventId).getTitle(),
+                eventRepo.getReferenceById(eventId).getParticipants()));
 
         eventRepo.deleteById(eventId);
     }

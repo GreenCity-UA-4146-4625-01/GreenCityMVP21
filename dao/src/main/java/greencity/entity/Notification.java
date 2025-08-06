@@ -7,6 +7,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "notifications")
 @NoArgsConstructor
@@ -31,4 +35,11 @@ public class Notification {
     @Column(name = "text")
     private String text;
 
+    private ZonedDateTime creationDate;
+
+    private String content;
+
+    @ElementCollection
+    @CollectionTable(name = "notification_commentators", joinColumns = @JoinColumn(name = "notification_id"))
+    private List<String> commentators = new ArrayList<>();
 }

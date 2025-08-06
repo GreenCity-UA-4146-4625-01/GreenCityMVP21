@@ -162,6 +162,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Filter> filters = new ArrayList<>();
 
+    @Column(name = "unread_notifications", nullable = false)
+    private int unreadNotifications;
+
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
     private List<Notification> notifications = new ArrayList<>();
 }

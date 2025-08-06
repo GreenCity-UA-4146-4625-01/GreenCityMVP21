@@ -10,17 +10,15 @@ import lombok.Builder;
 public record NewCommentNotificationDto(
     boolean isRead,
     UserVO receiver,
-    EcoNewsCommentDto comment
+    EcoNewsCommentDto comment,
+    String text
+
 
 ) implements NotificationDto {
 
     @Override
     public long objectId() {
         return comment.getId();
-    }
-    @Override
-    public String text() {
-        return "";
     }
 
 }

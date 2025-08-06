@@ -12,17 +12,18 @@ import greencity.enums.UserStatus;
 import greencity.exception.exceptions.BadRequestException;
 import greencity.exception.exceptions.NotFoundException;
 import greencity.exception.exceptions.UserHasNoPermissionToAccessException;
+import greencity.listeners.CommentCreatedEvent;
 import greencity.mapping.AddEventCommentDtoRequestToEventCommentMapper;
 import greencity.rating.RatingCalculation;
+import greencity.repository.EventCommentRepository;
 import greencity.repository.EventRepo;
 import greencity.repository.UserRepo;
-import greencity.repository.EventCommentRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,7 @@ public class EventCommentServiceImpl implements EventCommentService {
     private final RatingCalculation ratingCalculation;
     private final UserRepo userRepo;
     private final AddEventCommentDtoRequestToEventCommentMapper addCommentMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public EventCommentDtoResponse createComment(AddEventCommentDtoRequest addEventCommentDtoRequest, Long eventId, UserVO userVO) {
@@ -75,6 +77,7 @@ public class EventCommentServiceImpl implements EventCommentService {
         CompletableFuture.runAsync(() -> ratingCalculation.ratingCalculation(RatingCalculationEnum.ADD_COMMENT, userVO, accessToken));
 
         EventComment saved = eventCommentRepository.save(eventComment);
+        eventPublisher.publishEvent(new CommentCreatedEvent(this, saved));
 
         return EventCommentDtoResponse.builder()
                 .id(saved.getId())

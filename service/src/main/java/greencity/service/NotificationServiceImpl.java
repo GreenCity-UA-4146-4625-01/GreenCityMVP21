@@ -1,6 +1,6 @@
 package greencity.service;
 
-import greencity.dto.notification.*;
+import greencity.dto.notification.NotificationDto;
 import greencity.entity.Notification;
 import greencity.entity.User;
 import greencity.mapping.NotificationMapper;
@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**NewReplyNotificationDto
@@ -42,8 +42,9 @@ public class NotificationServiceImpl implements NotificationService {
     public void createNotification(NotificationDto dto) {
         Notification notification = NotificationMapper.mapToEntity(dto);
         notification.setReceiver(findUserById(dto.receiver().getId()));
+        notification.setCreationDate(ZonedDateTime.now());
         notificationRepo.save(notification);
-
+        incrementNotificationCounter(dto.receiver().getId());
         subscriptions.notifyByUser(dto.receiver().getId(), dto);
     }
 
@@ -129,5 +130,12 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public StreamingSubscription<NotificationDto> subscribeForUser(Long userId) {
         return subscriptions.createForUser(userId);
+    }
+
+    @Override
+    public void incrementNotificationCounter(Long userId){
+        User reciever=findUserById(userId);
+        reciever.setUnreadNotifications(reciever.getUnreadNotifications()+1);
+        userRepository.save(reciever);
     }
 }

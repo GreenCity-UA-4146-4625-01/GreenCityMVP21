@@ -125,7 +125,7 @@ public class FriendController {
             @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND,
                     content = @Content(examples = @ExampleObject(HttpStatuses.NOT_FOUND))),
     })
-    @DeleteMapping("/{friendId}")
+    @DeleteMapping("/cancel/{friendId}")
     public ResponseEntity<Void> cancelFriendRequest(
             @Parameter(description = "Id of user whose friend request will be cancelled.") @PathVariable long friendId,
             @Parameter(hidden = true) @CurrentUser UserVO userVO) {
@@ -206,5 +206,21 @@ public class FriendController {
         return friendService.getFriendStatus(userVO.getId(), friendId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @Operation(summary = "Delete friendship")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED,
+                    content = @Content(examples = @ExampleObject(HttpStatuses.UNAUTHORIZED))),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND,
+                    content = @Content(examples = @ExampleObject(HttpStatuses.NOT_FOUND))),
+    })
+    @DeleteMapping("/{friendId}")
+    public ResponseEntity<Void> unfriend(@PathVariable Long friendId,
+                                         @Parameter(hidden = true) @CurrentUser UserVO user) {
+        friendService.unfriend(user.getId(), friendId);
+        return ResponseEntity.noContent().build();
     }
 }

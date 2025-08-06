@@ -290,5 +290,16 @@ public class FriendServiceImpl implements FriendService {
         }
     }
 
+
+    @Override
+    @Transactional
+    public void unfriend(Long userId, Long friendId) {
+        validateUserAndFriendNotSamePerson(userId, friendId);
+        validateUserAndFriendExistence(userId, friendId);
+        validateUserAndFriendExistence(userId, friendId);
+
+        userFriendRepository.deleteFriendRequest(userId, friendId);
+        userFriendRepository.deleteFriendRequest(friendId, userId);
+    }
 }
 

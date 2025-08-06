@@ -22,5 +22,7 @@ public interface FriendService {
     void acceptFriendRequest(Long currentUserId, Long friendId);
 
     void revokeFriendRequest(Long currentUserId, Long friendId);
-}
+
+    void unfriend(Long userId, Long friendId);
+    }
 

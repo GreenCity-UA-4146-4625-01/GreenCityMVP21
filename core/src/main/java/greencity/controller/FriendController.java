@@ -134,7 +134,7 @@ public class FriendController {
     }
 
     /**
-     * Handles HTTP DELETE request to revoke a previously sent friend request.
+     * Handles HTTP POST request to revoke a previously sent friend request.
      * <p>
      * This method cancels the friend request sent by the current authenticated user
      * to the user identified by the given friendId.
@@ -147,14 +147,17 @@ public class FriendController {
     @Operation(summary = "Revoke a sent friend request",
             description = "Cancels the friend request sent by the current user to the specified friend.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Friend request successfully revoked"),
-            @ApiResponse(responseCode = "400", description = "Invalid request or friend request not found"),
-            @ApiResponse(responseCode = "404", description = "Friend user not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST,
+                    content = @Content(examples = @ExampleObject(HttpStatuses.BAD_REQUEST))),
+            @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED,
+                    content = @Content(examples = @ExampleObject(HttpStatuses.UNAUTHORIZED))),
+            @ApiResponse(responseCode = "404", description = HttpStatuses.NOT_FOUND,
+                    content = @Content(examples = @ExampleObject(HttpStatuses.NOT_FOUND))),
     })
-    @DeleteMapping("/{friendId}/revoke")
+    @PostMapping("/{friendId}/revoke")
     public ResponseEntity<Void> revokeFriendRequest(
-            @Parameter(description = "ID of the user whose friend request will be cancelled", required = true)
+            @Parameter(description = "User ID to which the request was sent", required = true)
             @PathVariable long friendId,
             @Parameter(hidden = true) @CurrentUser UserVO userVO) {
         friendService.revokeFriendRequest(userVO.getId(), friendId);

@@ -208,9 +208,27 @@ public class FriendController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    /**
+     * Deletes an existing friendship between the currently authenticated user and the specified user.
+     * <p>
+     * This endpoint removes the friend relationship from the database. If the friendship does not exist,
+     * a 404 Not Found response will be returned. The user must be authenticated to perform this action.
+     * </p>
+     *
+     * @param friendId the ID of the user to remove from the friend list
+     * @param user the currently authenticated user (injected from the security context)
+     * @return {@link ResponseEntity} with HTTP status:
+     * <ul>
+     *     <li>204 No Content – if the friendship was successfully deleted</li>
+     *     <li>400 Bad Request – if the provided data is invalid</li>
+     *     <li>401 Unauthorized – if the user is not authenticated</li>
+     *     <li>404 Not Found – if the specified friend does not exist or the friendship was not found</li>
+     * </ul>
+     */
+
     @Operation(summary = "Delete friendship")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = HttpStatuses.OK),
+            @ApiResponse(responseCode = "204", description = HttpStatuses.NO_CONTENT),
             @ApiResponse(responseCode = "400", description = HttpStatuses.BAD_REQUEST),
             @ApiResponse(responseCode = "401", description = HttpStatuses.UNAUTHORIZED,
                     content = @Content(examples = @ExampleObject(HttpStatuses.UNAUTHORIZED))),

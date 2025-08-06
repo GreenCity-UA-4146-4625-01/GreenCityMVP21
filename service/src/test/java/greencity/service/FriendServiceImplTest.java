@@ -192,4 +192,22 @@ class FriendServiceImplTest {
         verify(userFriendRepository).isFriendRequestedByCurrentUser(currentUserId, friendId);
         verify(userFriendRepository).revokeFriendRequest(currentUserId, friendId);
     }
+
+    @Test
+    @DisplayName("Should successfully remove friendship")
+    void shouldRemoveFriendshipSuccessfully() {
+        Long currentUserId = 1L;
+        Long friendId = 2L;
+
+        when(userRepo.existsById(currentUserId)).thenReturn(true);
+        when(userRepo.existsById(friendId)).thenReturn(true);
+        when(userFriendRepository.existsFriendshipWithStatus(currentUserId, friendId, "FRIEND")).thenReturn(true);
+
+        friendService.unfriend(currentUserId, friendId);
+
+        verify(userRepo).existsById(currentUserId);
+        verify(userRepo).existsById(friendId);
+        verify(userFriendRepository).deleteRelationshipByStatus(currentUserId, friendId, FriendStatus.FRIEND);
+    }
+
 }

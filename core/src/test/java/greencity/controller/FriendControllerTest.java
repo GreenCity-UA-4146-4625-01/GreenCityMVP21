@@ -112,7 +112,7 @@ class FriendControllerTest {
     void cancelFriendRequest_ShouldReturnOk() throws Exception {
         when(userService.findByEmail(TestConst.EMAIL)).thenReturn(mockUserVO);
 
-        mockMvc.perform(delete("/friends/{friendId}", 2L)
+        mockMvc.perform(delete("/friends/cancel/{friendId}", 2L)
                         .principal(() -> TestConst.EMAIL)
                 )
                 .andExpect(status().isOk());
@@ -179,5 +179,18 @@ class FriendControllerTest {
                 .andExpect(status().isOk());
 
         verify(friendService).revokeFriendRequest(1L, 2L);
+    }
+
+    @Test
+    @DisplayName("Delete Friendship")
+    void deleteFriendship_ShouldReturnOk() throws Exception {
+        when(userService.findByEmail(TestConst.EMAIL)).thenReturn(mockUserVO);
+        doNothing().when(friendService).unfriend(1L, 2L);
+
+        mockMvc.perform(delete("/friends/{friendId}", 2L)
+                        .principal(() -> TestConst.EMAIL))
+                .andExpect(status().isNoContent());
+
+        verify(friendService).unfriend(1L, 2L);
     }
 }

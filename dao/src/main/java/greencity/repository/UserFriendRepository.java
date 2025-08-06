@@ -44,8 +44,8 @@ public interface UserFriendRepository extends JpaRepository<UserFriend, UserFrie
      */
     @Modifying
     @Transactional
-    @Query("DELETE FROM UserFriend uf WHERE uf.user.id = :friendId AND uf.friend.id = :userId AND uf.status = 'REQUEST'")
-    void deleteFriendRequest(@Param("userId") Long userId, @Param("friendId") Long friendId);
+    @Query("DELETE FROM UserFriend uf WHERE uf.user.id = :friendId AND uf.friend.id = :userId AND uf.status = :status ")
+    void deleteRelationshipByStatus(@Param("userId") Long userId, @Param("friendId") Long friendId, @Param("status") FriendStatus status);
 
     /**
      * Retrieves the current friendship status between two users.

@@ -104,17 +104,17 @@ public class FriendServiceImpl implements FriendService {
         validateUserAndFriendExistence(currentUserId, friendId);
         validateFriendNotExists(currentUserId, friendId);
         validateFriendRequestSentByFriend(currentUserId, friendId);
-        userFriendRepository.deleteFriendRequest(currentUserId, friendId);
+        userFriendRepository.deleteRelationshipByStatus(currentUserId, friendId, FriendStatus.REQUEST);
     }
 
     /**
      * Revokes a previously sent friend request from the current user to the specified friend.
      * The method performs the following validations before revoking the request:
-     *     Checks that the current user and friend are not the same person.
-     *     Verifies that both users exist.
-     *     Confirms that a friend request was actually sent.
-     *     Ensures the users are not already friends.
-     *     Validates that the friend request was sent by the current user.
+     * Checks that the current user and friend are not the same person.
+     * Verifies that both users exist.
+     * Confirms that a friend request was actually sent.
+     * Ensures the users are not already friends.
+     * Validates that the friend request was sent by the current user.
      * If all validations pass, the friend request is revoked in the repository.
      *
      * @param currentUserId the ID of the user who sent the friend request
@@ -149,7 +149,7 @@ public class FriendServiceImpl implements FriendService {
         List<UserCardDto> allFriends = userFriendRepository.getAllFriends(currentUserId);
 
         if (allFriends.isEmpty()) {
-            return new PageableDto<>(Collections.emptyList(), 0,  pageable.getPageNumber(), pageable.getPageSize());
+            return new PageableDto<>(Collections.emptyList(), 0, pageable.getPageNumber(), pageable.getPageSize());
         }
 
         return new PageableDto<>(allFriends, allFriends.size(), pageable.getPageNumber(), pageable.getPageSize());
@@ -290,16 +290,52 @@ public class FriendServiceImpl implements FriendService {
         }
     }
 
+    /**
+     * Validates that a friendship exists between two users with the status {@link FriendStatus#FRIEND}.
+     * <p>
+     * If the friendship does not exist, this method throws a {@link NotFoundException}.
+     * This check ensures that operations depending on an existing friendship
+     * (e.g., removing a friend) cannot proceed when the relationship does not exist.
+     * </p>
+     *
+     * @param userId   the ID of the current user.
+     * @param friendId the ID of the friend to check.
+     * @throws NotFoundException if no friendship with status {@code FRIEND} exists between the given users.
+     */
+    private void validateFriendExists(long userId, long friendId) {
+        if (!userFriendRepository.existsFriendshipWithStatus(userId, friendId, FriendStatus.FRIEND.toString())) {
+            throw new NotFoundException(ErrorMessage.FRIENDSHIP_NOT_EXISTS + friendId);
+        }
+    }
 
+
+    /**
+     * Removes an existing friendship relationship between two users.
+     * <p>
+     * This method validates that:
+     * <ul>
+     *     <li>The user is not trying to unfriend themselves</li>
+     *     <li>Both users exist in the system</li>
+     * </ul>
+     * If all validations pass, the friendship relationship is deleted from both sides
+     * (user → friend and friend → user) in the database.
+     * </p>
+     *
+     * <p>The operation is transactional, ensuring that both deletions succeed or both are rolled back
+     * in case of failure.</p>
+     *
+     * @param userId   the ID of the user initiating the unfriend action
+     * @param friendId the ID of the user to be removed from the friend list
+     */
     @Override
     @Transactional
     public void unfriend(Long userId, Long friendId) {
         validateUserAndFriendNotSamePerson(userId, friendId);
         validateUserAndFriendExistence(userId, friendId);
-        validateUserAndFriendExistence(userId, friendId);
+        validateFriendExists(userId, friendId);
 
-        userFriendRepository.deleteFriendRequest(userId, friendId);
-        userFriendRepository.deleteFriendRequest(friendId, userId);
+        userFriendRepository.deleteRelationshipByStatus(userId, friendId, FriendStatus.FRIEND);
+        userFriendRepository.deleteRelationshipByStatus(friendId, userId, FriendStatus.FRIEND);
     }
 }
 
